@@ -32,8 +32,6 @@ class DefaultLiarAgent(common.Agent):
         count = hand.index(maxval)
         if obs[N] != N and obs[N+1] > maxval:
             return np.array(BLUFF)
-        if maxval + 1 < 2 * M:
-            maxval += 1
         return np.array([count, maxval])
 
     def update(self, reward, done):
