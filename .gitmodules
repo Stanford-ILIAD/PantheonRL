@@ -1,0 +1,3 @@
+[submodule "stable-baselines3"]
+	path = stable-baselines3
+	url = https://github.com/DLR-RM/stable-baselines3.git
