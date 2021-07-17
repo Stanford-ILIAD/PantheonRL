@@ -1,9 +1,10 @@
 import gym
-import rpsgym
+
+from multiagentworld.envs.rpsgym.rps import RPSWeightedAgent
 
 env = gym.make('RPS-v0')
-policy = rpsgym.WeightedAgent(0,0,1)
-env.add_partner_policy(rpsgym.WeightedAgent(0,1,1))
+policy = RPSWeightedAgent(0,0,1)
+env.add_partner_policy(RPSWeightedAgent(0,1,1))
 
 obs = env.reset()
 

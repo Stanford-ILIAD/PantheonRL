@@ -1,9 +1,11 @@
 import gym
-import liargym
+
+from multiagentworld.envs.liargym.liar import LiarDefaultAgent
+# from multiagentworld.common.agents import OnPolicyAgent, OffPolicyAgent
 
 env = gym.make('LiarsDice-v0')
-policy = liargym.DefaultLiarAgent()
-env.add_partner_policy(liargym.DefaultLiarAgent())
+policy = LiarDefaultAgent()
+env.add_partner_policy(LiarDefaultAgent())
 
 numgames = 100
 rewards = []
