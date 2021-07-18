@@ -9,3 +9,8 @@ register(
     id='LiarsDice-v0',
     entry_point='multiagentworld.envs.liargym.liar:LiarEnv'
 )
+
+register(
+    id='OvercookedMultiEnv-v0',
+    entry_point='multiagentworld.envs.overcookedgym.overcooked:OvercookedMultiEnv'
+)

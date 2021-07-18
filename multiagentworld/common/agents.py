@@ -61,7 +61,7 @@ class OnPolicyAgent(Agent):
             self.model.train()
             self.model.rollout_buffer.reset()
             self.n_steps = 0
-            print("UPDATE")
+            #print("UPDATE")
 
 
 class OffPolicyAgent(Agent):
@@ -129,4 +129,4 @@ class OffPolicyAgent(Agent):
 
             self.episode_rewards, self.total_timesteps = [], []
             self.num_collected_steps, self.num_collected_episodes = 0, 0
-            print("UPDATE")
+            #print("UPDATE")
