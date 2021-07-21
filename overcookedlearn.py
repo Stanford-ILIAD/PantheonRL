@@ -5,7 +5,9 @@ from stable_baselines3 import PPO, DQN
 from multiagentworld.envs.overcookedgym.overcooked import OvercookedEnv
 from multiagentworld.common.agents import OnPolicyAgent, OffPolicyAgent
 
-env = gym.make("OvercookedMultiEnv-v0", layout_name="random0")
+from multiagentworld.common.wrappers import SimultaneousFrameStack
+
+env = SimultaneousFrameStack(gym.make("OvercookedMultiEnv-v0", layout_name="random0"), numframes=3)
 env.add_partner_policy(OnPolicyAgent(PPO("MlpPolicy", env)))
 # env.add_partner_policy(OffPolicyAgent(DQN("MlpPolicy", env)))
 
