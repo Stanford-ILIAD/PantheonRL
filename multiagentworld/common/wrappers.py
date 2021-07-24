@@ -1,7 +1,7 @@
-import gym
 from multiagentworld.common.multiagentenv import TurnBasedEnv, SimultaneousEnv
-from gym.spaces import Box, Discrete, Dict, MultiBinary, MultiDiscrete
+from gym.spaces import Box, Discrete, MultiBinary, MultiDiscrete
 import numpy as np
+
 
 def add_obs(history, toadd, numframes):
     if len(history) == numframes:
@@ -9,6 +9,7 @@ def add_obs(history, toadd, numframes):
 
     history.insert(0, toadd)
     return np.array([val for obs in history for val in obs])
+
 
 def calculate_space(space, numframes):
     if isinstance(space, Box):
@@ -24,6 +25,7 @@ def calculate_space(space, numframes):
     else:
         raise NotImplementedError
 
+
 def get_default_obs(env):
     space = env.observation_space
     if isinstance(space, Box):
@@ -37,56 +39,69 @@ def get_default_obs(env):
     else:
         raise NotImplementedError
 
+
 class TurnBasedFrameStack(TurnBasedEnv):
 
     def __init__(self, env, numframes, defaultobs=None):
-        super(TurnBasedFrameStack, self).__init__(probegostart=env.probegostart, partners=env.partners)
+        super(TurnBasedFrameStack, self).__init__(
+            probegostart=env.probegostart, partners=env.partners)
         self.env = env
         self.numframes = numframes
 
         self.action_space = env.action_space
-        self.observation_space = calculate_space(env.observation_space, numframes)
+        self.observation_space = calculate_space(
+            env.observation_space, numframes)
 
-        self.defaultobs = get_default_obs(env) if defaultobs is None else list(defaultobs)
+        self.defaultobs = get_default_obs(
+            env) if defaultobs is None else list(defaultobs)
 
         self.egohistory = [self.defaultobs] * self.numframes
         self.althistory = [self.defaultobs] * self.numframes
 
     def ego_step(self, action):
         altobs, rews, done, info = self.env.ego_step(action)
-        return add_obs(self.althistory, altobs, self.numframes), rews, done, info
+        return add_obs(self.althistory, altobs, self.numframes), \
+            rews, done, info
 
     def alt_step(self, action):
         egoobs, rews, done, info = self.env.alt_step(action)
-        return add_obs(self.egohistory, egoobs, self.numframes), rews, done, info
+        return add_obs(self.egohistory, egoobs, self.numframes), \
+            rews, done, info
 
     def multi_reset(self, egofirst):
         newobs = self.env.multi_reset(egofirst)
         self.egohistory = [self.defaultobs] * self.numframes
         self.althistory = [self.defaultobs] * self.numframes
-        return add_obs(self.egohistory if egofirst else self.althistory, newobs, self.numframes)
+        return add_obs(self.egohistory if egofirst else self.althistory,
+                       newobs, self.numframes)
+
 
 class SimultaneousFrameStack(SimultaneousEnv):
 
-    def __init__(self, env, numframes, defaultobs = None):
+    def __init__(self, env, numframes, defaultobs=None):
         super(SimultaneousFrameStack, self).__init__(partners=env.partners)
         self.env = env
         self.numframes = numframes
 
         self.action_space = env.action_space
-        self.observation_space = calculate_space(env.observation_space, numframes)
+        self.observation_space = calculate_space(
+            env.observation_space, numframes)
 
-        self.defaultobs = get_default_obs(env) if defaultobs is None else list(defaultobs)
+        self.defaultobs = get_default_obs(
+            env) if defaultobs is None else list(defaultobs)
 
         self.egohistory = [self.defaultobs] * numframes
         self.althistory = [self.defaultobs] * numframes
 
     def multi_step(self, ego_action, alt_action):
         obs, rews, done, info = self.env.multi_step(ego_action, alt_action)
-        return (add_obs(self.egohistory, obs[0], self.numframes), add_obs(self.althistory, obs[1], self.numframes)), rews, done, info
+        return (add_obs(self.egohistory, obs[0], self.numframes),
+                add_obs(self.althistory, obs[1], self.numframes)), \
+            rews, done, info
 
     def multi_reset(self):
         obs = self.env.multi_reset()
         self.egohistory = [self.defaultobs] * self.numframes
         self.althistory = [self.defaultobs] * self.numframes
-        return (add_obs(self.egohistory, obs[0], self.numframes), add_obs(self.althistory, obs[1], self.numframes))
+        return (add_obs(self.egohistory, obs[0], self.numframes),
+                add_obs(self.althistory, obs[1], self.numframes))

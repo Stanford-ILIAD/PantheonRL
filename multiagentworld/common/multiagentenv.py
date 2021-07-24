@@ -1,6 +1,7 @@
 import gym
 import numpy as np
 
+
 class MultiAgentEnv(gym.Env):
     def __init__(self, partners=[]):
         self.partners = partners
@@ -59,6 +60,7 @@ class TurnBasedEnv(MultiAgentEnv):
 
     def multi_reset(self, egofirst):
         raise NotImplementedError
+
 
 class SimultaneousEnv(MultiAgentEnv):
 
