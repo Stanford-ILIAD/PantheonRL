@@ -18,12 +18,15 @@ RED = 2 # useful for if we add graphics later
 NUM_TOKENS = 20 # number of tokens the planner has
 
 PLANNER_ACTION_SPACE = gym.spaces.Discrete(NUM_TOKENS) # tokens that represent words
-CONSTRUCTOR_ACTION_SPACE = gym.spaces.MultiDiscrete([NUM_BLOCKS, NUM_COLORS]) 
+CONSTRUCTOR_ACTION_SPACE = gym.spaces.MultiDiscrete([NUM_BLOCKS, NUM_COLORS + 1]) 
 # in the simplified version, the constructor's action space is just coloring each block
 
-CONSTRUCTOR_OBS_SPACE # in the simplified version, constructor can see blocks
-                                                                  # for each block, store coordinate, H/V, and color
-PLANNER_OBS_SPACE  # constructor's obs space and true colorings
+blocklistformat = [[2, GRIDLEN, GRIDLEN, NUM_COLORS + 1] for i in range(NUM_BLOCKS)]
+blocklistformat.insert(0, [NUM_TOKENS]*4)
+CONSTRUCTOR_OBS_SPACE = gym.spaces.MultiDiscrete(blocklistformat)  # in the simplified version, constructor can see blocks
+                                                                  # for each block, store h/v, coordinate, and color
+blocklistformat.pop(0)
+PLANNER_OBS_SPACE = gym.spaces.MultiDiscrete([blocklistformat, blocklistformat]) # constructor's obs space and true colorings
 
 def generate_grid_world():
     # generates a random GRIDLEN x GRIDLEN world with NUM_BLOCKS blocks
@@ -35,12 +38,14 @@ def generate_grid_world():
         new_block = random_block()
         y = new_block[1]
         x = new_block[2]
-        if new_block[0] == 'h':
+        if new_block[0] == 0:
+            # horizontal
             if world[y][x] == 1 or world[y][x+1] == 1:
                 continue
             world[y][x] = 1
             world[y][x+1] = 1
         else:
+            # vertical
             if world[y][x] == 1 or world[y+1][x] == 1:
                 continue
             world[y][x] = 1
@@ -54,11 +59,11 @@ def random_block():
     block = []
     if np.random.randint(2) == 0:
         # horizontal
-        block.append('h')
+        block.append(0)
         x = np.random.randint(GRIDLEN - 1)
         y = np.random.randint(GRIDLEN)
     else:
-        block.append('v')
+        block.append(1)
         x = np.random.randint(GRIDLEN)
         y = np.random.randint(GRIDLEN - 1)
     block.append(y)
@@ -73,6 +78,7 @@ class SimpleBlockEnv(TurnBasedEnv):
         self.partner_observation_space = CONSTRUCTOR_OBS_SPACE
         self.action_space = PLANNER_ACTION_SPACE
         self.partner_action_space = CONSTRUCTOR_ACTION_SPACE
+        self.partner_env = PartnerEnv()
     
     def multi_reset(self, egofirst):
         self.gridworld = generate_grid_world()
@@ -84,16 +90,19 @@ class SimpleBlockEnv(TurnBasedEnv):
         # TODO: check format of observations
         if isego:
             return [self.gridworld, self.constructor_obs]
-        return [self.lastToken, self.constructor_obs]
+        else:
+            observations = self.constructor_obs
+            observations.insert(0, [self.last_token]*4)
+            return observations
     
     def ego_step(self, action):
-        self.lastToken = action
+        self.last_token = action
         # the planner gets to decide when they are done by taking action 0
         return self.get_obs(False), self.get_reward(), action == 0, {}
     
     def alt_step(self, action):
         # TODO: should our action[1] space be {0,1} or {0,1,2}?
-        self.constructor_obs[action[0]][3] = action[1] + 1
+        self.constructor_obs[action[0]][3] = action[1] 
         return self.get_obs(True), self.get_reward(), False, {}
     
     def get_reward(self):
@@ -106,3 +115,8 @@ class SimpleBlockEnv(TurnBasedEnv):
         reward = 100 * correct_blocks / NUM_BLOCKS 
         return [reward, reward] # since they both get the same reward
 
+class PartnerEnv(gym.Env):
+    def __init__(self):
+        super().__init__()
+        self.observation_space = CONSTRUCTOR_OBS_SPACE
+        self.action_space = PLANNER_OBS_SPACE
