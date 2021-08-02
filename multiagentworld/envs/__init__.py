@@ -15,3 +15,8 @@ register(
     entry_point='multiagentworld.envs.overcookedgym.overcooked:'
                 'OvercookedMultiEnv'
 )
+
+register(
+    id='SimpleBlockEnv-v0',
+    entry_point='multiagentworld.envs.blockworldgym.simpleblockworld:SimpleBlockEnv'
+)
