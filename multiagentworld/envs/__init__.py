@@ -1,4 +1,4 @@
-from gym.envs.registration import registry, register, make, spec
+from gym.envs.registration import register
 
 register(
     id='RPS-v0',
@@ -12,5 +12,6 @@ register(
 
 register(
     id='OvercookedMultiEnv-v0',
-    entry_point='multiagentworld.envs.overcookedgym.overcooked:OvercookedMultiEnv'
+    entry_point='multiagentworld.envs.overcookedgym.overcooked:'
+                'OvercookedMultiEnv'
 )

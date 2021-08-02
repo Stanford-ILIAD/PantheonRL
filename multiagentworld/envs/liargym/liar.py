@@ -4,8 +4,8 @@ import numpy as np
 from multiagentworld.common.agents import Agent
 from multiagentworld.common.multiagentenv import TurnBasedEnv
 
-N = 6 # Num sides per dice
-M = 6 # Num dice per player
+N = 6  # Num sides per dice
+M = 6  # Num dice per player
 
 WIN = (1, -1)
 LOSE = (-1, 1)
@@ -18,15 +18,17 @@ DEFAULT = [N, 0]
 ACTION_SPACE = gym.spaces.MultiDiscrete([N + 1, 2 * M])
 OBS_SPACE = gym.spaces.MultiDiscrete([M + 1] * N + [N + 1, 2 * M] * MAX_MOVES)
 
+
 def randRoll():
     dice = []
     for i in range(M):
         dice.append(np.random.randint(N))
     return [dice.count(i) for i in range(N)]
 
+
 class LiarDefaultAgent(Agent):
 
-    def get_action(self, obs, recording=True):
+    def get_action(self, obs, record=True):
         obs = obs.tolist()
         hand = obs[:N]
         maxval = max(hand)
@@ -38,6 +40,7 @@ class LiarDefaultAgent(Agent):
     def update(self, reward, done):
         pass
 
+
 class LiarEnv(TurnBasedEnv):
 
     def __init__(self):
@@ -47,7 +50,8 @@ class LiarEnv(TurnBasedEnv):
         self.action_space = ACTION_SPACE
 
     def getObs(self, isego):
-        prevmove = self.history + DEFAULT * (MAX_MOVES - len(self.history) // 2)
+        prevmove = self.history + DEFAULT * \
+            (MAX_MOVES - len(self.history) // 2)
         return np.array((self.egohand if isego else self.althand) + prevmove)
 
     def sanitize_action(self, action):
@@ -73,8 +77,7 @@ class LiarEnv(TurnBasedEnv):
             didwin = (self.eval_bluff() == isego)
             return self.getObs(not isego), WIN if didwin else LOSE, True, {}
         self.history = action + self.history
-        return self.getObs(not isego), (0,0), False, {}
-
+        return self.getObs(not isego), (0, 0), False, {}
 
     def ego_step(self, action):
         """

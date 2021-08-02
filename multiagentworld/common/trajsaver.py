@@ -1,48 +1,26 @@
-# pylint: disable=locally-disabled, multiple-statements, fixme, line-too-long
-
 import dataclasses
+from abc import ABC, abstractmethod
 from typing import Dict, Mapping, Sequence, Union, TypeVar, overload
 
 import numpy as np
 import torch as th
-from gym.spaces import Box, Discrete, MultiBinary, MultiDiscrete
 from torch.utils import data as th_data
-from torch.utils.data.dataloader import default_collate
+from torch.utils.data._utils.collate import default_collate
+
+from .util import get_space_size
 
 
 T = TypeVar("T")
-
-
-def write_transition(transitions, file, append=False):
-    full_list = np.concatenate((transitions.obs, transitions.acts), axis=1)
-    np.save(file, full_list)
-
-
-def get_space_size(space):
-    if isinstance(space, Box):
-        return len(space.low)
-    elif isinstance(space, Discrete):
-        return 1
-    elif isinstance(space, MultiBinary):
-        return space.n
-    elif isinstance(space, MultiDiscrete):
-        return len(space.nvec)
-    else:
-        raise NotImplementedError
-
-
-def read_transition(file, obs_space, act_space):
-    full_list = np.load(file)
-    obs_size = get_space_size(obs_space)
-    obs = full_list[:, :obs_size]
-    acts = full_list[:, obs_size:]
-    return TransitionsMinimal(obs, acts)
 
 
 def transitions_collate_fn(
     batch: Sequence[Mapping[str, np.ndarray]],
 ) -> Dict[str, Union[np.ndarray, th.Tensor]]:
     """
+    This function is from HumanCompatibleAI's imitation repo:
+    https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/
+    data/types.py
+
     Custom `torch.utils.data.DataLoader` collate_fn for `TransitionsMinimal`.
     Use this as the `collate_fn` argument to `DataLoader` if using an instance
     of `TransitionsMinimal` as the `dataset` argument.
@@ -58,6 +36,10 @@ def transitions_collate_fn(
 
 def dataclass_quick_asdict(dataclass_instance) -> dict:
     """
+    This function is from HumanCompatibleAI's imitation repo:
+    https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/
+    data/types.py
+
     Extract dataclass to items using `dataclasses.fields` + dict comprehension.
     This is a quick alternative to `dataclasses.asdict`, which expensively and
     undocumentedly deep-copies every numpy array value.
@@ -70,7 +52,12 @@ def dataclass_quick_asdict(dataclass_instance) -> dict:
 
 @dataclasses.dataclass(frozen=True)
 class TransitionsMinimal(th_data.Dataset):
-    """A Torch-compatible `Dataset` of obs-act transitions.
+    """
+    This class is modified from HumanCompatibleAI's imitation repo:
+    https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/
+    data/types.py
+
+    A Torch-compatible `Dataset` of obs-act transitions.
     This class and its subclasses are usually instantiated via
     `imitation.data.rollout.flatten_trajectories`.
     Indexing an instance `trans` of TransitionsMinimal with an integer `i`
@@ -139,3 +126,97 @@ class TransitionsMinimal(th_data.Dataset):
             # dictionaries together to make a single dictionary batch with
             # `torch.Tensor` values.
             return d_item
+
+    def write_transition(self, file):
+        full_list = np.concatenate((self.obs, self.acts), axis=1)
+        np.save(file, full_list)
+
+    @classmethod
+    def read_transition(cls, file, obs_space, act_space):
+        full_list = np.load(file)
+        obs_size = get_space_size(obs_space)
+        obs = full_list[:, :obs_size]
+        acts = full_list[:, obs_size:]
+        return TransitionsMinimal(obs, acts)
+
+
+class MultiTransitions(ABC):
+    """ Base class for all classes that store multiple transitions """
+
+    @abstractmethod
+    def get_ego_transitions(self) -> TransitionsMinimal:
+        """ Returns the ego's transitions """
+
+    @abstractmethod
+    def get_alt_transitions(self) -> TransitionsMinimal:
+        """ Returns the partner's transitions """
+
+
+@dataclasses.dataclass(frozen=True)
+class TurnBasedTransitions(MultiTransitions):
+    obs: np.ndarray
+    acts: np.ndarray
+    flags: np.ndarray
+
+    def get_ego_transitions(self) -> TransitionsMinimal:
+        """ Returns the ego's transitions """
+        mask = (self.flags % 2 == 0)
+        return TransitionsMinimal(self.obs[mask], self.acts[mask])
+
+    def get_alt_transitions(self) -> TransitionsMinimal:
+        """ Returns the partner's transitions """
+        mask = (self.flags % 2 == 1)
+        return TransitionsMinimal(self.obs[mask], self.acts[mask])
+
+    def write_transition(self, file):
+        flags = np.reshape(self.flags, (-1, 1))
+        full_list = np.concatenate((self.obs, self.acts, flags), axis=1)
+        np.save(file, full_list)
+
+    @classmethod
+    def read_transition(cls, file, obs_space, act_space):
+        full_list = np.load(file)
+        obs_size = get_space_size(obs_space)
+        obs = full_list[:, :obs_size]
+        acts = full_list[:, obs_size:-1]
+        flags = full_list[:, -1]
+
+        return TurnBasedTransitions(obs, acts, flags)
+
+
+@dataclasses.dataclass(frozen=True)
+class SimultaneousTransitions(MultiTransitions):
+    egoobs: np.ndarray
+    egoacts: np.ndarray
+    altobs: np.ndarray
+    altacts: np.ndarray
+    flags: np.ndarray
+
+    def get_ego_transitions(self) -> TransitionsMinimal:
+        """ Returns the ego's transitions """
+        return TransitionsMinimal(self.egoobs, self.egoacts)
+
+    def get_alt_transitions(self) -> TransitionsMinimal:
+        """ Returns the partner's transitions """
+        return TransitionsMinimal(self.altobs, self.altacts)
+
+    def write_transition(self, file):
+        flags = np.reshape(self.flags, (-1, 1))
+        full_list = np.concatenate(
+                (self.egoobs, self.egoacts, self.altobs, self.altacts, flags),
+                axis=1
+            )
+        np.save(file, full_list)
+
+    @classmethod
+    def read_transition(cls, file, obs_space, act_space):
+        full_list = np.load(file)
+        obs_size = get_space_size(obs_space)
+        act_size = get_space_size(act_space)
+        egoobs = full_list[:, :obs_size]
+        egoacts = full_list[:, obs_size:(obs_size + act_size)]
+        altobs = full_list[:, (obs_size + act_size):(2 * obs_size + act_size)]
+        altacts = full_list[:, (2*obs_size + act_size):-1]
+        flags = full_list[:, -1]
+
+        return SimultaneousTransitions(egoobs, egoacts, altobs, altacts, flags)

@@ -10,6 +10,7 @@ OBS_SPACE = gym.spaces.Discrete(1)
 
 NULL_OBS = np.array([0])
 
+
 class RPSWeightedAgent(Agent):
     def __init__(self, r=1, p=1, s=1, np_random=np.random):
         weight = r + p + s
@@ -17,12 +18,13 @@ class RPSWeightedAgent(Agent):
         self.c1 = (r + p) / weight
         self.np_random = np_random
 
-    def get_action(self, obs, recording=True):
+    def get_action(self, obs, record=True):
         roll = self.np_random.rand()
-        return 0 if roll < self.c0 else 1 if roll < self.c1 else 2
+        return np.array([0 if roll < self.c0 else 1 if roll < self.c1 else 2])
 
     def update(self, reward, done):
         pass
+
 
 class RPSEnv(SimultaneousEnv):
 

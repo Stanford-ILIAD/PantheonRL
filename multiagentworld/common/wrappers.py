@@ -1,48 +1,225 @@
-from multiagentworld.common.multiagentenv import TurnBasedEnv, SimultaneousEnv
-from gym.spaces import Box, Discrete, MultiBinary, MultiDiscrete
 import numpy as np
+from abc import ABC, abstractmethod
+from typing import List, Optional, Dict, Tuple
+
+import gym
+
+from .multiagentenv import TurnBasedEnv, SimultaneousEnv
+from .trajsaver import (TurnBasedTransitions, SimultaneousTransitions,
+                        MultiTransitions)
+from .util import (calculate_space, get_default_obs)
+
+# Flags for the TurnBasedRecorder wrapper
+EGO_NOT_DONE = 0
+ALT_NOT_DONE = 1
+EGO_DONE = 2
+ALT_DONE = 3
+
+# Flags for the SimultaneousRecorder wrapper
+NOT_DONE = 0
+DONE = 1
 
 
-def add_obs(history, toadd, numframes):
-    if len(history) == numframes:
-        history.pop()
+class HistoryQueue:
+    """
+    Ring buffer representing the saved history for the FrameStack wrappers.
 
-    history.insert(0, toadd)
-    return np.array([val for obs in history for val in obs])
+    :param defaultelem: The default element for an empty buffer
+    :param size: The length of the queue
+    """
+
+    def __init__(self, defaultelem: np.ndarray, size: int):
+        self.defaultelem = defaultelem
+        self.size = size
+        self.pos = 0
+
+        self.history: List[np.ndarray] = [defaultelem] * size
+
+    def add(self, toadd: np.ndarray) -> np.ndarray:
+        """
+        Add the given value to the queue and return the new representation
+
+        :param toadd: The new value to add. This overrides the oldest value
+        :return: The new queue representation, where the first element is the
+            most recently added element and the last element is the oldest
+        """
+        self.history[self.pos] = toadd
+        ans = np.array([val for ind in range(self.size)
+                        for val in self.history[self.pos - ind]])
+        self.pos = (self.pos + 1) % self.size
+        return ans
+
+    def reset(self) -> None:
+        """
+        Reset the queue. This fills the buffer with the defaultelement.
+        """
+        self.history = [self.defaultelem] * self.size
+        self.pos = 0
 
 
-def calculate_space(space, numframes):
-    if isinstance(space, Box):
-        low = np.tile(space.low, numframes)
-        high = np.tile(space.high, numframes)
-        return Box(low, high, dtype=space.dtype)
-    elif isinstance(space, Discrete):
-        return MultiDiscrete([space.n] * numframes)
-    elif isinstance(space, MultiBinary):
-        return MultiBinary(space.n * numframes)
-    elif isinstance(space, MultiDiscrete):
-        return MultiDiscrete(list(space.nvec) * numframes)
-    else:
-        raise NotImplementedError
+class MultiRecorder(ABC):
+    """ Base Class for all Recorder Wrappers"""
+
+    @abstractmethod
+    def get_transitions(self) -> MultiTransitions:
+        """ Get the transitions that have been recorded """
 
 
-def get_default_obs(env):
-    space = env.observation_space
-    if isinstance(space, Box):
-        return space.low
-    elif isinstance(space, Discrete):
-        return [0]
-    elif isinstance(space, MultiBinary):
-        return [0] * space.n
-    elif isinstance(space, MultiDiscrete):
-        return [0] * len(space.nvec)
-    else:
-        raise NotImplementedError
+class TurnBasedRecorder(TurnBasedEnv, MultiRecorder):
+    """
+    Recorder for all turn-based environments
+
+    :param env: The environment to record
+    """
+
+    def __init__(self, env: gym.Env):
+        super(TurnBasedRecorder, self).__init__(
+            probegostart=env.probegostart, partners=env.partners)
+        self.env = env
+
+        self.action_space = env.action_space
+        self.observation_space = env.observation_space
+
+        self.allobs: List[np.ndarray] = []
+        self.allacts: List[np.ndarray] = []
+        self.flags: List[int] = []
+
+    def ego_step(
+                self,
+                action: np.ndarray
+            ) -> Tuple[Optional[np.ndarray], Tuple[float, float], bool, Dict]:
+        """
+        This function calls the embedded environment's ego_step and records the
+        action and new observation.
+        """
+        altobs, rews, done, info = self.env.ego_step(action)
+        self.allacts.append(action)
+        if not done:
+            self.allobs.append(altobs)
+            self.flags.append(EGO_NOT_DONE)
+        else:
+            self.flags.append(EGO_DONE)
+        return altobs, rews, done, info
+
+    def alt_step(
+                self,
+                action: np.ndarray
+            ) -> Tuple[Optional[np.ndarray], Tuple[float, float], bool, Dict]:
+        """
+        This function calls the embedded environment's alt_step and records the
+        action and new observation.
+        """
+        egoobs, rews, done, info = self.env.alt_step(action)
+        self.allacts.append(action)
+        if not done:
+            self.allobs.append(egoobs)
+            self.flags.append(ALT_NOT_DONE)
+        else:
+            self.flags.append(ALT_DONE)
+        return egoobs, rews, done, info
+
+    def multi_reset(self, egofirst: bool) -> np.ndarray:
+        """
+        This function calls the embedded environment's multi_reset and records
+        the new observation.
+        """
+        newobs = self.env.multi_reset(egofirst)
+        self.allobs.append(newobs)
+        return newobs
+
+    def get_transitions(self) -> TurnBasedTransitions:
+        """ Return the recorded transitions """
+        return TurnBasedTransitions(
+                    np.array(self.allobs),
+                    np.array(self.allacts),
+                    np.array(self.flags)
+                )
+
+
+class SimultaneousRecorder(SimultaneousEnv):
+    """
+    Recorder for all turn-based environments
+
+    :param env: The environment to record
+    """
+
+    def __init__(self, env):
+        super(SimultaneousRecorder, self).__init__(partners=env.partners)
+        self.env = env
+
+        self.action_space = env.action_space
+        self.observation_space = env.observation_space
+
+        self.allegoobs = []
+        self.allegoacts = []
+        self.allaltobs = []
+        self.allaltacts = []
+        self.allflags = []
+
+    def multi_step(
+                    self,
+                    ego_action: np.ndarray,
+                    alt_action: np.ndarray
+                ) -> Tuple[Tuple[Optional[np.ndarray], Optional[np.ndarray]],
+                           Tuple[float, float], bool, Dict]:
+        """
+        This function calls the embedded environment's multi_step and records
+        the new actions and observations.
+        """
+        obs, rews, done, info = self.env.multi_step(ego_action, alt_action)
+        self.allegoacts.append(ego_action)
+        self.allaltacts.append(alt_action)
+        if not done:
+            self.allegoobs.append(obs[0])
+            self.allaltobs.append(obs[1])
+            self.allflags.append(NOT_DONE)
+        else:
+            self.allflags.append(DONE)
+        return obs, rews, done, info
+
+    def multi_reset(self) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        This function calls the embedded environment's multi_reset and records
+        the new observations.
+        """
+        obs = self.env.multi_reset()
+        self.allegoobs.append(obs[0])
+        self.allaltobs.append(obs[1])
+        return obs
+
+    def get_transitions(self) -> SimultaneousTransitions:
+        """ Return the recorded transitions """
+        return SimultaneousTransitions(
+                    np.array(self.allegoobs),
+                    np.array(self.allegoacts),
+                    np.array(self.allaltobs),
+                    np.array(self.allaltacts),
+                    np.array(self.allflags)
+                )
 
 
 class TurnBasedFrameStack(TurnBasedEnv):
+    """
+    Wrapper that stacks the observations of a turn-based environment.
 
-    def __init__(self, env, numframes, defaultobs=None):
+    :param env: The environment to wrap
+    :param numframes: The number of frames to stack for each observation
+    :param defaultobs: The default observation that fills old segments of the
+        frame stacks.
+    :param altenv: The optional dummy environment representing the spaces of
+        the partner agent.
+    :param defaultaltobs: The default observation that fills old segments of
+        the frame stacks for the partner agent.
+    """
+
+    def __init__(
+                self,
+                env: gym.Env,
+                numframes: int,
+                defaultobs: Optional[np.ndarray] = None,
+                altenv: Optional[gym.Env] = None,
+                defaultaltobs: Optional[np.ndarray] = None
+            ):
         super(TurnBasedFrameStack, self).__init__(
             probegostart=env.probegostart, partners=env.partners)
         self.env = env
@@ -52,33 +229,63 @@ class TurnBasedFrameStack(TurnBasedEnv):
         self.observation_space = calculate_space(
             env.observation_space, numframes)
 
-        self.defaultobs = get_default_obs(
-            env) if defaultobs is None else list(defaultobs)
+        if defaultobs is not None:
+            defobs = defaultobs
+        else:
+            defobs = get_default_obs(env)
 
-        self.egohistory = [self.defaultobs] * self.numframes
-        self.althistory = [self.defaultobs] * self.numframes
+        if altenv is None:
+            altenv = env
 
-    def ego_step(self, action):
+        if defaultaltobs is not None:
+            defaltobs = defaultaltobs
+        else:
+            defaltobs = get_default_obs(altenv)
+
+        self.egohistory = HistoryQueue(defobs, numframes)
+        self.althistory = HistoryQueue(defaltobs, numframes)
+
+    def ego_step(
+                self,
+                action: np.ndarray
+            ) -> Tuple[Optional[np.ndarray], Tuple[float, float], bool, Dict]:
         altobs, rews, done, info = self.env.ego_step(action)
-        return add_obs(self.althistory, altobs, self.numframes), \
-            rews, done, info
+        return self.althistory.add(altobs), rews, done, info
 
-    def alt_step(self, action):
+    def alt_step(
+                self,
+                action: np.ndarray
+            ) -> Tuple[Optional[np.ndarray], Tuple[float, float], bool, Dict]:
         egoobs, rews, done, info = self.env.alt_step(action)
-        return add_obs(self.egohistory, egoobs, self.numframes), \
-            rews, done, info
+        return self.egohistory.add(egoobs), rews, done, info
 
-    def multi_reset(self, egofirst):
+    def multi_reset(self, egofirst: bool) -> np.ndarray:
         newobs = self.env.multi_reset(egofirst)
-        self.egohistory = [self.defaultobs] * self.numframes
-        self.althistory = [self.defaultobs] * self.numframes
-        return add_obs(self.egohistory if egofirst else self.althistory,
-                       newobs, self.numframes)
+        self.egohistory.reset()
+        self.althistory.reset()
+
+        if egofirst:
+            return self.egohistory.add(newobs)
+        else:
+            return self.althistory.add(newobs)
 
 
 class SimultaneousFrameStack(SimultaneousEnv):
+    """
+    Wrapper that stacks the observations of a simultaneous environment.
 
-    def __init__(self, env, numframes, defaultobs=None):
+    :param env: The environment to wrap
+    :param numframes: The number of frames to stack for each observation
+    :param defaultobs: The default observation that fills old segments of the
+        frame stacks.
+    """
+
+    def __init__(
+                self,
+                env: gym.Env,
+                numframes: int,
+                defaultobs: Optional[np.ndarray] = None
+            ):
         super(SimultaneousFrameStack, self).__init__(partners=env.partners)
         self.env = env
         self.numframes = numframes
@@ -90,18 +297,21 @@ class SimultaneousFrameStack(SimultaneousEnv):
         self.defaultobs = get_default_obs(
             env) if defaultobs is None else list(defaultobs)
 
-        self.egohistory = [self.defaultobs] * numframes
-        self.althistory = [self.defaultobs] * numframes
+        self.egohistory = HistoryQueue(self.defaultobs, self.numframes)
+        self.althistory = HistoryQueue(self.defaultobs, self.numframes)
 
-    def multi_step(self, ego_action, alt_action):
+    def multi_step(
+                    self,
+                    ego_action: np.ndarray,
+                    alt_action: np.ndarray
+                ) -> Tuple[Tuple[Optional[np.ndarray], Optional[np.ndarray]],
+                           Tuple[float, float], bool, Dict]:
         obs, rews, done, info = self.env.multi_step(ego_action, alt_action)
-        return (add_obs(self.egohistory, obs[0], self.numframes),
-                add_obs(self.althistory, obs[1], self.numframes)), \
-            rews, done, info
+        return (self.egohistory.add(obs[0]),
+                self.althistory.add(obs[1])), rews, done, info
 
-    def multi_reset(self):
+    def multi_reset(self) -> Tuple[np.ndarray, np.ndarray]:
         obs = self.env.multi_reset()
-        self.egohistory = [self.defaultobs] * self.numframes
-        self.althistory = [self.defaultobs] * self.numframes
-        return (add_obs(self.egohistory, obs[0], self.numframes),
-                add_obs(self.althistory, obs[1], self.numframes))
+        self.egohistory.reset()
+        self.althistory.reset()
+        return (self.egohistory.add(obs[0]), self.althistory.add(obs[1]))
