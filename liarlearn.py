@@ -12,5 +12,5 @@ env = gym.make("LiarsDice-v0")
 env.add_partner_policy(OnPolicyAgent(PPO("MlpPolicy", env)))
 
 model = PPO("MlpPolicy", env, verbose=1)
-
-model.learn(total_timesteps=100000)
+wrappedmodel = OnPolicyAgent(model)
+wrappedmodel.learn(total_timesteps=100000)

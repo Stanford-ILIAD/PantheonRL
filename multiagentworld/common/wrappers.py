@@ -136,7 +136,7 @@ class TurnBasedRecorder(TurnBasedEnv, MultiRecorder):
                 )
 
 
-class SimultaneousRecorder(SimultaneousEnv):
+class SimultaneousRecorder(SimultaneousEnv, MultiRecorder):
     """
     Recorder for all turn-based environments
 

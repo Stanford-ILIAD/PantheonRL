@@ -148,6 +148,11 @@ class OnPolicyAgent(Agent):
         self._last_episode_starts = [done]
         buf.rewards[buf.pos - 1][0] += reward
 
+    def learn(self, **kwargs) -> None:
+        """ Call the model's learn function with the given parameters """
+        self.model._custom_logger = False
+        self.model.learn(**kwargs)
+
 
 class OffPolicyAgent(Agent):
     """
@@ -254,6 +259,10 @@ class OffPolicyAgent(Agent):
         self.total_timesteps = []
         self.num_collected_steps = 0
         self.num_collected_episodes = 0
+
+    def learn(self, **kwargs) -> None:
+        self.model._custom_logger = False
+        self.model.learn(**kwargs)
 
 
 class RecordingAgentWrapper(Agent):
