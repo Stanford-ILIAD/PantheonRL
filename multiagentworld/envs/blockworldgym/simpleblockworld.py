@@ -4,7 +4,7 @@
 import gym
 import numpy as np
 
-# from multiagentworld.common.agents import Agent
+from multiagentworld.common.agents import Agent
 from multiagentworld.common.multiagentenv import TurnBasedEnv
 
 GRIDLEN = 7 # block world in a 7 x 7 grid
@@ -21,12 +21,9 @@ PLANNER_ACTION_SPACE = gym.spaces.Discrete(NUM_TOKENS) # tokens that represent w
 CONSTRUCTOR_ACTION_SPACE = gym.spaces.MultiDiscrete([NUM_BLOCKS, NUM_COLORS + 1]) 
 # in the simplified version, the constructor's action space is just coloring each block
 
-blocklistformat = [[2, GRIDLEN, GRIDLEN, NUM_COLORS + 1] for i in range(NUM_BLOCKS)]
-blocklistformat.insert(0, [NUM_TOKENS]*4)
-CONSTRUCTOR_OBS_SPACE = gym.spaces.MultiDiscrete(blocklistformat)  # in the simplified version, constructor can see blocks
-                                                                  # for each block, store h/v, coordinate, and color
-blocklistformat.pop(0)
-PLANNER_OBS_SPACE = gym.spaces.MultiDiscrete([blocklistformat, blocklistformat]) # constructor's obs space and true colorings
+blocklistformat = [2, GRIDLEN, GRIDLEN, NUM_COLORS + 1]*NUM_BLOCKS # for each block, store h/v, coordinate, and color
+CONSTRUCTOR_OBS_SPACE = gym.spaces.MultiDiscrete([NUM_TOKENS]+blocklistformat)  # in the simplified version, constructor can see blocks
+PLANNER_OBS_SPACE = gym.spaces.MultiDiscrete(blocklistformat + blocklistformat) # constructor's obs space and true colorings
 
 def generate_grid_world():
     # generates a random GRIDLEN x GRIDLEN world with NUM_BLOCKS blocks
@@ -84,26 +81,28 @@ class SimpleBlockEnv(TurnBasedEnv):
         self.gridworld = generate_grid_world()
         self.constructor_obs = [[block[0], block[1], block[2], 0] for block in self.gridworld]
         self.lastToken = None
-        return self.getObs(egofirst)
+        return self.get_obs(egofirst)
     
     def get_obs(self, isego):
         # TODO: check format of observations
         if isego:
-            return [self.gridworld, self.constructor_obs]
+            return np.array([self.gridworld, self.constructor_obs]).flatten()
         else:
-            observations = self.constructor_obs
-            observations.insert(0, [self.last_token]*4)
-            return observations
+            observations = [elem for block in self.constructor_obs for elem in block]
+            return [self.last_token]+observations
     
     def ego_step(self, action):
         self.last_token = action
         # the planner gets to decide when they are done by taking action 0
-        return self.get_obs(False), self.get_reward(), action == 0, {}
+        done = action == 0
+        reward = [0, 0]
+        if done:
+            reward = self.get_reward()
+        return self.get_obs(False), reward, done, {}
     
     def alt_step(self, action):
-        # TODO: should our action[1] space be {0,1} or {0,1,2}?
         self.constructor_obs[action[0]][3] = action[1] 
-        return self.get_obs(True), self.get_reward(), False, {}
+        return self.get_obs(True), [0,0], False, {}
     
     def get_reward(self):
         # for simplified version, 100 * num blocks colored correctly / total blocks 
@@ -120,3 +119,47 @@ class PartnerEnv(gym.Env):
         super().__init__()
         self.observation_space = CONSTRUCTOR_OBS_SPACE
         self.action_space = PLANNER_OBS_SPACE
+
+class SBWDefaultAgent(Agent):
+    def get_action(self, obs, recording=True):
+        token = obs[0]
+        if token == 0: # do nothing
+            return [0, obs[4]]
+        else:
+            blocks = np.reshape(obs[1:],(NUM_BLOCKS, 4))
+            grid = self.gridfromobs(blocks)
+            # tokens 1 - 7 mean find the first uncolored one in that row and color it red
+            if token <= 7:
+                index = self.findfirstuncolored(grid, token-1, blocks)
+                if index != -1:
+                    return [index, RED]
+            # tokens 8 - 14 mean find the first uncolored one in that row and color it blue
+            if token <= 14:
+                index = self.findfirstuncolored(grid, token-8, blocks)
+                if index != -1:
+                    return [index, BLUE]
+            # otherwise do nothing
+            return [0, obs[4]]
+
+    def findfirstuncolored(self, grid, row, blocks):
+        for space in grid[row]:
+            if space != -1:
+                if blocks[space][3] == 0:
+                    return space
+        return -1
+
+    def gridfromobs(self, blocks):
+        grid = np.full((GRIDLEN, GRIDLEN), -1)
+        for i in range(len(blocks)):
+            y = blocks[i][1]
+            x = blocks[i][2]
+            grid[y][x] = i
+            if blocks[i][0] == 0: #horizontal
+                grid[y][x+1] = i
+            else:
+                grid[y+1][x] = i
+        return grid
+    
+    def update(self, reward, done):
+        pass
+
