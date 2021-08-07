@@ -122,33 +122,35 @@ class SimpleBlockEnv(TurnBasedEnv):
             self.viewer = rendering.Viewer(screen_width, screen_width)
             self.block_renders = []
             for blockdata in self.constructor_obs:
-                x, y = blockdata[1], blockdata[2]
+                y, x = blockdata[1], blockdata[2]
                 if blockdata[0] == 0: # horizontal
-                    left, right, top, bottom = x*scale, (x+2)*scale, y*scale, (y+1)*scale
+                    left, right, top, bottom = x*scale, (x+2)*scale, (GRIDLEN - y)*scale, (GRIDLEN - (y+1))*scale
                 else: # vertical
-                    left, right, top, bottom = x*scale, (x+1)*scale, y*scale, (y+2)*scale
+                    left, right, top, bottom = x*scale, (x+1)*scale, (GRIDLEN - y)*scale, (GRIDLEN - (y+2))*scale
                 newblock = rendering.FilledPolygon([(left, bottom), (left, top), (right, top), (right, bottom)])
-                newblock.set_color(110, 110, 110)
+                newblock.set_color(0.5, 0.5, 0.5)
                 self.viewer.add_geom(newblock)
                 self.block_renders.append(newblock)
             for blockdata in self.gridworld:
-                x, y = blockdata[1], blockdata[2]
-                if blockdata[0] == 0: # horizontal
-                    left, right, top, bottom = x*scale, (x+2)*scale, y*scale, (y+1)*scale
-                else: # vertical
-                    left, right, top, bottom = x*scale, (x+1)*scale, y*scale, (y+2)*scale
-                newblock = rendering.PolyLine([(left, bottom), (left, top), (right, top), (right, bottom)])
+                y, x = blockdata[1], blockdata[2]
+                if blockdata[0] == 0:  # horizontal
+                    left, right, top, bottom = x * scale, (x + 2) * scale, (GRIDLEN - y) * scale, (
+                                GRIDLEN - (y + 1)) * scale
+                else:  # vertical
+                    left, right, top, bottom = x * scale, (x + 1) * scale, (GRIDLEN - y) * scale, (
+                                GRIDLEN - (y + 2)) * scale
+                newblock = rendering.PolyLine([(left, bottom), (left, top), (right, top), (right, bottom)], close=True)
                 newblock.set_linewidth(10)
                 if blockdata[3] == RED:
-                    newblock.set_color(250, 5, 5)
+                    newblock.set_color(0.98, 0.02, 0.02)
                 if blockdata[3] == BLUE:
-                    newblock.set_color(5, 5, 250)
+                    newblock.set_color(0.02, 0.02, 0.98)
                 self.viewer.add_geom(newblock)
         for i in range(len(self.block_renders)):
             if self.constructor_obs[i][3] == RED:
-                self.block_renders[i].set_color(250, 5, 5)
+                self.block_renders[i].set_color(0.98, 0.02, 0.02)
             if self.constructor_obs[i][3] == BLUE:
-                self.block_renders[i].set_color(5, 5, 250)
+                self.block_renders[i].set_color(0.02, 0.02, 0.98)
         return self.viewer.render(return_rgb_array=mode == "rgb_array")
                 
                     
