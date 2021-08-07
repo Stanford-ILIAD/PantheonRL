@@ -15,7 +15,7 @@ NO_COLOR = 0
 BLUE = 1 
 RED = 2 # useful for if we add graphics later
 
-NUM_TOKENS = 20 # number of tokens the planner has
+NUM_TOKENS = 16 # number of tokens the planner has
 
 PLANNER_ACTION_SPACE = gym.spaces.Discrete(NUM_TOKENS) # tokens that represent words
 CONSTRUCTOR_ACTION_SPACE = gym.spaces.MultiDiscrete([NUM_BLOCKS, NUM_COLORS + 1]) 
@@ -76,6 +76,7 @@ class SimpleBlockEnv(TurnBasedEnv):
         self.action_space = PLANNER_ACTION_SPACE
         self.partner_action_space = CONSTRUCTOR_ACTION_SPACE
         self.partner_env = PartnerEnv()
+        self.viewer = None
     
     def multi_reset(self, egofirst):
         self.gridworld = generate_grid_world()
@@ -84,7 +85,6 @@ class SimpleBlockEnv(TurnBasedEnv):
         return self.get_obs(egofirst)
     
     def get_obs(self, isego):
-        # TODO: check format of observations
         if isego:
             return np.array([self.gridworld, self.constructor_obs]).flatten()
         else:
@@ -93,8 +93,8 @@ class SimpleBlockEnv(TurnBasedEnv):
     
     def ego_step(self, action):
         self.last_token = action
-        # the planner gets to decide when they are done by taking action 0
-        done = action == 0
+        # the planner gets to decide when they are done by taking action NUM_TOKENS - 1
+        done = action == NUM_TOKENS - 1
         reward = [0, 0]
         if done:
             reward = self.get_reward()
@@ -114,11 +114,68 @@ class SimpleBlockEnv(TurnBasedEnv):
         reward = 100 * correct_blocks / NUM_BLOCKS 
         return [reward, reward] # since they both get the same reward
 
+    def render(self, mode="human"):
+        screen_width = 700
+        scale = screen_width/GRIDLEN
+        if self.viewer is None:
+            from gym.envs.classic_control import rendering
+            self.viewer = rendering.Viewer(screen_width, screen_width)
+            self.block_renders = []
+            for blockdata in self.constructor_obs:
+                x, y = blockdata[1], blockdata[2]
+                if blockdata[0] == 0: # horizontal
+                    left, right, top, bottom = x*scale, (x+2)*scale, y*scale, (y+1)*scale
+                else: # vertical
+                    left, right, top, bottom = x*scale, (x+1)*scale, y*scale, (y+2)*scale
+                newblock = rendering.FilledPolygon([(left, bottom), (left, top), (right, top), (right, bottom)])
+                newblock.set_color(110, 110, 110)
+                self.viewer.add_geom(newblock)
+                self.block_renders.append(newblock)
+            for blockdata in self.gridworld:
+                x, y = blockdata[1], blockdata[2]
+                if blockdata[0] == 0: # horizontal
+                    left, right, top, bottom = x*scale, (x+2)*scale, y*scale, (y+1)*scale
+                else: # vertical
+                    left, right, top, bottom = x*scale, (x+1)*scale, y*scale, (y+2)*scale
+                newblock = rendering.PolyLine([(left, bottom), (left, top), (right, top), (right, bottom)])
+                newblock.set_linewidth(10)
+                if blockdata[3] == RED:
+                    newblock.set_color(250, 5, 5)
+                if blockdata[3] == BLUE:
+                    newblock.set_color(5, 5, 250)
+                self.viewer.add_geom(newblock)
+        for i in range(len(self.block_renders)):
+            if self.constructor_obs[i][3] == RED:
+                self.block_renders[i].set_color(250, 5, 5)
+            if self.constructor_obs[i][3] == BLUE:
+                self.block_renders[i].set_color(5, 5, 250)
+        return self.viewer.render(return_rgb_array=mode == "rgb_array")
+                
+                    
+
 class PartnerEnv(gym.Env):
     def __init__(self):
         super().__init__()
         self.observation_space = CONSTRUCTOR_OBS_SPACE
         self.action_space = PLANNER_OBS_SPACE
+
+class SBWEasyPartner(Agent):
+    def get_action(self, obs, recording=True):
+        token = obs[0]
+        if token > 10:
+            token = token//2
+        # tokens 1 - 5 mean color the block at that index red
+        if 1 <= token <= 5:
+            return [token - 1, RED]
+        # tokens 6 - 10 mean color the block at that index blue
+        if 6 <= token <= 10:
+            return [token - 8, BLUE]
+        else:
+            return [0, obs[4]]
+
+    def update(self, reward, done):
+        pass
+
 
 class SBWDefaultAgent(Agent):
     def get_action(self, obs, recording=True):
