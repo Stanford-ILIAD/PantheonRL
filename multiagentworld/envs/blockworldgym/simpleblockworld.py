@@ -75,7 +75,7 @@ class SimpleBlockEnv(TurnBasedEnv):
         self.partner_observation_space = CONSTRUCTOR_OBS_SPACE
         self.action_space = PLANNER_ACTION_SPACE
         self.partner_action_space = CONSTRUCTOR_ACTION_SPACE
-        self.partner_env = PartnerEnv()
+        self.partner_env = gym.make('PartnerBlockEnv-v0')
         self.viewer = None
     
     def multi_reset(self, egofirst):
@@ -89,7 +89,8 @@ class SimpleBlockEnv(TurnBasedEnv):
             return np.array([self.gridworld, self.constructor_obs]).flatten()
         else:
             observations = [elem for block in self.constructor_obs for elem in block]
-            return [self.last_token]+observations
+            output = np.array(([self.last_token]+observations))
+            return output
     
     def ego_step(self, action):
         self.last_token = action
@@ -159,7 +160,7 @@ class PartnerEnv(gym.Env):
     def __init__(self):
         super().__init__()
         self.observation_space = CONSTRUCTOR_OBS_SPACE
-        self.action_space = PLANNER_OBS_SPACE
+        self.action_space = CONSTRUCTOR_ACTION_SPACE
 
 class SBWEasyPartner(Agent):
     def get_action(self, obs, recording=True):

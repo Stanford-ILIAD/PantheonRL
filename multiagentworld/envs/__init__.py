@@ -25,3 +25,8 @@ register(
     id='BlockEnv-v1',
     entry_point='multiagentworld.envs.blockworldgym.blockworld:BlockEnv'
 )
+
+register(
+    id='PartnerBlockEnv-v0',
+    entry_point='multiagentworld.envs.blockworldgym.simpleblockworld:PartnerEnv'
+)

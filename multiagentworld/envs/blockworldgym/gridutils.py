@@ -60,4 +60,5 @@ def matches(grid1, grid2):
     # then count nonzeroes in the array quotient==1
     # but i'm filtering the divide by zero warning -- should be careful about this later
     warnings.filterwarnings('ignore', 'invalid value encountered in true_divide')
+    warnings.filterwarnings('ignore', 'divide by zero encountered in true_divide')
     return np.count_nonzero((grid1/grid2 == 1))

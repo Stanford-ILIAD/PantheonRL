@@ -1,20 +1,22 @@
 # the more complex version of blockworld, where the constructor doesn't see the blocks beforehand
+from multiagentworld.envs.blockworldgym.simpleblockworld import PartnerEnv
 import gym
 import numpy as np
 
 from multiagentworld.common.agents import Agent
 from multiagentworld.common.multiagentenv import TurnBasedEnv
-from multiagentworld.envs.blockworldgym.gridutils import HORIZONTAL, generate_random_world, gravity, place, matches
+from multiagentworld.envs.blockworldgym.gridutils import HORIZONTAL, VERTICAL, generate_random_world, gravity, place, matches
 
 GRIDLEN = 7 # block world in a 7 x 7 grid
 NUM_BLOCKS = 5 # the number of blocks will be variable in the non-simplified version, 
                # but allows for a constant sized action space here
+
+#TODO: make sure color and action space/resulting grid are consistent
 NUM_COLORS = 2 
-NO_COLOR = 0
 BLUE = 1 
 RED = 2 # useful for if we add graphics later
 
-NUM_TOKENS = 16 # number of tokens the planner has
+NUM_TOKENS = 30 # number of tokens the planner has
 
 PLANNER_ACTION_SPACE = gym.spaces.Discrete(NUM_TOKENS) # tokens that represent words
 CONSTRUCTOR_ACTION_SPACE = gym.spaces.MultiDiscrete([GRIDLEN, 2, NUM_COLORS]) # it can drop any block from the top, set h/v and color
@@ -44,19 +46,19 @@ class BlockEnv(TurnBasedEnv):
         if isego:
             return np.concatenate((self.gridworld, self.constructor_obs), axis=None)
         else:
-            observations = list(np.flatten(self.constructor_obs))
+            observations = list(self.constructor_obs.flatten())
             return [self.last_token] + observations
 
     def ego_step(self, action):
         self.last_token = action
         done = action==NUM_TOKENS-1
-        reward = [0, 0]
+        reward = 0
         if done:
             reward = self.get_reward()
-        return self.get_obs(False), reward, done, {}
+        return self.get_obs(False), [reward, reward], done, {}
     
     def alt_step(self, action):
-        x, orientation, color = action[0], action[1], action[2]
+        x, orientation, color = action[0], action[1], action[2]+1
         if not(orientation == HORIZONTAL and x == GRIDLEN-1):
             y = gravity(self.constructor_obs, orientation, x)
             if y != -1:
@@ -75,4 +77,20 @@ class PartnerEnv(gym.Env):
     def __init__(self):
         super().__init__()
         self.observation_space = CONSTRUCTOR_OBS_SPACE
-        self.action_space = PLANNER_OBS_SPACE
+        self.action_space = CONSTRUCTOR_ACTION_SPACE
+
+class DefaultConstructorAgent(Agent):
+    def get_action(self, obs, recording=True):
+        token = obs[0]
+        if token == 0 or token == 29:
+            return [GRIDLEN - 1, VERTICAL, 0]
+        token -= 1
+        color = token % 2
+        token = token // 2
+        orientation = token % 2
+        token = token // 2
+        x = token
+        return [x, orientation, color]
+    def update(self, reward, done):
+        pass
+
