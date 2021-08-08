@@ -81,7 +81,7 @@ class SimpleBlockEnv(TurnBasedEnv):
     def multi_reset(self, egofirst):
         self.gridworld = generate_grid_world()
         self.constructor_obs = [[block[0], block[1], block[2], 0] for block in self.gridworld]
-        self.lastToken = None
+        self.last_token = 0
         return self.get_obs(egofirst)
     
     def get_obs(self, isego):
