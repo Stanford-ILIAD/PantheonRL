@@ -110,8 +110,9 @@ class ADAP(OnPolicyAlgorithm):
         _init_setup_model: bool = True,
         context_loss_coeff: float = 0.1,
         context_size: int = 3,
-        num_context_samples: int = 10,
-        context_sampler: str = "l2"
+        num_context_samples: int = 5,
+        context_sampler: str = "l2",
+        num_state_samples: int = 32
     ):
         if policy_kwargs is None:
             policy_kwargs = {}
@@ -187,7 +188,7 @@ class ADAP(OnPolicyAlgorithm):
         else:
             self.action_dist = 'categorical'
 
-        self.num_state_samples = self.batch_size
+        self.num_state_samples = num_state_samples
         self.num_context_samples = num_context_samples
         self.context_sampler = context_sampler
         self.context_size = context_size

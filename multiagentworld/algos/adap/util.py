@@ -1,4 +1,5 @@
 import copy
+from itertools import combinations
 
 import torch as th
 import numpy as np
@@ -106,14 +107,17 @@ def get_context_kl_loss(policy: 'ADAP', model: 'AdapPolicy',
     sampled_states = original_obs[indices]
     num_state_samples = min(num_state_samples, sampled_states.shape[0])
 
-    all_contexts = []
+    all_contexts = set()
     all_action_dists = []
     old_context = model.get_context()
     for i in range(0, num_context_samples):  # 10 sampled contexts
         sampled_context = SAMPLERS[policy.context_sampler](
             ctx_size=context_size, num=1, torch=True)
 
-        all_contexts.append(sampled_context)
+        if sampled_context in all_contexts:
+            continue
+
+        all_contexts.add(sampled_context)
         model.set_context(sampled_context)
         latent_pi, _, latent_sde = model._get_latent(sampled_states)
         context_action_dist = model._get_action_dist_from_latent(
@@ -121,24 +125,7 @@ def get_context_kl_loss(policy: 'ADAP', model: 'AdapPolicy',
         all_action_dists.append(copy.copy(context_action_dist))
 
     model.set_context(old_context)
-    count = 0
-    all_CLs = []
-    all_ents = []
-    for i in range(0, num_context_samples - 1):
-        for j in range(i+1, num_context_samples):
-            context_dist = th.sum(
-                th.abs(all_contexts[i] - all_contexts[j])) / context_size
-            if context_dist > 0:
-                count += 1
-                assert 0 < context_dist <= 2, context_dist
-                dist_1 = all_action_dists[i]
-                dist_2 = all_action_dists[j]
-                ent = dist_1.entropy() + dist_2.entropy()
-                kval = kl_divergence(dist_1, dist_2)
-                div = th.mean(th.exp(-kval))
-                assert th.sum(th.isnan(div)) == 0, \
-                    "found nan value: " + str(div)
-                all_CLs.append(div)
-                all_ents.append(ent)
+    all_CLs = [th.mean(th.exp(-kl_divergence(a, b)))
+               for a, b in combinations(all_action_dists, 2)]
     rawans = sum(all_CLs)/len(all_CLs)
     return rawans
