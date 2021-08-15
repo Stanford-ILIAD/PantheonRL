@@ -19,3 +19,7 @@ env.and_partner_agent(AdapAgent(ADAP(AdapPolicy, env, context_sampler="categoric
                                  model.policy))
 
 model.learn(total_timesteps=100000)
+# model.save("adap-learn")
+# model = ADAP.load("adap-learn")
+# model.set_env(env)
+# model.learn(total_timesteps=10000)

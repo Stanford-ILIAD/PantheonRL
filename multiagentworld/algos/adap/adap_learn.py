@@ -154,6 +154,11 @@ class ADAP(OnPolicyAlgorithm):
         if self.env is not None:
             # Check that `n_steps * n_envs > 1` to avoid NaN
             # when doing advantage normalization
+
+            if self.env.action_space == spaces.Box:
+                self.action_dist = 'gaussian'
+            else:
+                self.action_dist = 'categorical'
             buffer_size = self.env.num_envs * self.n_steps
             assert (
                 buffer_size > 1
@@ -183,11 +188,6 @@ class ADAP(OnPolicyAlgorithm):
 
         self.context_loss_coeff = context_loss_coeff
 
-        if self.env.action_space == spaces.Box:
-            self.action_dist = 'gaussian'
-        else:
-            self.action_dist = 'categorical'
-
         self.num_state_samples = num_state_samples
         self.num_context_samples = num_context_samples
         self.context_sampler = context_sampler
@@ -196,14 +196,23 @@ class ADAP(OnPolicyAlgorithm):
         if _init_setup_model:
             self._setup_model()
 
-        sampled_context = SAMPLERS[context_sampler](
-            ctx_size=context_size, num=1, torch=True)
-
-        self.policy.set_context(sampled_context)
         self.full_obs_shape = None
+
+    def set_env(self, env):
+        super(ADAP, self).set_env(env)
+
+        if self.env.action_space == spaces.Box:
+            self.action_dist = 'gaussian'
+        else:
+            self.action_dist = 'categorical'
 
     def _setup_model(self) -> None:
         super(ADAP, self)._setup_model()
+
+        sampled_context = SAMPLERS[self.context_sampler](
+            ctx_size=self.context_size, num=1, torch=True)
+
+        self.policy.set_context(sampled_context)
 
         # Initialize schedules for policy/value clipping
         self.clip_range = get_schedule_fn(self.clip_range_raw)
@@ -393,7 +402,9 @@ class ADAP(OnPolicyAlgorithm):
         if self.full_obs_shape is None:
             self.full_obs_shape = (
                 rollout_buffer.obs_shape[0] + self.context_size,)
-        rollout_buffer.obs_shape = self.full_obs_shape
+
+        rollout_buffer.obs_shape = tuple(self.full_obs_shape)
+
         rollout_buffer.reset()
         # Sample new weights for the state dependent exploration
         if self.use_sde:
