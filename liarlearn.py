@@ -8,8 +8,8 @@ from multiagentworld.common.wrappers import TurnBasedFrameStack
 
 # env = TurnBasedFrameStack(gym.make("LiarsDice-v0"), numframes=3)
 env = gym.make("LiarsDice-v0")
-# env.add_partner_policy(LiarDefaultAgent())
-env.add_partner_policy(OnPolicyAgent(PPO("MlpPolicy", env)))
+# env.and_partner_agent(LiarDefaultAgent())
+env.and_partner_agent(OnPolicyAgent(PPO("MlpPolicy", env)))
 
 model = PPO("MlpPolicy", env, verbose=1)
 wrappedmodel = OnPolicyAgent(model)

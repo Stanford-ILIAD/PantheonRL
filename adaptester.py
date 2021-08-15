@@ -14,7 +14,7 @@ env = SimultaneousFrameStack(
     gym.make("OvercookedMultiEnv-v0", layout_name="random0"), numframes=3)
 model = ADAP(AdapPolicy, env, verbose=1, context_sampler="categorical",
              context_size=3, context_loss_coeff=0.1)
-env.add_partner_policy(AdapAgent(ADAP(AdapPolicy, env, context_sampler="categorical",
+env.and_partner_agent(AdapAgent(ADAP(AdapPolicy, env, context_sampler="categorical",
                                       context_size=3, context_loss_coeff=0),
                                  model.policy))
 
