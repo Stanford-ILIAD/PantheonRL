@@ -7,6 +7,8 @@ from multiagentworld.common.agents import Agent
 from multiagentworld.common.multiagentenv import TurnBasedEnv
 from multiagentworld.envs.blockworldgym.gridutils import HORIZONTAL, VERTICAL, generate_random_world, gravity, place, matches
 
+from gym.envs.classic_control import rendering
+
 GRIDLEN = 7 # block world in a 7 x 7 grid
 NUM_BLOCKS = 5 # the number of blocks will be variable in the non-simplified version, 
                # but allows for a constant sized action space here
@@ -60,6 +62,7 @@ class BlockEnv(TurnBasedEnv):
     def alt_step(self, action):
         x, orientation, color = action[0], action[1], action[2]+1
         if not(orientation == HORIZONTAL and x == GRIDLEN-1):
+            print(x)
             y = gravity(self.constructor_obs, orientation, x)
             if y != -1:
                 place(self.constructor_obs, x, y, color, orientation)
@@ -77,7 +80,6 @@ class BlockEnv(TurnBasedEnv):
         screen_width = 700
         scale = screen_width/GRIDLEN
         if self.viewer is None:
-            from gym.envs.classic_control import rendering
             self.viewer = rendering.Viewer(screen_width, screen_width)
             for i in range(len(self.gridworld)):
                 for j in range(len(self.gridworld[i])):
@@ -88,7 +90,7 @@ class BlockEnv(TurnBasedEnv):
                     if self.gridworld[i][j] == RED:
                         newblock.set_color(0.98, 0.02, 0.02)
                     elif self.gridworld[i][j] == BLUE:
-                        newblock.setcolor(0.02, 0.02, 0.98)
+                        newblock.set_color(0.02, 0.02, 0.98)
         for i in range(len(self.constructor_obs)):
             for j in range(len(self.constructor_obs[i])):
                 if not self.constructor_obs[i][j] == 0:
@@ -99,7 +101,7 @@ class BlockEnv(TurnBasedEnv):
                     if self.constructor_obs[i][j] == RED:
                         newblock.set_color(0.98, 0.02, 0.02)
                     elif self.constructor_obs[i][j] == BLUE:
-                        newblock.setcolor(0.02, 0.02, 0.98)
+                        newblock.set_color(0.02, 0.02, 0.98)
         return self.viewer.render(return_rgb_array=mode == "rgb_array")
 
 
@@ -111,7 +113,7 @@ class PartnerEnv(gym.Env):
 
 class DefaultConstructorAgent(Agent):
     def get_action(self, obs, recording=True):
-        token = obs[0]
+        token = int(obs[0])
         if token == 0 or token == 29:
             return [GRIDLEN - 1, VERTICAL, 0]
         token -= 1
