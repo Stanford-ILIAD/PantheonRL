@@ -18,18 +18,26 @@ class MultiAgentEnv(gym.Env, ABC):
         self.partners = partners
         self.partnerid = 0
 
-    def add_partner_policy(self, policy: Agent) -> None:
+    def add_partner_agent(self, agent: Agent) -> None:
         """
-        Add policy to the list of potential partner policies
+        Add agent to the list of potential partner agents
 
-        :param policy: Policy to add
+        :param agent: Agent to add
         """
-        self.partners.append(policy)
+        self.partners.append(agent)
 
+    def set_partnerid(self, partnerid: int) -> None:
+        """
+        Set the current partner agent to use
+
+        :param partnerid: Partnerid to use as current partner
+        """
+        assert(partnerid >= 0 and partnerid < len(self.partners))
+        self.partnerid = partnerid
+        
     def resample_partner(self) -> None:
-        """ Resample the partner policy used """
+        """ Resample the partner agent used """
         self.partnerid = np.random.randint(len(self.partners))
-
 
 class TurnBasedEnv(MultiAgentEnv, ABC):
     """
@@ -68,6 +76,7 @@ class TurnBasedEnv(MultiAgentEnv, ABC):
             info: Extra information about the environment
         """
         altobs, rewA, done, info = self.ego_step(action)
+        info['_partnerid'] = self.partnerid
 
         # if partner made an action, update with new reward
         if self.altmoved:
@@ -198,6 +207,7 @@ class SimultaneousEnv(MultiAgentEnv, ABC):
         """
         altaction = self.partners[self.partnerid].get_action(self.altobs)
         fullobs, fullreward, done, info = self.multi_step(action, altaction)
+        info['_partnerid'] = self.partnerid
 
         self.altobs = fullobs[1]
         self.partners[self.partnerid].update(fullreward[1], done)

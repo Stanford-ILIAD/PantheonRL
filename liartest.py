@@ -5,7 +5,7 @@ from multiagentworld.envs.liargym.liar import LiarDefaultAgent
 
 env = gym.make('LiarsDice-v0')
 policy = LiarDefaultAgent()
-env.add_partner_policy(LiarDefaultAgent())
+env.add_partner_agent(LiarDefaultAgent())
 
 numgames = 100
 rewards = []

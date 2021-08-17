@@ -20,7 +20,7 @@ class RPSWeightedAgent(Agent):
 
     def get_action(self, obs, record=True):
         roll = self.np_random.rand()
-        return np.array([0 if roll < self.c0 else 1 if roll < self.c1 else 2])
+        return 0 if roll < self.c0 else 1 if roll < self.c1 else 2
 
     def update(self, reward, done):
         pass

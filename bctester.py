@@ -27,7 +27,7 @@ def run_game(env, numgames, policy, verbose=True):
 def liars(write=False, save=False):
     env = gym.make('LiarsDice-v0')
     policy = LiarDefaultAgent()
-    env.add_partner_policy(LiarDefaultAgent())
+    env.add_partner_agent(LiarDefaultAgent())
 
     trainsteps = 100000
     numgames = 100
@@ -57,7 +57,7 @@ def liars(write=False, save=False):
 def rps(write=False, save=False):
     env = gym.make('RPS-v0')
     policy = RPSWeightedAgent()
-    env.add_partner_policy(RPSWeightedAgent())
+    env.add_partner_agent(RPSWeightedAgent())
 
     trainsteps = 100000
     numgames = 100

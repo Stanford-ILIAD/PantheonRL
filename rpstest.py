@@ -4,7 +4,7 @@ from multiagentworld.envs.rpsgym.rps import RPSWeightedAgent
 
 env = gym.make('RPS-v0')
 policy = RPSWeightedAgent(0,0,1)
-env.add_partner_policy(RPSWeightedAgent(0,1,1))
+env.add_partner_agent(RPSWeightedAgent(0,1,1))
 
 obs = env.reset()
 
