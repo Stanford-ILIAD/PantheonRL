@@ -47,7 +47,7 @@ class BlockEnv(TurnBasedEnv):
             return np.concatenate((self.gridworld, self.constructor_obs), axis=None)
         else:
             observations = list(self.constructor_obs.flatten())
-            return [self.last_token] + observations
+            return np.array(([self.last_token] + observations))
 
     def ego_step(self, action):
         self.last_token = action
@@ -72,6 +72,36 @@ class BlockEnv(TurnBasedEnv):
         selected = np.count_nonzero(self.constructor_obs)
         relevant = np.count_nonzero(self.gridworld)
         return 2 * truepos / (selected + relevant)
+
+    def render(self, mode="human"):
+        screen_width = 700
+        scale = screen_width/GRIDLEN
+        if self.viewer is None:
+            from gym.envs.classic_control import rendering
+            self.viewer = rendering.Viewer(screen_width, screen_width)
+            for i in range(len(self.gridworld)):
+                for j in range(len(self.gridworld[i])):
+                    left, right, top, bottom = j*scale, (j+1)*scale, (GRIDLEN - i)*scale, (GRIDLEN - (i+1))*scale
+                    newblock = rendering.PolyLine([(left, bottom), (left, top), (right, top), (right, bottom)], close=True)
+                    newblock.set_linewidth(10)
+                    self.viewer.add_geom(newblock)
+                    if self.gridworld[i][j] == RED:
+                        newblock.set_color(0.98, 0.02, 0.02)
+                    elif self.gridworld[i][j] == BLUE:
+                        newblock.setcolor(0.02, 0.02, 0.98)
+        for i in range(len(self.constructor_obs)):
+            for j in range(len(self.constructor_obs[i])):
+                if not self.constructor_obs[i][j] == 0:
+                    left, right, top, bottom = j*scale, (j+1)*scale, (GRIDLEN - i)*scale, (GRIDLEN - (i+1))*scale
+                    newblock = rendering.FilledPolygon([(left, bottom), (left, top), (right, top), (right, bottom)])
+                    newblock.set_color(0.5, 0.5, 0.5)
+                    self.viewer.add_geom(newblock)
+                    if self.constructor_obs[i][j] == RED:
+                        newblock.set_color(0.98, 0.02, 0.02)
+                    elif self.constructor_obs[i][j] == BLUE:
+                        newblock.setcolor(0.02, 0.02, 0.98)
+        return self.viewer.render(return_rgb_array=mode == "rgb_array")
+
 
 class PartnerEnv(gym.Env):
     def __init__(self):
