@@ -19,6 +19,6 @@ def main():
             flash(error)
 
         for possible_env in ENV_LIST:
-            if env_name == possible_env:
-                return redirect(url_for(f"envs.{possible_env}"))
+            if env_name == ENV_LIST[possible_env]:
+                return redirect(url_for(f"envs.{ENV_LIST[possible_env]}"))
     return render_template('welcome.html', envs=ENV_LIST)

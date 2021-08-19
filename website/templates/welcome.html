@@ -17,7 +17,7 @@
         <label for="env">Pick one of the following:</label>
         <select name="env" id="env">
             {% for possible_env in envs %}
-                <option value="{{ possible_env }}">{{ possible_env }}</option>
+                <option value="{{ envs[possible_env] }}">{{ possible_env }}</option>
             {% endfor %}
         </select>
         <br> <br>
