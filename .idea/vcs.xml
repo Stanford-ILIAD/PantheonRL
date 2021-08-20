@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/multiagentworld/envs/overcookedgym/human_aware_rl" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/multiagentworld/envs/overcookedgym/human_aware_rl/baselines" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/multiagentworld/envs/overcookedgym/human_aware_rl/overcooked_ai" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/multiagentworld/envs/overcookedgym/human_aware_rl/stable-baselines" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/multiagentworld/envs/overcookedgym/human_aware_rl/tfjs-converter" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/stable-baselines3" vcs="Git" />
+  </component>
+</project>

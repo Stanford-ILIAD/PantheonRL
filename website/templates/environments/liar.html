@@ -1,0 +1,22 @@
+{% extends 'welcome.html' %}
+
+{% block title %}Liar's Dice{% endblock %}
+
+{% block parameters %}
+<form method="post">
+    <label for="probegostart">probability the ego agent starts: </label>
+    <input type="range" name="probegostart" id="probegostart" value="50" min="0" max="100">
+    <span id="output"></span>
+    <br> <br>
+    <input type="submit" value="Go">
+</form>
+<script>
+var slider = document.getElementById("probegostart");
+var output = document.getElementById("output");
+output.innerHTML = slider.value/100;
+
+slider.oninput = function() {
+  output.innerHTML = this.value/100;
+}
+</script>
+{% endblock %}

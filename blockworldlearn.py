@@ -17,12 +17,7 @@ env.add_partner_agent(bw.DefaultConstructorAgent())
 # env.add_partner_agent(sbw.SBWEasyPartner())
 # env.add_partner_agent(OnPolicyAgent(PPO("MlpPolicy", env.partner_env)))
 
-# model = PPO("MlpPolicy", env, verbose=1)
-# wrappedmodel = OnPolicyAgent(model)
-# wrappedmodel.learn(total_timesteps=1000000)
+model = PPO("MlpPolicy", env, verbose=1)
+wrappedmodel = OnPolicyAgent(model)
+wrappedmodel.learn(total_timesteps=1000000)
 
-env.reset()
-for i in range(10):
-    env.render()
-    env.step(i)
-    time.sleep(2)

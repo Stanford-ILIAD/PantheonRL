@@ -448,7 +448,7 @@ class ADAP(OnPolicyAlgorithm):
             rollout_buffer.add(np.concatenate(
                                 (self._last_obs,
                                  self.policy.get_context()),
-                                axis=1),
+                                axis=None),
                                actions, rewards,
                                self._last_episode_starts, values, log_probs)
             self._last_obs = new_obs

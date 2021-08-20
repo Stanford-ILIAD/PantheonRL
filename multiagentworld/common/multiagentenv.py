@@ -14,8 +14,8 @@ class MultiAgentEnv(gym.Env, ABC):
     :param partners: List of policies to choose from for the partner agent
     """
 
-    def __init__(self, partners: List[Agent] = []):
-        self.partners = partners
+    def __init__(self, partners: Optional[List[Agent]] = None):
+        self.partners = partners or []
         self.partnerid = 0
 
     def add_partner_agent(self, agent: Agent) -> None:
@@ -34,10 +34,11 @@ class MultiAgentEnv(gym.Env, ABC):
         """
         assert(partnerid >= 0 and partnerid < len(self.partners))
         self.partnerid = partnerid
-        
+
     def resample_partner(self) -> None:
         """ Resample the partner agent used """
         self.partnerid = np.random.randint(len(self.partners))
+
 
 class TurnBasedEnv(MultiAgentEnv, ABC):
     """
@@ -50,8 +51,10 @@ class TurnBasedEnv(MultiAgentEnv, ABC):
     :param partners: List of policies to choose from for the partner agent
     """
 
-    def __init__(self, probegostart: float = 0.5, partners: List[Agent] = []):
-        super(TurnBasedEnv, self).__init__(partners=partners)
+    def __init__(self,
+                 probegostart: float = 0.5,
+                 partners: Optional[List[Agent]] = None):
+        super(TurnBasedEnv, self).__init__(partners=partners or [])
         self.probegostart = probegostart
         self.altmoved = False
 
@@ -182,8 +185,8 @@ class SimultaneousEnv(MultiAgentEnv, ABC):
     :param partners: List of policies to choose from for the partner agent
     """
 
-    def __init__(self, partners: List[Agent] = []):
-        super(SimultaneousEnv, self).__init__(partners)
+    def __init__(self, partners: Optional[List[Agent]] = None):
+        super(SimultaneousEnv, self).__init__(partners or [])
         self.altobs: Optional[np.ndarray] = None
 
     def step(

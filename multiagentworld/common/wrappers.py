@@ -4,7 +4,7 @@ from typing import List, Optional, Dict, Tuple
 
 import gym
 
-from .multiagentenv import TurnBasedEnv, SimultaneousEnv
+from .multiagentenv import TurnBasedEnv, SimultaneousEnv, MultiAgentEnv
 from .trajsaver import (TurnBasedTransitions, SimultaneousTransitions,
                         MultiTransitions)
 from .util import (calculate_space, get_default_obs)
@@ -18,6 +18,20 @@ ALT_DONE = 3
 # Flags for the SimultaneousRecorder wrapper
 NOT_DONE = 0
 DONE = 1
+
+
+def frame_wrap(env: MultiAgentEnv, numframes: int):
+    if isinstance(env, TurnBasedEnv):
+        return TurnBasedFrameStack(env, numframes)
+    else:
+        return SimultaneousFrameStack(env, numframes)
+
+
+def recorder_wrap(env: MultiAgentEnv, numframes: int):
+    if isinstance(env, TurnBasedEnv):
+        return TurnBasedRecorder(env)
+    else:
+        return SimultaneousRecorder(env)
 
 
 class HistoryQueue:

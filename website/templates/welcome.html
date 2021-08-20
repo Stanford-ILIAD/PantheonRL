@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block mainbody %}
+<p>Select an environment to get started.</p>
+{% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+{% endfor %}
+<form action="{{ url_for('welcome.main') }}" method="post">
+    <label for="env">Pick one of the following:</label>
+    <select name="env" id="env">
+        {% for possible_env in envs %}
+            <option value="{{ envs[possible_env] }}">{{ possible_env }}</option>
+        {% endfor %}
+    </select>
+    <br> <br>
+    <input type="submit" value="Continue">
+</form>
+{% if selected %}
+<h2>Parameters for {% block title %}{% endblock %}</h2>
+{% block parameters %}{% endblock %}
+{% endif %}
+{% endblock %}
