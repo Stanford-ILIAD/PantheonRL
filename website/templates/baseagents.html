@@ -8,12 +8,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-<h1>{% block title %}{% endblock %} Parameters</h1>
-<p>Please set the environment parameters.</p>
-{% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-{% endfor %}
-{% block parameters %}{% endblock %}
+<h1>Agent Settings</h1>
+<div class="row">
+  <div class="column" style="background-color:#aaa;">
+    <h2>Ego Agent</h2>
+    <p>Some text..</p>
+  </div>
+  <div class="column" style="background-color:#bbb;">
+    <h2>Partner Agent 1</h2>
+    <p>Some text..</p>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
 </body>
 </html>

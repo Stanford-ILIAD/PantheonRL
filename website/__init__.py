@@ -21,8 +21,12 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from website import welcome, envs
-    app.register_blueprint(welcome.bp)
-    app.register_blueprint(envs.bp)
+    from . import db
+    db.init_app(app)
+
+    from website import env_selection, agents, login
+    app.register_blueprint(login.bp)
+    app.register_blueprint(env_selection.bp)
+    app.register_blueprint(agents.bp)
 
     return app

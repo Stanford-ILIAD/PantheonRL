@@ -1,4 +1,4 @@
-{% extends 'baseenv.html' %}
+{% extends 'welcome.html' %}
 
 {% block title %}Liar's Dice{% endblock %}
 
@@ -8,7 +8,7 @@
     <input type="range" name="probegostart" id="probegostart" value="50" min="0" max="100">
     <span id="output"></span>
     <br> <br>
-    <input type="submit" value="Continue">
+    <input type="submit" value="Go">
 </form>
 <script>
 var slider = document.getElementById("probegostart");
