@@ -104,7 +104,7 @@ def generate_env(args):
         altenv = frame_wrap(altenv, args.framestack)
 
     if args.record is not None:
-        env = recorder_wrap(env)
+        env = recorder_wrap(env, numframes=1) # TODO: check numframes arg?
 
     return env, altenv
 
@@ -316,7 +316,7 @@ if __name__ == '__main__':
                         help='Number of observations to stack')
 
     parser.add_argument('--record', '-r',
-                        type=argparse.FileType('w'),
+                        type=argparse.FileType('wb'),
                         help='Saves joint trajectory into file specified')
 
     parser.add_argument('--ego-save',

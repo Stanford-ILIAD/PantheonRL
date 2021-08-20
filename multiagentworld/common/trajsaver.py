@@ -202,8 +202,20 @@ class SimultaneousTransitions(MultiTransitions):
 
     def write_transition(self, file):
         flags = np.reshape(self.flags, (-1, 1))
+        
+        # TODO check if this patch is ok?
+        # print(self.egoobs.shape, self.egoacts.shape, self.altobs.shape, self.altacts.shape)
+        egoobs, altobs = self.egoobs, self.altobs
+        egoacts, altacts = self.egoacts, self.altacts
+        if egoacts.ndim == 1: egoacts = egoacts[:, np.newaxis]
+        if altacts.ndim == 1: altacts = altacts[:, np.newaxis]
+        if egoobs.shape[0] > egoacts.shape[0]:
+            print("shape mismatch in transition saver")
+            egoobs = egoobs[:egoacts.shape[0]]
+            altobs = altobs[:altacts.shape[0]]
+
         full_list = np.concatenate(
-                (self.egoobs, self.egoacts, self.altobs, self.altacts, flags),
+                (egoobs, egoacts, altobs, altacts, flags),
                 axis=1
             )
         np.save(file, full_list)
