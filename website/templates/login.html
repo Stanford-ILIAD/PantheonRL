@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block mainbody %}
+<p>Please log in or create an account.</p>
+{% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+{% endfor %}
+<form method="post">
+    <label for="username">Username</label>
+    <input name="username" id="username" required>
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" required>
+    <input type="submit" value="Log In / Register">
+</form>
+{% endblock %}

@@ -1,4 +1,6 @@
 # constants useful for keeping things clean across website options
 # move somewhere else later?
 
-ENV_LIST = ["block world", "block world (simple)", "liar's dice", "overcooked", "rock-paper-scissors"]
+# contains environment display names and url names
+ENV_LIST = {"block world": "blockworld", "block world (simple)": "simpleblockworld", "overcooked": "overcooked",
+            "liar's dice": "liar", "rock-paper-scissors": "rps"}

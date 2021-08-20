@@ -1,0 +1,21 @@
+{% extends 'welcome.html' %}
+
+{% block title %}Overcooked{% endblock %}
+
+{% block parameters %}
+<form method="post">
+    <label for="layout_name">Layout Name (cannot contain spaces or special characters): </label>
+    <input name="layout_name" id="layout_name" value="random0" required pattern="[a-zA-Z0-9]+">
+    <br> <br>
+    <label for="ego_agent_idx">(Ego Agent) Plays as: </label>
+    <select name="ego_agent_idx" value="ego_agent_idx" required>
+        <option value="0">Player 0</option>
+        <option value="1">Player 1</option>
+    </select>
+    <br> <br>
+    <label for="baselines">Baselines </label>
+    <input type="checkbox" name="baselines" id="baselines">
+    <br> <br>
+    <input type="submit" value="Go">
+</form>
+{% endblock %}
