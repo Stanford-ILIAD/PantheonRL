@@ -88,7 +88,7 @@ class BlockEnv(TurnBasedEnv):
                     if self.gridworld[i][j] == RED:
                         newblock.set_color(0.98, 0.02, 0.02)
                     elif self.gridworld[i][j] == BLUE:
-                        newblock.setcolor(0.02, 0.02, 0.98)
+                        newblock.set_color(0.02, 0.02, 0.98)
         for i in range(len(self.constructor_obs)):
             for j in range(len(self.constructor_obs[i])):
                 if not self.constructor_obs[i][j] == 0:
@@ -99,7 +99,7 @@ class BlockEnv(TurnBasedEnv):
                     if self.constructor_obs[i][j] == RED:
                         newblock.set_color(0.98, 0.02, 0.02)
                     elif self.constructor_obs[i][j] == BLUE:
-                        newblock.setcolor(0.02, 0.02, 0.98)
+                        newblock.set_color(0.02, 0.02, 0.98)
         return self.viewer.render(return_rgb_array=mode == "rgb_array")
 
 
