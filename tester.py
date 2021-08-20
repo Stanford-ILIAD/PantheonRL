@@ -1,22 +1,6 @@
 import argparse
 import json
 
-import torch as th
-
-from stable_baselines3 import PPO
-
-from multiagentworld.common.agents import StaticPolicyAgent
-
-from multiagentworld.algos.adap.adap_learn import ADAP
-from multiagentworld.algos.adap.policies import AdapPolicyMult, AdapPolicy
-
-from multiagentworld.algos.modular.learn import ModularAlgorithm
-from multiagentworld.algos.modular.policies import ModularPolicy
-
-from multiagentworld.envs.rpsgym.rps import RPSEnv, RPSWeightedAgent
-from multiagentworld.envs.blockworldgym import simpleblockworld, blockworld
-from multiagentworld.envs.liargym.liar import LiarEnv, LiarDefaultAgent
-
 from trainer import generate_env, gen_fixed, gen_default
 
 ENV_LIST = ['RPS-v0', 'BlockEnv-v0', 'BlockEnv-v1', 'LiarsDice-v0',
