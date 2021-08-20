@@ -167,7 +167,6 @@ if __name__ == '__main__':
                         help='Number of observations to stack')
 
     parser.add_argument('--record', '-r',
-                        type=argparse.FileType('w'),
                         help='Saves joint trajectory into file specified')
 
     parser.add_argument('--ego-load',

@@ -8,6 +8,8 @@ from multiagentworld.common.wrappers import (TurnBasedRecorder,
 from multiagentworld.algos.bc import BC
 from multiagentworld.common import trajsaver
 
+from stable_baselines3.ppo import PPO
+
 
 def run_game(env, numgames, policy, verbose=True):
     rewards = []
@@ -26,16 +28,19 @@ def run_game(env, numgames, policy, verbose=True):
 
 def liars(write=False, save=False):
     env = gym.make('LiarsDice-v0')
-    policy = LiarDefaultAgent()
     env.add_partner_agent(LiarDefaultAgent())
 
     trainsteps = 100000
     numgames = 100
     recorder = TurnBasedRecorder(env)
-    run_game(recorder, numgames, policy)
+    policy = PPO(policy='MlpPolicy', env=recorder)
+    policy.learn(numgames)
+    # run_game(recorder, numgames, policy)
 
     transition = recorder.get_transitions()
-
+    print(transition.obs.shape)
+    print(transition.acts.shape)
+    print(transition.flags.shape)
     if write:
         transition.write_transition("temptransition")
         transition = trajsaver.TurnBasedTransitions.read_transition(
@@ -85,4 +90,4 @@ def rps(write=False, save=False):
 
 
 if __name__ == '__main__':
-    liars()
+    liars(write=True)
