@@ -1,6 +1,8 @@
 import argparse
 import json
 
+import numpy as np
+
 from trainer import generate_env, gen_fixed, gen_default
 
 ENV_LIST = ['RPS-v0', 'BlockEnv-v0', 'BlockEnv-v1', 'LiarsDice-v0',
@@ -53,13 +55,16 @@ def run_test(ego, env, num_episodes):
     for game in range(num_episodes):
         obs = env.reset()
         done = False
+        reward = 0
         while not done:
             action = ego.get_action(obs, False)
-            obs, reward, done, _ = env.step(action)
+            obs, newreward, done, _ = env.step(action)
+            reward += newreward
         rewards.append(reward)
 
     env.close()
     print(f"Average Reward: {sum(rewards)/num_episodes}")
+    print(f"Standard Deviance: {np.std(rewards)}")
 
 
 if __name__ == '__main__':
@@ -167,7 +172,6 @@ if __name__ == '__main__':
                         help='Number of observations to stack')
 
     parser.add_argument('--record', '-r',
-                        type=argparse.FileType('w'),
                         help='Saves joint trajectory into file specified')
 
     parser.add_argument('--ego-load',

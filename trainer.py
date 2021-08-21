@@ -314,7 +314,6 @@ if __name__ == '__main__':
                         help='Number of observations to stack')
 
     parser.add_argument('--record', '-r',
-                        type=argparse.FileType('w'),
                         help='Saves joint trajectory into file specified')
 
     parser.add_argument('--ego-save',
@@ -353,7 +352,8 @@ if __name__ == '__main__':
     ego.learn(**learn_config)
 
     if args.record is not None:
-        env.get_transitions().write_transition(args.record)
+        transition = env.get_transitions()
+        transition.write_transition(args.record)
 
     if args.ego_save is not None:
         ego.save(args.ego_save)

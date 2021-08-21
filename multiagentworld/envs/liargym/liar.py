@@ -55,11 +55,13 @@ class LiarEnv(TurnBasedEnv):
         return np.array((self.egohand if isego else self.althand) + prevmove)
 
     def sanitize_action(self, action):
-        if action[0] == N:
+
+        if len(self.history) != 0 and (action[1] <= self.history[1]
+                                       or action[0] == N):
             return BLUFF
 
-        if len(self.history) != 0 and action[1] <= self.history[1]:
-            return BLUFF
+        if len(self.history) == 0 and action[0] == N:
+            return [0, 0]
 
         return action.tolist()
 

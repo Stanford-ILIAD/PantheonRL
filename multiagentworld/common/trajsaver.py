@@ -170,7 +170,12 @@ class TurnBasedTransitions(MultiTransitions):
 
     def write_transition(self, file):
         flags = np.reshape(self.flags, (-1, 1))
-        full_list = np.concatenate((self.obs, self.acts, flags), axis=1)
+        len = flags.shape[0]
+
+        obs = np.reshape(self.obs, (len, -1))
+        acts = np.reshape(self.acts, (len, -1))
+
+        full_list = np.concatenate((obs, acts, flags), axis=1)
         np.save(file, full_list)
 
     @classmethod
@@ -202,8 +207,13 @@ class SimultaneousTransitions(MultiTransitions):
 
     def write_transition(self, file):
         flags = np.reshape(self.flags, (-1, 1))
+        len = flags.shape[0]
+        egoobs = np.reshape(self.egoobs, (len, -1))
+        egoacts = np.reshape(self.egoacts, (len, -1))
+        altobs = np.reshape(self.altobs, (len, -1))
+        altacts = np.reshape(self.altacts, (len, -1))
         full_list = np.concatenate(
-                (self.egoobs, self.egoacts, self.altobs, self.altacts, flags),
+                (egoobs, egoacts, altobs, altacts, flags),
                 axis=1
             )
         np.save(file, full_list)

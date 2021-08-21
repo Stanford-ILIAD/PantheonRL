@@ -27,7 +27,7 @@ def frame_wrap(env: MultiAgentEnv, numframes: int):
         return SimultaneousFrameStack(env, numframes)
 
 
-def recorder_wrap(env: MultiAgentEnv, numframes: int):
+def recorder_wrap(env: MultiAgentEnv):
     if isinstance(env, TurnBasedEnv):
         return TurnBasedRecorder(env)
     else:
@@ -97,6 +97,7 @@ class TurnBasedRecorder(TurnBasedEnv, MultiRecorder):
         self.allobs: List[np.ndarray] = []
         self.allacts: List[np.ndarray] = []
         self.flags: List[int] = []
+        self.incomplete = False
 
     def ego_step(
                 self,
@@ -113,6 +114,7 @@ class TurnBasedRecorder(TurnBasedEnv, MultiRecorder):
             self.flags.append(EGO_NOT_DONE)
         else:
             self.flags.append(EGO_DONE)
+            self.incomplete = False
         return altobs, rews, done, info
 
     def alt_step(
@@ -130,6 +132,7 @@ class TurnBasedRecorder(TurnBasedEnv, MultiRecorder):
             self.flags.append(ALT_NOT_DONE)
         else:
             self.flags.append(ALT_DONE)
+            self.incomplete = False
         return egoobs, rews, done, info
 
     def multi_reset(self, egofirst: bool) -> np.ndarray:
@@ -138,13 +141,20 @@ class TurnBasedRecorder(TurnBasedEnv, MultiRecorder):
         the new observation.
         """
         newobs = self.env.multi_reset(egofirst)
-        self.allobs.append(newobs)
+        if self.incomplete:
+            self.allobs[-1] = newobs
+        else:
+            self.allobs.append(newobs)
+        self.incomplete = True
         return newobs
 
     def get_transitions(self) -> TurnBasedTransitions:
         """ Return the recorded transitions """
+        obsarray = np.array(self.allobs)
+        if self.incomplete:
+            obsarray = obsarray[:-1]
         return TurnBasedTransitions(
-                    np.array(self.allobs),
+                    obsarray,
                     np.array(self.allacts),
                     np.array(self.flags)
                 )
@@ -169,6 +179,7 @@ class SimultaneousRecorder(SimultaneousEnv, MultiRecorder):
         self.allaltobs = []
         self.allaltacts = []
         self.allflags = []
+        self.incomplete = False
 
     def multi_step(
                     self,
@@ -189,6 +200,7 @@ class SimultaneousRecorder(SimultaneousEnv, MultiRecorder):
             self.allflags.append(NOT_DONE)
         else:
             self.allflags.append(DONE)
+            self.incomplete = False
         return obs, rews, done, info
 
     def multi_reset(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -199,14 +211,20 @@ class SimultaneousRecorder(SimultaneousEnv, MultiRecorder):
         obs = self.env.multi_reset()
         self.allegoobs.append(obs[0])
         self.allaltobs.append(obs[1])
+        self.incomplete = True
         return obs
 
     def get_transitions(self) -> SimultaneousTransitions:
         """ Return the recorded transitions """
+        egoobsarr = np.array(self.allegoobs)
+        altobsarr = np.array(self.allaltobs)
+        if self.incomplete:
+            egoobsarr = egoobsarr[:-1]
+            altobsarr = altobsarr[:-1]
         return SimultaneousTransitions(
-                    np.array(self.allegoobs),
+                    egoobsarr,
                     np.array(self.allegoacts),
-                    np.array(self.allaltobs),
+                    altobsarr,
                     np.array(self.allaltacts),
                     np.array(self.allflags)
                 )
