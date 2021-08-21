@@ -90,18 +90,20 @@ def latent_check(args):
 
 
 def generate_env(args):
-    env = gym.make(args['env'], **args['env_config'])
+    env = gym.make(args.env, **args.env_config)
 
-    if args['env'] == 'BlockEnv-v0' or args['env'] == 'BlockEnv-v1':
-        altenv = env.partner_env
+    if args.env == 'BlockEnv-v0':
+        altenv = gym.make('PartnerBlockEnv-v0')
+    elif args.env == 'BlockEnv-v1':
+        altenv = blockworld.PartnerEnv()
     else:
         altenv = env
 
-    if args['framestack'] > 1:
-        env = frame_wrap(env, args['framestack'])
-        altenv = frame_wrap(altenv, args['framestack'])
+    if args.framestack > 1:
+        env = frame_wrap(env, args.framestack)
+        altenv = frame_wrap(altenv, args.framestack)
 
-    if args['record'] is not None:
+    if args.record is not None:
         env = recorder_wrap(env)
 
     return env, altenv

@@ -61,6 +61,7 @@ def blockworld():
             env_name = "BlockEnv-v1"
             env_config = {}
             env, altenv = generate_env(create_args_dict(env_name, env_config, record, framestack))
+            saveenvs(env, altenv, g.user['id'])
             return redirect(url_for('agents.agents', env='blockworld'))
     return render_template('environments/blockworld.html', envs=ENV_LIST, selected=True)
 
@@ -76,6 +77,7 @@ def simpleblockworld():
             env_name = "BlockEnv-v0"
             env_config = {}
             env, altenv = generate_env(create_args_dict(env_name, env_config, record, framestack))
+            saveenvs(env, altenv, g.user['id'])
             return redirect(url_for('agents.agents', env='simpleblockworld'))
     return render_template('environments/simpleblockworld.html', envs=ENV_LIST, selected=True)
 
@@ -83,22 +85,21 @@ def simpleblockworld():
 @login_required
 def overcooked():
     if request.method == 'POST':
-        layout_name = request.form['layout_name'].strip()
+        layout_name = request.form['layout_name']
         ego_agent_idx = int(request.form['ego_agent_idx'])
-        baselines = request.form['baselines'] == 'on'
-        error = None
+        baselines = 'baselines' in request.form
 
-        if not layout_name or not layout_name.isalnum():
-            error = "Please enter a valid layout name."
-        else:
-            record, framestack, error = common_env_configs(request.form, g.user['id'])
+        record, framestack, error = common_env_configs(request.form, g.user['id'])
 
         if error is not None:
             flash(error)
         else:
             env_name = "OvercookedMultiEnv-v0"
+            env_config = {"layout_name": layout_name, "ego_agent_idx": ego_agent_idx, "baselines": baselines}
+            env, altenv = generate_env(create_args_dict(env_name, env_config, record, framestack))
 
-        return redirect(url_for('agents.agents', env='overcooked'))
+            return redirect(url_for('agents.agents', env='overcooked'))
+
     return render_template('environments/overcooked.html', envs=ENV_LIST, selected=True, layouts=LAYOUT_LIST)
 
 @bp.route("/liar", methods=('GET', 'POST'))
