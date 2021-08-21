@@ -1,0 +1,38 @@
+{% extends 'baseagents.html' %}
+
+{% block egoparams %}
+{% if session['egotype'] != None %} 
+<h4>{{ session['egotype'] }} Parameters</h4>
+<form action="{{ url_for('agents.setego', env=env) }}" method="post">
+    <label for="seed">Seed for randomness (optional): </label>
+    <input type="number" name="seed" id="seed" step="1">
+    <br> <br>
+    <input type="submit" value="Save Ego Agent">
+</form>
+{% endif %}
+{% endblock %}
+
+{% block partnerparams %}
+{% if session['partnertype'] != None %} 
+<h4>{{ session['partnertype'] }} Parameters</h4>
+<form action="{{ url_for('agents.setpartner', env=env) }}" method="post">
+    {% if env == 'rps' and session['partnertype'] == 'DEFAULT' %}
+    <label for='r'>Probability of rock: </label>
+    <input type='number' name='r' id='r' min='0' value='1' required>
+    <br>
+    <label for='p'>Probability of paper: </label>
+    <input type='number' name='p' id='p' min='0' value='1' required>
+    <br>
+    <label for='s'>Probability of scissors: </label>
+    <input type='number' name='s' id='s' min='0' value='1' required>
+    {% elif session['partnertype'] != 'DEFAULT' and session['partnertype'] != 'FIXED' %} 
+    <label for="seed">Seed for randomness (optional): </label>
+    <input type="number" name="seed" id="seed" step="1">
+    {% else %}
+    <p>No parameters to set!</p>
+    {% endif %}
+    <br> <br>
+    <input type="submit" value="Save Partner Agent">
+</form>
+{% endif %}
+{% endblock %}

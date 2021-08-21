@@ -13,6 +13,7 @@ bp = Blueprint("welcome", __name__)
 @bp.route("/", methods=('GET','POST'))
 @login_required
 def main():
+    clear_agent_selection()
     if request.method == 'POST':
         env_name = request.form['env']
         error = None
@@ -111,3 +112,13 @@ def rps():
 
             return redirect(url_for('agents.agents', env='rps'))
     return render_template('environments/rps.html', envs=ENV_LIST, selected=True)
+
+def clear_agent_selection():
+    if 'egotype' in session:
+        session.pop('egotype')
+    if 'partnertype' in session:
+        session.pop('partnertype')
+    if 'partners' in session:
+        session.pop('partners')
+    if 'ego' in session:
+        session.pop('ego')

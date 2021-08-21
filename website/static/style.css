@@ -48,3 +48,14 @@ nav ul li a, nav ul li span, header .action {
   background-color: lightcoral;
   color:whitesmoke;
 }
+
+.notification {
+  background-color: rgb(188, 154, 226);
+  color:whitesmoke;
+  padding-left: 10px;
+  padding-right: 10px
+}
+
+body {
+  padding: 10px;
+}
