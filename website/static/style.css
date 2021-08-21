@@ -3,6 +3,7 @@
   box-sizing: border-box;
 }
 
+/* taken from the Flask website tutorial */
 nav {
   background: lightgray;
   display: flex;
@@ -40,4 +41,9 @@ nav ul li a, nav ul li span, header .action {
 .column {
   flex: 50%;
   padding: 10px;
+}
+
+.flash {
+  background-color: lightcoral;
+  color:whitesmoke;
 }

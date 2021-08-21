@@ -115,44 +115,44 @@ class SimpleBlockEnv(TurnBasedEnv):
         reward = 100 * correct_blocks / NUM_BLOCKS 
         return [reward, reward] # since they both get the same reward
 
-    def render(self, mode="human"):
-        screen_width = 700
-        scale = screen_width/GRIDLEN
-        if self.viewer is None:
-            from gym.envs.classic_control import rendering
-            self.viewer = rendering.Viewer(screen_width, screen_width)
-            self.block_renders = []
-            for blockdata in self.constructor_obs:
-                y, x = blockdata[1], blockdata[2]
-                if blockdata[0] == 0: # horizontal
-                    left, right, top, bottom = x*scale, (x+2)*scale, (GRIDLEN - y)*scale, (GRIDLEN - (y+1))*scale
-                else: # vertical
-                    left, right, top, bottom = x*scale, (x+1)*scale, (GRIDLEN - y)*scale, (GRIDLEN - (y+2))*scale
-                newblock = rendering.FilledPolygon([(left, bottom), (left, top), (right, top), (right, bottom)])
-                newblock.set_color(0.5, 0.5, 0.5)
-                self.viewer.add_geom(newblock)
-                self.block_renders.append(newblock)
-            for blockdata in self.gridworld:
-                y, x = blockdata[1], blockdata[2]
-                if blockdata[0] == 0:  # horizontal
-                    left, right, top, bottom = x * scale, (x + 2) * scale, (GRIDLEN - y) * scale, (
-                                GRIDLEN - (y + 1)) * scale
-                else:  # vertical
-                    left, right, top, bottom = x * scale, (x + 1) * scale, (GRIDLEN - y) * scale, (
-                                GRIDLEN - (y + 2)) * scale
-                newblock = rendering.PolyLine([(left, bottom), (left, top), (right, top), (right, bottom)], close=True)
-                newblock.set_linewidth(10)
-                if blockdata[3] == RED:
-                    newblock.set_color(0.98, 0.02, 0.02)
-                if blockdata[3] == BLUE:
-                    newblock.set_color(0.02, 0.02, 0.98)
-                self.viewer.add_geom(newblock)
-        for i in range(len(self.block_renders)):
-            if self.constructor_obs[i][3] == RED:
-                self.block_renders[i].set_color(0.98, 0.02, 0.02)
-            if self.constructor_obs[i][3] == BLUE:
-                self.block_renders[i].set_color(0.02, 0.02, 0.98)
-        return self.viewer.render(return_rgb_array=mode == "rgb_array")
+    # def render(self, mode="human"):
+    #     screen_width = 700
+    #     scale = screen_width/GRIDLEN
+    #     if self.viewer is None:
+    #         from gym.envs.classic_control import rendering
+    #         self.viewer = rendering.Viewer(screen_width, screen_width)
+    #         self.block_renders = []
+    #         for blockdata in self.constructor_obs:
+    #             y, x = blockdata[1], blockdata[2]
+    #             if blockdata[0] == 0: # horizontal
+    #                 left, right, top, bottom = x*scale, (x+2)*scale, (GRIDLEN - y)*scale, (GRIDLEN - (y+1))*scale
+    #             else: # vertical
+    #                 left, right, top, bottom = x*scale, (x+1)*scale, (GRIDLEN - y)*scale, (GRIDLEN - (y+2))*scale
+    #             newblock = rendering.FilledPolygon([(left, bottom), (left, top), (right, top), (right, bottom)])
+    #             newblock.set_color(0.5, 0.5, 0.5)
+    #             self.viewer.add_geom(newblock)
+    #             self.block_renders.append(newblock)
+    #         for blockdata in self.gridworld:
+    #             y, x = blockdata[1], blockdata[2]
+    #             if blockdata[0] == 0:  # horizontal
+    #                 left, right, top, bottom = x * scale, (x + 2) * scale, (GRIDLEN - y) * scale, (
+    #                             GRIDLEN - (y + 1)) * scale
+    #             else:  # vertical
+    #                 left, right, top, bottom = x * scale, (x + 1) * scale, (GRIDLEN - y) * scale, (
+    #                             GRIDLEN - (y + 2)) * scale
+    #             newblock = rendering.PolyLine([(left, bottom), (left, top), (right, top), (right, bottom)], close=True)
+    #             newblock.set_linewidth(10)
+    #             if blockdata[3] == RED:
+    #                 newblock.set_color(0.98, 0.02, 0.02)
+    #             if blockdata[3] == BLUE:
+    #                 newblock.set_color(0.02, 0.02, 0.98)
+    #             self.viewer.add_geom(newblock)
+    #     for i in range(len(self.block_renders)):
+    #         if self.constructor_obs[i][3] == RED:
+    #             self.block_renders[i].set_color(0.98, 0.02, 0.02)
+    #         if self.constructor_obs[i][3] == BLUE:
+    #             self.block_renders[i].set_color(0.02, 0.02, 0.98)
+    #     return self.viewer.render(return_rgb_array=mode == "rgb_array")
                 
                     
 

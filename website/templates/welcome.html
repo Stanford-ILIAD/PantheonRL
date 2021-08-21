@@ -3,7 +3,7 @@
 {% block mainbody %}
 <p>Select an environment to get started.</p>
 {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
+    <div class="flash">Error: {{ message }}</div>
 {% endfor %}
 <form action="{{ url_for('welcome.main') }}" method="post">
     <label for="env">Pick one of the following:</label>

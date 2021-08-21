@@ -4,8 +4,12 @@
 
 {% block parameters %}
 <form method="post">
-    <label for="layout_name">Layout Name (cannot contain spaces or special characters): </label>
-    <input name="layout_name" id="layout_name" value="random0" required pattern="[a-zA-Z0-9]+">
+    <label for="layout_name">Layout Name: </label>
+    <select name="layout_name" value="layout_name" required>
+        {% for name in layouts %}
+        <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
+    </select>
     <br> <br>
     <label for="ego_agent_idx">(Ego Agent) Plays as: </label>
     <select name="ego_agent_idx" value="ego_agent_idx" required>
@@ -15,6 +19,12 @@
     <br> <br>
     <label for="baselines">Baselines </label>
     <input type="checkbox" name="baselines" id="baselines">
+    <br>
+    <label for="framestack">Number of frames to stack: </label>
+    <input type="number" name="framestack" id="framestack" min="1" step="1" value="1" required>
+    <br>
+    <label for="record">Record Trajectories </label>
+    <input type="checkbox" name="record" id="record">
     <br> <br>
     <input type="submit" value="Go">
 </form>

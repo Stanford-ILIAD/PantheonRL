@@ -3,7 +3,7 @@
 {% block mainbody %}
 <p>Please log in or create an account.</p>
 {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
+    <div class="flash">Error: {{ message }}</div>
 {% endfor %}
 <form method="post">
     <label for="username">Username</label>
