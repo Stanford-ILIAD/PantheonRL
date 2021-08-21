@@ -6,8 +6,6 @@ from multiagentworld.common.agents import Agent
 from multiagentworld.common.multiagentenv import TurnBasedEnv
 from multiagentworld.envs.blockworldgym.gridutils import HORIZONTAL, VERTICAL, generate_random_world, gravity, place, matches
 
-from gym.envs.classic_control import rendering
-
 GRIDLEN = 7  # block world in a 7 x 7 grid
 NUM_BLOCKS = 5  # the number of blocks will be variable in the non-simplified version,
 # but allows for a constant sized action space here
@@ -80,6 +78,8 @@ class BlockEnv(TurnBasedEnv):
         return 2 * truepos / (selected + relevant)
 
     def render(self, mode="human"):
+        from gym.envs.classic_control import rendering
+        
         screen_width = 700
         scale = screen_width/GRIDLEN
         if self.viewer is None:
