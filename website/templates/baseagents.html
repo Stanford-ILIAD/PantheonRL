@@ -1,24 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>MultiAgentWorld</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
-<h1>Agent Settings</h1>
+{% extends 'base.html' %}
+
+{% block mainbody %}
+<h2>Agent Settings</h2>
+{% for message in get_flashed_messages() %}
+    <div class="flash">Error: {{ message }}</div>
+    <br>
+{% endfor %}
 <div class="row">
-  <div class="column" style="background-color:#aaa;">
-    <h2>Ego Agent</h2>
-    <p>Some text..</p>
+  <div class="column">
+    <h3>Ego Agent</h3>
+    <form action="{{ url_for('agents.egotype', env=env) }}" method="post">
+      <label for="egotype">Pick a type of agent:</label>
+      <select name="egotype" id="egotype">
+          {% for typeoption in ego_options %}
+              <option value="{{ typeoption }}">{{ typeoption }}</option>
+          {% endfor %}
+      </select>
+      <input type="submit" value="Select">
+    </form>
   </div>
-  <div class="column" style="background-color:#bbb;">
-    <h2>Partner Agent 1</h2>
-    <p>Some text..</p>
+  <div class="column">
+    <h3>Partner Agent {{ partners + 1 }}</h3>
+    <form action="{{ url_for('agents.partnertype', env=env) }}" method="post">
+      <label for="partnertype">Pick a type of agent:</label>
+      <select name="partnertype" id="partnertype">
+          {% for typeoption in partner_options %}
+              <option value="{{ typeoption }}">{{ typeoption }}</option>
+          {% endfor %}
+      </select>
+      <input type="submit" value="Select">
+    </form>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
-</body>
-</html>
+<br> <br>
+<form method="post">
+  <input type="submit" value="Train!">
+</form>
+{% endblock %}

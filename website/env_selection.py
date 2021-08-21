@@ -1,17 +1,12 @@
 # the welcome page for the website, where users select their environment
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for, jsonify
+    Blueprint, flash, g, redirect, render_template, request, url_for, jsonify, session
 )
 from website.constants import ENV_LIST, LAYOUT_LIST
 from website.login import login_required
+from website.data_processing import common_env_configs, create_args_dict
 
-import numpy as np
-import gym
-import os
-from multiagentworld.envs.rpsgym.rps import RPSEnv, RPSWeightedAgent
-from multiagentworld.envs.blockworldgym import simpleblockworld, blockworld
-from multiagentworld.envs.liargym.liar import LiarEnv, LiarDefaultAgent
-from trainer import generate_env
+from collections import namedtuple
 
 bp = Blueprint("welcome", __name__)
 
@@ -33,22 +28,6 @@ def main():
                 return redirect(url_for(f"welcome.{ENV_LIST[possible_env]}"))
     return render_template('welcome.html', envs=ENV_LIST, selected=False)
 
-def common_env_configs(args, id):
-    record = None
-    if "record" in args:
-        record = f"./data/user{id}traj.json"
-    error = None
-    framestack = args["framestack"]
-    if not framestack or not framestack.isnumeric():
-        error = "Please enter a valid integer for the number of frames stacked."
-    else:
-        framestack = int(framestack)
-    
-    return record, framestack, error
-
-def create_args_dict(env_name, env_config, record, framestack):
-    return {"env": env_name, "env_config": env_config, "record": record, "framestack": framestack}
-
 @bp.route("/blockworld", methods=('GET', 'POST'))
 @login_required
 def blockworld():
@@ -60,8 +39,7 @@ def blockworld():
         else:
             env_name = "BlockEnv-v1"
             env_config = {}
-            env, altenv = generate_env(create_args_dict(env_name, env_config, record, framestack))
-            saveenvs(env, altenv, g.user['id'])
+            session['env_data'] = create_args_dict(env_name, env_config, record, framestack)
             return redirect(url_for('agents.agents', env='blockworld'))
     return render_template('environments/blockworld.html', envs=ENV_LIST, selected=True)
 
@@ -76,8 +54,7 @@ def simpleblockworld():
         else:
             env_name = "BlockEnv-v0"
             env_config = {}
-            env, altenv = generate_env(create_args_dict(env_name, env_config, record, framestack))
-            saveenvs(env, altenv, g.user['id'])
+            session['env_data'] = create_args_dict(env_name, env_config, record, framestack)
             return redirect(url_for('agents.agents', env='simpleblockworld'))
     return render_template('environments/simpleblockworld.html', envs=ENV_LIST, selected=True)
 
@@ -96,7 +73,7 @@ def overcooked():
         else:
             env_name = "OvercookedMultiEnv-v0"
             env_config = {"layout_name": layout_name, "ego_agent_idx": ego_agent_idx, "baselines": baselines}
-            env, altenv = generate_env(create_args_dict(env_name, env_config, record, framestack))
+            session['env_data'] = create_args_dict(env_name, env_config, record, framestack)
 
             return redirect(url_for('agents.agents', env='overcooked'))
 
@@ -107,21 +84,30 @@ def liar():
     if request.method == 'POST':
         probegostart = request.form['probegostart']
 
-        # create and save the environment
+        record, framestack, error = common_env_configs(request.form, g.user['id'])
 
-        return redirect(url_for('agents.agents', env='liar'))
+        if error is not None:
+            flash(error)
+        else:
+            env_name = "LiarsDice-v0"
+            env_config = {"probegostart": probegostart}
+            session['env_data'] = create_args_dict(env_name, env_config, record, framestack)
+
+            return redirect(url_for('agents.agents', env='liar'))
+
     return render_template('environments/liar.html', envs=ENV_LIST, selected=True)
 
 @bp.route("/rps", methods=('GET', 'POST'))
 def rps():
     if request.method == 'POST':
-        # create and save the environment
+        record, framestack, error = common_env_configs(request.form, g.user['id'])
 
-        return redirect(url_for('agents.agents', env='rps'))
+        if error is not None:
+            flash(error)
+        else:
+            env_name = "RPS-v0"
+            env_config = {}
+            session['env_data'] = create_args_dict(env_name, env_config, record, framestack)
+
+            return redirect(url_for('agents.agents', env='rps'))
     return render_template('environments/rps.html', envs=ENV_LIST, selected=True)
-
-def saveenvs(env, alt_env, id):
-    if not os.path.exists('data'):
-        os.makedirs('data')
-
-    np.savez(f"./data/user{id}.npz", env=env, alt_env=alt_env)
