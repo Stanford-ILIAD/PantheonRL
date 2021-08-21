@@ -125,7 +125,7 @@ def generate_ego(env, args):
     elif args.ego == 'ADAP_MULT':
         return ADAP(policy=AdapPolicyMult, **kwargs)
     elif args.ego == 'ModularAlgorithm':
-        policy_kwargs = dict(num_partners=len(env.partners))
+        policy_kwargs = dict(num_partners=len(args.alt))
         return ModularAlgorithm(policy=ModularPolicy,
                                 policy_kwargs=policy_kwargs,
                                 **kwargs)
