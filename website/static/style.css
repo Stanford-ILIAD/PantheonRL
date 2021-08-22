@@ -59,3 +59,21 @@ nav ul li a, nav ul li span, header .action {
 body {
   padding: 10px;
 }
+
+/* taken from the w3schools table tutorial */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  padding: 10px;
+}
+
+td, th {
+  border: 1px solid #000000;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  border: 1px solid;
+  background-color: #dddddd;
+}

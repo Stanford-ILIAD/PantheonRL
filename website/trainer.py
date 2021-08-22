@@ -4,16 +4,17 @@ from flask import (
 )
 from website.constants import ENV_LIST, LAYOUT_LIST
 from website.login import login_required
-from website.data_processing import start_training, read
+from website.data_processing import start_training, read, check_for_updates
 from website.db import get_db
 
 from collections import namedtuple
 
 bp = Blueprint("training", __name__, url_prefix="/training")
 
-@bp.route("/", methods=("GET",))
-@login_required
+@bp.route("/", methods=("GET","POST"))
 def main():
+    if request.method == "POST":
+        session['updates'] = read(session['tb_log'], session['tb_name'])
     return render_template('training.html', training=g.user['running'])
 
 @bp.route("/learn", methods=("POST",))
@@ -32,7 +33,6 @@ def learn():
         return redirect(url_for('training.done'))
 
 @bp.route("/done", methods=("POST", "GET"))
-@login_required
 def done():
     if g.user['running'] == True:
         db = get_db()
