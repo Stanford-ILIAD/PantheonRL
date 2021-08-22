@@ -6,6 +6,9 @@ import os
 from collections import namedtuple
 from trainer import generate_env, generate_ego, gen_partner
 import datetime
+import time
+# import tensorflow as tf
+import requests
 
 def common_env_configs(args, id):
     record = None
@@ -67,7 +70,7 @@ def create_partner_dict(partner_type, env, args):
     
     return error, partner_dict
 
-def check_agent_errors(env, ego, partners):
+def check_agent_errors(id, env, ego, partners):
     # assumes that ego exists and partners has length at least one
     errors = []
     i = 0
@@ -77,7 +80,12 @@ def check_agent_errors(env, ego, partners):
             partners.pop(i)
             i -= 1
         i += 1
-    return errors, partners
+
+    time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_log = f"./data/user{id}logs"
+    tensorboard_name = f"user{id}-{time}"
+    
+    return errors, partners, tensorboard_log, tensorboard_name
 
 def create_ego_object(ego_data, num_partners, tensorboard_log):
     ego_config = {"verbose": 1}
@@ -90,15 +98,11 @@ def create_partner_object(seed):
     Partner = namedtuple("Partner", ["seed", "device", "share_latent"])
     return Partner(seed, "auto", False)
 
-def start_training(id, env_data, ego_data, partners):
+def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboard_name):
     print("started training")
     env_args = create_args_object(env_data)
     env, alt_env = generate_env(env_args)
     print(f"Environment: {env}; Partner env: {alt_env}")
-
-    time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    tensorboard_log = f"./data/user{id}logs/{time}"
-    tensorboard_name = f"user{id}-{time}"
 
     ego_agent = generate_ego(env, create_ego_object(ego_data, len(partners), tensorboard_log))
     print(f'Ego: {ego_agent}')
@@ -119,5 +123,16 @@ def start_training(id, env_data, ego_data, partners):
     if env_data["record"] is not None:
         transition = env.get_transitions()
         transition.write_transition(env_data["record"])
+
+def read(tensorboard_log, tensorboard_name):
+    #TODO: doesn't work because file name is wrong
+    summaries = tf.compat.v1.train.summary_iterator(f"{tensorboard_log}/{tensorboard_name}_1")
+    for i in range(30):
+        for e in summaries:
+            for v in e.summary.value:
+                if v.tag == 'loss':
+                    print(v.simple_value)
+        # Wait for a bit before checking the file for any new events
+        time.sleep(10)
 
         

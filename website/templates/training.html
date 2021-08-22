@@ -1,5 +1,11 @@
 {% extends 'base.html' %}
 
 {% block mainbody %} 
+{% if training %}
 <p>Training in progress!!</p>
+{% else %}
+<form action="{{ url_for('training.learn') }}" method="post">
+    <input type="submit" value="Start Training">
+</form>
+{% endif %}
 {% endblock %}

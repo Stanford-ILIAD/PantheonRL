@@ -5,11 +5,13 @@
 {% for message in get_flashed_messages() %}
     <div class="flash">Error: {{ message }}</div>
 {% endfor %}
+<div class="column">
 <form method="post">
-    <label for="username">Username</label>
+    <label for="username">Username:</label>
     <input name="username" id="username" required>
-    <label for="password">Password</label>
+    <label for="password">Password:</label>
     <input type="password" name="password" id="password" required>
     <input type="submit" value="Log In / Register">
 </form>
+</div>
 {% endblock %}

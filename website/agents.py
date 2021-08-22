@@ -3,8 +3,9 @@ from website.login import login_required
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for, session
 )
-from website.constants import EGO_LIST, PARTNER_LIST
+from website.constants import EGO_LIST, PARTNER_LIST, ENV_LIST
 from website.data_processing import create_ego_dict, create_partner_dict, check_agent_errors
+import requests
 
 bp = Blueprint("agents", __name__)
 
@@ -24,7 +25,7 @@ def agents(env):
         if error is not None:
             flash(error)
         else:
-            errors, partners = check_agent_errors(env, session['ego'], session['partners'])
+            errors, partners, tb_log, tb_name = check_agent_errors(g.user['id'], env, session['ego'], session['partners'])
         
         if not errors == []:
             errors.append("Either add more agents, or press \'Train\' again to continue.")
@@ -32,6 +33,8 @@ def agents(env):
                 flash(e)
             session['partners'] = partners
         else:
+            session['tb_log'] = tb_log
+            session['tb_name'] = tb_name
             return redirect(url_for('training.main'))
     
     # set blank agent parameters in session
@@ -41,7 +44,7 @@ def agents(env):
         session['partnertype'] = None
     if not 'partners' in session:
         session['partners'] = []
-    return render_template('agentparams.html', partners=len(session['partners']), ego_options=EGO_LIST, partner_options=PARTNER_LIST, env=env)
+    return render_template('agentparams.html', partners=len(session['partners']), ego_options=EGO_LIST, partner_options=PARTNER_LIST, env=env, env_options=ENV_LIST)
 
 @bp.route("/<string:env>/egotype", methods=('POST',))
 @login_required
