@@ -6,6 +6,9 @@
 <form action="{{ url_for('agents.setego', env=env) }}" method="post">
     <label for="seed">Seed for randomness (optional): </label>
     <input type="number" name="seed" id="seed" step="1">
+    <br>
+    <label for="timesteps">Number of timesteps to train for: </label>
+    <input type="number" name="timesteps" id="timesteps" value="100000" min="1" max="2000000">
     <br> <br>
     <input type="submit" value="Save Ego Agent">
 </form>

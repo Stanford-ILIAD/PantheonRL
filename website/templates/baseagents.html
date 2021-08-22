@@ -3,7 +3,7 @@
 {% block mainbody %}
 <h2>Agent Settings</h2>
 {% for message in get_flashed_messages() %}
-    <div class="flash">Error: {{ message }}</div>
+    <div class="flash">{{ message }}</div>
     <br>
 {% endfor %}
 <div class="row">

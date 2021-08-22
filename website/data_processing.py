@@ -4,6 +4,8 @@ import numpy as np
 import gym
 import os
 from collections import namedtuple
+from trainer import generate_env, generate_ego, gen_partner
+import datetime
 
 def common_env_configs(args, id):
     record = None
@@ -18,10 +20,9 @@ def common_env_configs(args, id):
     
     return record, framestack, error
 
-def create_args_object(env_name, env_config, record, framestack):
+def create_args_object(env_args):
     Config = namedtuple("Config", ["env", "env_config", "record", "framestack"])
-    args = Config(env_name, env_config, record, framestack)
-    return args
+    return Config(env_args["env"], env_args["env_config"], env_args["record"], env_args["framestack"])
 
 def create_args_dict(env_name, env_config, record, framestack):
     args = {"env": env_name, "env_config": env_config, "record": record, "framestack": framestack}
@@ -39,7 +40,7 @@ def create_ego_dict(ego_type, args):
     if "seed" in args and args['seed'] != "":
         seed = int(args["seed"])
 
-    ego_dict = {"type": ego_type, "seed": seed}
+    ego_dict = {"type": ego_type, "seed": seed, "timesteps": int(args["timesteps"])}
 
     return ego_dict
 
@@ -68,13 +69,55 @@ def create_partner_dict(partner_type, env, args):
 
 def check_agent_errors(env, ego, partners):
     # assumes that ego exists and partners has length at least one
-    errors = ""
+    errors = []
     i = 0
     while i < len(partners):
-        if partners[i]["type"] == "DEFAULT":
-            errors += f"Default agents haven't been implemented yet. Partner {i} will be deleted.\n"
+        if partners[i]["type"] == "FIXED":
+            errors.append(f"Fixed agents haven't been implemented yet. Partner {i + len(errors)} will be deleted.\n")
             partners.pop(i)
             i -= 1
         i += 1
     return errors, partners
+
+def create_ego_object(ego_data, num_partners, tensorboard_log):
+    ego_config = {"verbose": 1}
+    alt = [0]*num_partners
+    device = "auto"
+    Ego = namedtuple("Ego", ["ego_config", "tensorboard_log", "alt", "device", "seed", "ego"])
+    return Ego(ego_config, tensorboard_log, alt, device, ego_data['seed'], ego_data['type'])
+
+def create_partner_object(seed):
+    Partner = namedtuple("Partner", ["seed", "device", "share_latent"])
+    return Partner(seed, "auto", False)
+
+def start_training(id, env_data, ego_data, partners):
+    print("started training")
+    env_args = create_args_object(env_data)
+    env, alt_env = generate_env(env_args)
+    print(f"Environment: {env}; Partner env: {alt_env}")
+
+    time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_log = f"./data/user{id}logs/{time}"
+    tensorboard_name = f"user{id}-{time}"
+
+    ego_agent = generate_ego(env, create_ego_object(ego_data, len(partners), tensorboard_log))
+    print(f'Ego: {ego_agent}')
+
+    for partner in partners:
+        type = partner.pop("type")
+        seed = None
+        if "seed" in partner:
+            seed = partner.pop("seed")
+        p_args = create_partner_object(seed)
+        env.add_partner_agent(gen_partner(type, partner, alt_env, ego_agent, p_args))
+    
+    learn_config = {'total_timesteps': ego_data["timesteps"]}
+    if tensorboard_log is not None:
+        learn_config['tb_log_name'] = tensorboard_name
+    ego_agent.learn(**learn_config)
+
+    if env_data["record"] is not None:
+        transition = env.get_transitions()
+        transition.write_transition(env_data["record"])
+
         

@@ -24,11 +24,12 @@ def agents(env):
         if error is not None:
             flash(error)
         else:
-            error, partners = check_agent_errors(env, session['ego'], session['partners'])
+            errors, partners = check_agent_errors(env, session['ego'], session['partners'])
         
-        if not error == "":
-            error += "Either add more agents, or press \'Train\' again to continue."
-            flash(error)
+        if not errors == []:
+            errors.append("Either add more agents, or press \'Train\' again to continue.")
+            for e in errors:
+                flash(e)
             session['partners'] = partners
         else:
             return redirect(url_for('training.main'))
@@ -80,6 +81,4 @@ def setpartner(env):
         else:
             session['partners'].append(partner_dict)
             session['partnertype'] = None
-            print("successfully added a partner")
-            print(session['partners'])
         return redirect(url_for('agents.agents', env=env))

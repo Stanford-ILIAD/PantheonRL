@@ -24,9 +24,10 @@ def create_app(test_config=None):
     from . import db
     db.init_app(app)
 
-    from website import env_selection, agents, login
+    from website import env_selection, agents, login, trainer
     app.register_blueprint(login.bp)
     app.register_blueprint(env_selection.bp)
     app.register_blueprint(agents.bp)
+    app.register_blueprint(trainer.bp)
 
     return app

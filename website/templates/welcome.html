@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block mainbody %}
+<div class="column">
 <p>Select an environment to get started.</p>
 {% for message in get_flashed_messages() %}
     <div class="flash">Error: {{ message }}</div>
@@ -19,4 +20,5 @@
 <h2>Parameters for {% block title %}{% endblock %}</h2>
 {% block parameters %}{% endblock %}
 {% endif %}
+</div>
 {% endblock %}
