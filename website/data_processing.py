@@ -8,7 +8,6 @@ from trainer import generate_env, generate_ego, gen_partner
 import datetime
 import time
 import tensorflow as tf
-import requests
 from os import listdir
 from os.path import isfile, join
 
