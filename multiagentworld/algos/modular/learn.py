@@ -194,6 +194,7 @@ class ModularAlgorithm(OnPolicyAlgorithm):
             if isinstance(self.action_space, gym.spaces.Box):
                 clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
 
+            env.envs[0].set_partnerid(partner_idx)
             new_obs, rewards, dones, infos = env.step(clipped_actions)
 
             if callback.on_step() is False:
