@@ -3,6 +3,21 @@
 {% block mainbody %} 
 {% if training %}
 <p>Training in progress!!</p>
+{% if 'updates' in session %}
+<h2>Current Training Data:</h2>
+<table>
+    {% for key in session['updates'] %}
+    <tr>
+    <th>{{ key }}: </th>
+    <td>{{ session['updates'][key] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<br>
+{% endif %}
+<form method="post">
+    <input type="submit" value="Check for Updates">
+</form>
 {% else %}
 <form action="{{ url_for('training.learn') }}" method="post">
     <input type="submit" value="Start Training">

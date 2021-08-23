@@ -7,8 +7,9 @@ from collections import namedtuple
 from trainer import generate_env, generate_ego, gen_partner
 import datetime
 import time
-# import tensorflow as tf
-import requests
+import tensorflow as tf
+from os import listdir
+from os.path import isfile, join
 
 def common_env_configs(args, id):
     record = None
@@ -125,14 +126,18 @@ def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboar
         transition.write_transition(env_data["record"])
 
 def read(tensorboard_log, tensorboard_name):
-    #TODO: doesn't work because file name is wrong
-    summaries = tf.compat.v1.train.summary_iterator(f"{tensorboard_log}/{tensorboard_name}_1")
-    for i in range(30):
-        for e in summaries:
-            for v in e.summary.value:
-                if v.tag == 'loss':
-                    print(v.simple_value)
-        # Wait for a bit before checking the file for any new events
-        time.sleep(10)
+    mypath = f"{tensorboard_log}/{tensorboard_name}_1"
+    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    print(f"reading from {join(mypath, onlyfiles[0])}")
+    summaries = tf.compat.v1.train.summary_iterator(join(mypath, onlyfiles[0]))
+    mydict = {}
+    for e in summaries:
+        for v in e.summary.value:
+            mydict[v.tag] = v.simple_value
+    return mydict
 
+def check_for_updates(file):
+    # a function that would theoretically check for updates from the learning agent
+    # right now it just returns a test json
+    return {"updates": "In terms of updates, there are no updates."}    
         

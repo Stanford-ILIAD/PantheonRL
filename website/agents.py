@@ -5,7 +5,6 @@ from flask import (
 )
 from website.constants import EGO_LIST, PARTNER_LIST, ENV_LIST
 from website.data_processing import create_ego_dict, create_partner_dict, check_agent_errors
-import requests
 
 bp = Blueprint("agents", __name__)
 

@@ -75,16 +75,16 @@ def login_required(view):
         if g.user is None:
             return redirect(url_for('login.main'))
         elif g.user['running']:
-            if g.user['id'] == 1:
-                print("user is aditi, setting running to false")
-                db = get_db()
-                db.execute(
-                    'UPDATE user SET running = ?'
-                    ' WHERE id = ?',
-                    (False, g.user['id'])
-                )
-                db.commit()
-            else:
+            # if g.user['id'] == 1:
+            #     print("user is aditi, setting running to false")
+            #     db = get_db()
+            #     db.execute(
+            #         'UPDATE user SET running = ?'
+            #         ' WHERE id = ?',
+            #         (False, g.user['id'])
+            #     )
+            #     db.commit()
+            # else:
                 return redirect(url_for('training.main'))
 
         return view(**kwargs)
