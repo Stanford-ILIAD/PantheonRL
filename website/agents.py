@@ -5,6 +5,7 @@ from flask import (
 )
 from website.constants import EGO_LIST, PARTNER_LIST, ENV_LIST
 from website.data_processing import create_ego_dict, create_partner_dict, check_agent_errors
+from website.db import get_db
 
 bp = Blueprint("agents", __name__)
 
@@ -24,7 +25,7 @@ def agents(env):
         if error is not None:
             flash(error)
         else:
-            errors, partners, tb_log, tb_name = check_agent_errors(g.user['id'], env, session['ego'], session['partners'])
+            errors, partners, tb_log, tb_name, filedata = check_agent_errors(g.user['id'], env, session['ego'], session['partners'])
         
         if not errors == []:
             errors.append("Either add more agents, or press \'Train\' again to continue.")
@@ -34,6 +35,13 @@ def agents(env):
         else:
             session['tb_log'] = tb_log
             session['tb_name'] = tb_name
+            db = get_db()
+            db.execute(
+                'UPDATE user SET filedata = ?'
+                ' WHERE id = ?',
+                (filedata, g.user['id'])
+            )
+            db.commit()
             return redirect(url_for('training.main'))
     
     # set blank agent parameters in session

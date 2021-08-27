@@ -1,26 +1,45 @@
 {% extends 'base.html' %}
 
 {% block mainbody %} 
-{% if training %}
-<p>Training in progress!!</p>
-{% if 'updates' in session %}
-<h2>Current Training Data:</h2>
-<table>
-    {% for key in session['updates'] %}
-    <tr>
-    <th>{{ key }}: </th>
-    <td>{{ session['updates'][key] }}</td>
-    </tr>
-    {% endfor %}
-</table>
-<br>
-{% endif %}
-<form method="post">
-    <input type="submit" value="Check for Updates">
-</form>
+<div class="column">
+
+{% for message in get_flashed_messages() %}
+    <div class="flash">Error: {{ message }}</div>
+{% endfor %}
+
+{% if training or done %}
+    {% if training %}
+        <p>Training in progress!!</p>
+    {% else %} 
+        <div class="notification">Done training!</div>
+    {% endif %}
+    {% if 'updates' in session %}
+        <h2>Current Training Data:</h2>
+        <table>
+            {% for key in session['updates'] %}
+                <tr>
+                <th>{{ key }}: </th>
+                <td>{{ session['updates'][key] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+        {% if done %}
+            <form action="{{ url_for('welcome.main') }}" method="get">
+                <input type="submit" value="Train New Environment">
+            </form>
+        {% endif %}
+    {% endif %}
 {% else %}
-<form action="{{ url_for('training.learn') }}" method="post">
-    <input type="submit" value="Start Training">
-</form>
+    <p>Training not yet started.</p>
+    <form action="{{ url_for('training.learn') }}" method="post">
+        <input type="submit" value="Start Training">
+    </form>
+{% endif %}
+{% if not done %}
+    <form method="post">
+        <input type="submit" value="Check for Updates">
+    </form>
+    </div>
 {% endif %}
 {% endblock %}

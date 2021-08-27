@@ -86,7 +86,7 @@ def check_agent_errors(id, env, ego, partners):
     tensorboard_log = f"./data/user{id}logs"
     tensorboard_name = f"user{id}-{time}"
     
-    return errors, partners, tensorboard_log, tensorboard_name
+    return errors, partners, tensorboard_log, tensorboard_name, time
 
 def create_ego_object(ego_data, num_partners, tensorboard_log):
     ego_config = {"verbose": 1}
@@ -99,7 +99,7 @@ def create_partner_object(seed):
     Partner = namedtuple("Partner", ["seed", "device", "share_latent"])
     return Partner(seed, "auto", False)
 
-def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboard_name):
+def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboard_name, mydatabase):
     print("started training")
     env_args = create_args_object(env_data)
     env, alt_env = generate_env(env_args)
@@ -124,17 +124,34 @@ def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboar
     if env_data["record"] is not None:
         transition = env.get_transitions()
         transition.write_transition(env_data["record"])
+    
+    mydatabase.execute(
+            'UPDATE user SET running = ?'
+            ' WHERE id = ?',
+            (False, id)
+        )
+    mydatabase.commit()
+
+def check_trained(log, name):
+    mypath = f"{log}/{name}_1"
+    return os.path.isdir(mypath)
+
+def create_dir(tensorboard_log, tensorboard_name):
+    mypath = f"{tensorboard_log}/{tensorboard_name}_1"
+    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    return mypath, onlyfiles
 
 def read(tensorboard_log, tensorboard_name):
     mypath = f"{tensorboard_log}/{tensorboard_name}_1"
+    if not os.path.isdir(mypath):
+        return {}, "Please start training before checking for updates."
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-    print(f"reading from {join(mypath, onlyfiles[0])}")
-    summaries = tf.compat.v1.train.summary_iterator(join(mypath, onlyfiles[0]))
+    summaries = tf.compat.v1.train.summary_iterator(join(mypath, onlyfiles[len(onlyfiles) - 1]))
     mydict = {}
     for e in summaries:
         for v in e.summary.value:
             mydict[v.tag] = v.simple_value
-    return mydict
+    return mydict, None
 
 def check_for_updates(file):
     # a function that would theoretically check for updates from the learning agent
