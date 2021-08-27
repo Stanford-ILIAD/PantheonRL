@@ -5,6 +5,8 @@ import gym
 import torch as th
 
 from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.monitor import Monitor
 
 from multiagentworld.common.wrappers import frame_wrap, recorder_wrap
 from multiagentworld.common.agents import OnPolicyAgent, StaticPolicyAgent
@@ -20,11 +22,13 @@ from multiagentworld.envs.rpsgym.rps import RPSEnv, RPSWeightedAgent
 from multiagentworld.envs.blockworldgym import simpleblockworld, blockworld
 from multiagentworld.envs.liargym.liar import LiarEnv, LiarDefaultAgent
 
+from preset import preset
+
 ENV_LIST = ['RPS-v0', 'BlockEnv-v0', 'BlockEnv-v1', 'LiarsDice-v0',
             'OvercookedMultiEnv-v0']
 
 ADAP_TYPES = ['ADAP', 'ADAP_MULT']
-EGO_LIST = ['PPO', 'ModularAlgorithm'] + ADAP_TYPES
+EGO_LIST = ['PPO', 'ModularAlgorithm', 'LOAD'] + ADAP_TYPES
 PARTNER_LIST = ['PPO', 'DEFAULT', 'FIXED'] + ADAP_TYPES
 
 LAYOUT_LIST = ['corridor', 'five_by_five', 'mdp_test', 'multiplayer_schelling',
@@ -118,7 +122,15 @@ def generate_ego(env, args):
 
     kwargs['tensorboard_log'] = args.tensorboard_log
 
-    if args.ego == 'PPO':
+    if args.ego == 'LOAD':
+        model = gen_load(kwargs, kwargs['type'], kwargs['location'])
+        vec_env = DummyVecEnv([lambda: Monitor(env)]) # wrap env in Monitor and VecEnv wrapper
+        model.set_env(vec_env)
+        if kwargs['type'] == 'ModularAlgorithm':
+            model.policy.do_init_weights(init_partner=True)
+            model.policy.num_partners = len(args.alt)
+        return model
+    elif args.ego == 'PPO':
         return PPO(policy='MlpPolicy', **kwargs)
     elif args.ego == 'ADAP':
         return ADAP(policy=AdapPolicy, **kwargs)
@@ -132,23 +144,26 @@ def generate_ego(env, args):
     else:
         raise EnvException("Not a valid policy")
 
-
-def gen_fixed(config, policy_type, location):
+def gen_load(config, policy_type, location):
     if policy_type in ADAP_TYPES:
         if 'latent_val' not in config:
             raise EnvException("latent_val needs to be specified for \
                                 FIXED ADAP policy")
         latent_val = th.tensor(config.pop('latent_val'))
-        policy = ADAP.load(location).policy
-        policy.set_context(latent_val)
+        agent = ADAP.load(location)
+        agent.policy.set_context(latent_val)
     elif policy_type == 'PPO':
-        policy = PPO.load(location).policy
+        agent = PPO.load(location)
     elif policy_type == 'ModularAlgorithm':
-        policy = ModularAlgorithm.load(location).policy
+        agent = ModularAlgorithm.load(location)
     else:
-        raise EnvException("Not a valid FIXED policy")
+        raise EnvException("Not a valid FIXED/LOAD policy")
 
-    return StaticPolicyAgent(policy)
+    return agent
+
+def gen_fixed(config, policy_type, location):
+    agent = gen_load(config, policy_type, location)
+    return StaticPolicyAgent(agent.policy)
 
 
 def gen_default(config, altenv):
@@ -284,13 +299,14 @@ if __name__ == '__main__':
 
     parser.add_argument('--total-timesteps', '-t',
                         type=int,
-                        default=100000,
+                        default=500000,
                         help='Number of time steps to run (ego perspective)')
 
     parser.add_argument('--device', '-d',
                         default='auto',
                         help='Device to run pytorch on')
     parser.add_argument('--seed', '-s',
+                        default=0,
                         type=int,
                         help='Seed for randomness')
 
@@ -334,8 +350,11 @@ if __name__ == '__main__':
     parser.add_argument('--tensorboard-name',
                         help='Name for ego in tensorboard')
 
+    parser.add_argument('--preset', type=int, help='Use preset args')
+
     args = parser.parse_args()
 
+    if args.preset: args = preset(args, args.preset)
     input_check(args)
 
     if args.share_latent:

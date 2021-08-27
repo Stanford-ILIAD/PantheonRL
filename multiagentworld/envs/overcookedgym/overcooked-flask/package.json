@@ -1,0 +1,29 @@
+{
+  "name": "overcooked-demo",
+  "version": "1.0.0",
+  "description": "Website to play Overcooked with AI agents",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-debug": "browserify static/js/demo/index.js -o static/js/demo.js -d -t [ babelify --presets [ env ] ]",
+    "build": "browserify static/js/demo/index.js -o static/js/demo/demo.js -t [ babelify --presets [ env ] ]; browserify static/js/demo/replay-index.js -o static/js/demo/replay.js -t [ babelify --presets [ env ] ]"
+  },
+  "author": "Rohin Shah",
+  "license": "ISC",
+  "devDependencies": {
+    "@tensorflow/tfjs": "^1.2.3",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babelify": "^8.0.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "ejs": "^2.6.1",
+    "express": "^4.17.1",
+    "jquery": "^3.3.1",
+    "lodash": "^4.17.11",
+    "overcooked": "file:../human_aware_rl/overcooked_ai/overcooked_ai_js",
+    "rollup": "^1.12.3",
+    "socket.io-client": "^2.2.0"
+  }
+}
