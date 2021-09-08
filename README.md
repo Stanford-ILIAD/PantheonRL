@@ -76,18 +76,24 @@ python3 tester.py ...
 | Ad-hoc / cross-play             | :heavy_check_mark: |
 | Round-robin training            | :heavy_check_mark: |
 | Finetune / adapt to new partners| :heavy_check_mark: |
+| Custom policies                 | :heavy_check_mark: |
+
 
 
 #### Current Environments
 
-| **Name**            | **Environment Type**  | **Reward Type**  | **Players**     | **Visualization**   |
-| ------------------- | --------------------- | ---------------- | --------------- | ------------------- |
-| Rock Paper Scissors | SimultaneousEnv       | Competitive      | 2               | :x:                 |
-| Liar's Dice         | TurnBasedEnv          | Competitive       | 2               | :x:                 |
-| Block World         | TurnBasedEnv          | Cooperative      | 2               | :heavy_check_mark:  |
-| Overcooked [[1]](#1)| SimultaneousEnv       | Cooperative      | 2               | :heavy_check_mark:  |
+| **Name**              | **Environment Type**  | **Reward Type**  | **Players**     | **Visualization**   |
+| --------------------- | --------------------- | ---------------- | --------------- | ------------------- |
+| Rock Paper Scissors   | SimultaneousEnv       | Competitive      | 2               | :x:                 |
+| Liar's Dice           | TurnBasedEnv          | Competitive       | 2               | :x:                 |
+| Block World [[1]](#1) | TurnBasedEnv          | Cooperative      | 2               | :heavy_check_mark:  |
+| Overcooked [[2]](#2)  | SimultaneousEnv       | Cooperative      | 2               | :heavy_check_mark:  |
 
 <a id="1">[1]</a> 
+Adapted from the block construction task from https://github.com/cogtoolslab/compositional-abstractions
+
+<a id="2">[2]</a> 
 Adapted from the Human-Aware_Rl / Overcooked AI package from https://github.com/HumanCompatibleAI/human_aware_rl
+
 
 ## Acknowledgments
