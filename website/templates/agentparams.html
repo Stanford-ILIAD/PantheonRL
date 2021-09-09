@@ -7,6 +7,10 @@
     <label for="seed">Seed for randomness (optional): </label>
     <input type="number" name="seed" id="seed" step="1">
     <br>
+    <label for="egoname">Save as: </label>
+    <input name="egoname" id="egoname" pattern="[a-zA-Z0-9]+">
+    (if left blank, the trained ego policy will not be saved)
+    <br>
     <label for="timesteps">Number of timesteps to train for: </label>
     <input type="number" name="timesteps" id="timesteps" value="100000" min="1" max="2000000">
     <br> <br>
@@ -31,6 +35,17 @@
     {% elif session['partnertype'] != 'DEFAULT' and session['partnertype'] != 'FIXED' %} 
     <label for="seed">Seed for randomness (optional): </label>
     <input type="number" name="seed" id="seed" step="1">
+    <br> <br>
+    <label for="partnername">Save as: </label>
+    <input name="partnername" id="partnername" pattern="[a-zA-Z0-9]+">
+    (if left blank, the trained partner policy will not be saved)
+    {% elif session['partnertype'] == 'FIXED' %} 
+    <label for="fixedtype">Select a fixed agent: </label>
+    <select name="fixedtype" id="fixedtype">
+        {% for pname, ptype in fixed_options %}
+          <option value="{{ ptype }}/{{ pname }}.zip">{{ pname }} ({{ ptype }})</option>
+        {% endfor %}
+    </select>
     {% else %}
     <p>No parameters to set!</p>
     {% endif %}

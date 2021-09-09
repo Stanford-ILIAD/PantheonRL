@@ -9,5 +9,6 @@ setup(name='multiagentworld',
       author_email='',
       packages=find_packages(),
       install_requires=[
+        'flask', 'tensorflow', 'torch'
       ],
     )

@@ -3,6 +3,7 @@
 # contains environment display names and url names
 ENV_LIST = {"block world": "blockworld", "block world (simple)": "simpleblockworld", "overcooked": "overcooked",
             "liar's dice": "liar", "rock-paper-scissors": "rps"}
+ENV_TO_NAME = {"blockworld": "BlockEnv-v1", "simpleblockworld": "BlockEnv-v0", "overcooked": "OvercookedMultiEnv-v0", "liar": "LiarsDice-v0", "rps": "RPS-v0"}
 
 ADAP_TYPES = ['ADAP', 'ADAP_MULT']
 EGO_LIST = ['PPO', 'ModularAlgorithm'] + ADAP_TYPES

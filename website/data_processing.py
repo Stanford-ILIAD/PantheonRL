@@ -1,15 +1,35 @@
 # functions for saving data, changing formats, etc
 # will change as i change the data formats being used
 import numpy as np
-import gym
 import os
 from collections import namedtuple
-from trainer import generate_env, generate_ego, gen_partner
+from trainer import generate_env, generate_ego, gen_partner, gen_fixed
 import datetime
-import time
 import tensorflow as tf
 from os import listdir
 from os.path import isfile, join
+from website.constants import PARTNER_LIST, ENV_TO_NAME
+
+def savedpartnerpath(id, env, name, ptype):
+    return f"./data/user{id}/{env}/fixedpartners/{ptype}/{name}"
+
+def loadpartnerpath(id, env):
+    return f"./data/user{id}/{env}/fixedpartners"
+
+def savedegopath(id, env, name, ptype):
+    return f"./data/user{id}/{env}/fixedego/{ptype}/{name}"
+
+def fixedpartneroptions(id, env):
+    mypath = loadpartnerpath(id, env)
+    if not os.path.isdir(mypath):
+        return "You have not saved any fixed partners for this environment. Please select a different partner type.", []
+    else:
+        options = []
+        for ptype in PARTNER_LIST:
+            if os.path.isdir(join(mypath, ptype)):
+                currpath = join(mypath, ptype)
+                options += [(f.replace('.zip', ''), ptype) for f in listdir(currpath) if isfile(join(currpath, f))]
+        return None, options
 
 def common_env_configs(args, id):
     record = None
@@ -38,17 +58,24 @@ def saveenvs(env, alt_env, id):
 
     np.savez(f"./data/user{id}.npz", env=env, alt_env=alt_env)
 
-def create_ego_dict(ego_type, args):
+def create_ego_dict(ego_type, args, env, id):
     seed = None
     error = None
+    location = None
     if "seed" in args and args['seed'] != "":
         seed = int(args["seed"])
+    if "egoname" in args and args['egoname'] != "":
+        location = savedegopath(id, ENV_TO_NAME[env], args['egoname'], ego_type)
+        if not args['egoname'].isalnum():
+            error = "Name to save as must be alphanumeric."
+        elif os.path.exists(location):
+            error = "There already exists an ego agent saved with that name."
 
-    ego_dict = {"type": ego_type, "seed": seed, "timesteps": int(args["timesteps"])}
+    ego_dict = {"type": ego_type, "seed": seed, "timesteps": int(args["timesteps"]), "location": location}
 
-    return ego_dict
+    return error, ego_dict
 
-def create_partner_dict(partner_type, env, args):
+def create_partner_dict(id, partner_type, env, args):
     error = None
     partner_dict = {"type": partner_type}
 
@@ -62,22 +89,42 @@ def create_partner_dict(partner_type, env, args):
             error = "All probabilities must be nonnegative."
         partner_dict['r'], partner_dict['p'], partner_dict['s'] = r, p, s
     elif partner_type == "FIXED":
-        error = "Fixed partners have not yet been implemented - please select a different partner type."
+        mypath = loadpartnerpath(id, ENV_TO_NAME[env])
+        if not os.path.isdir(mypath):
+            error = "You do not have any fixed partners for this environment. Please select a different partner type."
+        else:
+            partner_dict['location'] = join(mypath, args['fixedtype'])
+            partner_dict['ptype'] = args['fixedtype'][:args['fixedtype'].find('/')]
     elif partner_type != "DEFAULT":
         seed = None
         if "seed" in args and args['seed'] != "":
             seed = int(args["seed"])
         partner_dict['seed'] = seed
+        save = None
+        if "partnername" in args and args['partnername'] != "":
+            if not args['partnername'].isalnum():
+                error = "Name to save as must be alphanumeric."
+            elif os.path.exists(savedpartnerpath(id, env, args['partnername'], partner_type)):
+                error = "There already exists a partner saved with that name."
+            save = args['partnername']
+        partner_dict['save'] = save
     
     return error, partner_dict
 
 def check_agent_errors(id, env, ego, partners):
-    # assumes that ego exists and partners has length at least one
     errors = []
+    if ego is None or len(partners) < 1:
+        errors.append("Need at least one valid ego agent and partner agent to train with.")
+
     i = 0
     while i < len(partners):
-        if partners[i]["type"] == "FIXED":
-            errors.append(f"Fixed agents haven't been implemented yet. Partner {i + len(errors)} will be deleted.\n")
+        if partners[i]["type"] == "FIXED" and (not 'location' in partners[i] or not 'ptype' in partners[i]):
+            errors.append(f"Fixed agents need a filename to load from. Partner {i + len(errors)} will be deleted.\n")
+            partners.pop(i)
+            i -= 1
+        elif partners[i]["type"] == "FIXED" and not os.path.isfile(partners[i]['location']):
+            # honestly if it reaches here it's probably my fault and not the users
+            errors.append(f"Fixed agents need a valid filepath. Partner {i + len(errors)} will be deleted.\n")
             partners.pop(i)
             i -= 1
         i += 1
@@ -101,6 +148,7 @@ def create_partner_object(seed):
 
 def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboard_name, mydatabase):
     print("started training")
+    ego_save = ego_data.pop("location")
     env_args = create_args_object(env_data)
     env, alt_env = generate_env(env_args)
     print(f"Environment: {env}; Partner env: {alt_env}")
@@ -108,13 +156,24 @@ def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboar
     ego_agent = generate_ego(env, create_ego_object(ego_data, len(partners), tensorboard_log))
     print(f'Ego: {ego_agent}')
 
+    partners_to_save = []
     for partner in partners:
-        type = partner.pop("type")
+        ptype = partner.pop("type")
         seed = None
         if "seed" in partner:
             seed = partner.pop("seed")
-        p_args = create_partner_object(seed)
-        env.add_partner_agent(gen_partner(type, partner, alt_env, ego_agent, p_args))
+        save = None
+        if "save" in partner:
+            save = partner.pop("save")
+        #TODO: adap agents can't load, fix this later
+        if ptype == "FIXED":
+            current_partner = gen_fixed({}, partner.pop('ptype'), partner.pop('location'))
+        else:
+            p_args = create_partner_object(seed)
+            current_partner = gen_partner(ptype, partner, alt_env, ego_agent, p_args)
+        env.add_partner_agent(current_partner)
+        if save is not None:
+            partners_to_save.append((current_partner, save, ptype))
     
     learn_config = {'total_timesteps': ego_data["timesteps"]}
     if tensorboard_log is not None:
@@ -125,6 +184,13 @@ def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboar
         transition = env.get_transitions()
         transition.write_transition(env_data["record"])
     
+    for partner, name, ptype in partners_to_save:
+        partner.model.save(savedpartnerpath(id, env_data['env'], name, ptype))
+    
+    if ego_save is not None:
+        ego_agent.save(ego_save)
+        print("saved ego agent")
+
     mydatabase.execute(
             'UPDATE user SET running = ?'
             ' WHERE id = ?',
@@ -156,5 +222,5 @@ def read(tensorboard_log, tensorboard_name):
 def check_for_updates(file):
     # a function that would theoretically check for updates from the learning agent
     # right now it just returns a test json
-    return {"updates": "In terms of updates, there are no updates."}    
+    return {"updates": "In terms of updates, we have no updates."}    
         

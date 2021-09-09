@@ -4,7 +4,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for, session
 )
 from website.constants import EGO_LIST, PARTNER_LIST, ENV_LIST
-from website.data_processing import create_ego_dict, create_partner_dict, check_agent_errors
+from website.data_processing import create_ego_dict, create_partner_dict, check_agent_errors, fixedpartneroptions
 from website.db import get_db
 
 bp = Blueprint("agents", __name__)
@@ -51,7 +51,14 @@ def agents(env):
         session['partnertype'] = None
     if not 'partners' in session:
         session['partners'] = []
-    return render_template('agentparams.html', partners=len(session['partners']), ego_options=EGO_LIST, partner_options=PARTNER_LIST, env=env, env_options=ENV_LIST)
+
+    options = []
+    if session['partnertype'] == "FIXED":
+        error, options = fixedpartneroptions(g.user['id'], session['env_data']['env'])
+        if error is not None:
+            flash(error)
+
+    return render_template('agentparams.html', partners=len(session['partners']), ego_options=EGO_LIST, partner_options=PARTNER_LIST, env=env, env_options=ENV_LIST, fixed_options=options)
 
 @bp.route("/<string:env>/egotype", methods=('POST',))
 @login_required
@@ -65,9 +72,9 @@ def egotype(env):
 def partnertype(env):
     if request.method == 'POST':
         session['partnertype'] = request.form['partnertype']
-        if session['partnertype'] == 'FIXED':
-            error = "Fixed partner agents are not yet implemented. Please pick a different partner type."
-            flash(error)
+        # if session['partnertype'] == 'FIXED':
+        #     error = "Fixed partner agents are not yet implemented. Please pick a different partner type."
+        #     flash(error)
         return redirect(url_for('agents.agents', env=env))
 
 @bp.route("/<string:env>/setego", methods=('POST',))
@@ -75,8 +82,12 @@ def partnertype(env):
 def setego(env):
     if request.method == 'POST':
         # add ego params to the session variable
-        session['ego'] = create_ego_dict(session['egotype'], request.form)
-        session['egotype'] = None
+        error, ego_dict = create_ego_dict(session['egotype'], request.form, env, g.user['id'])
+        if error is not None:
+            flash(error)
+        else: 
+            session['ego'] = ego_dict
+            session['egotype'] = None
         return redirect(url_for('agents.agents', env=env))
 
 
@@ -85,7 +96,7 @@ def setego(env):
 def setpartner(env):
     if request.method == 'POST':
         # add ego params to the session variable
-        error, partner_dict = create_partner_dict(session['partnertype'], env, request.form)
+        error, partner_dict = create_partner_dict(g.user['id'], session['partnertype'], env, request.form)
         if error is not None:
             flash(error)
         else:
