@@ -8,7 +8,9 @@ import datetime
 import tensorflow as tf
 from os import listdir
 from os.path import isfile, join
-from website.constants import PARTNER_LIST, ENV_TO_NAME
+from website.constants import PARTNER_LIST, ENV_TO_NAME, TB_PORT
+import subprocess
+import signal
 
 def savedpartnerpath(id, env, name, ptype):
     return f"./data/user{id}/{env}/fixedpartners/{ptype}/{name}"
@@ -223,4 +225,14 @@ def check_for_updates(file):
     # a function that would theoretically check for updates from the learning agent
     # right now it just returns a test json
     return {"updates": "In terms of updates, we have no updates."}    
+
+def gen_tensorboard(tb_log, tb_name):
+    mypath = f"{tb_log}/{tb_name}_1"
+    if not os.path.isdir(mypath):
+        return None, "Please start training before generating the tensorboard."
+    p = subprocess.Popen(["tensorboard", "--logdir", mypath, "--bind_all", "--port", TB_PORT])
+    return p.pid, None
+
+def stop_tensorboard(processid):
+    os.kill(processid, signal.SIGINT)
         

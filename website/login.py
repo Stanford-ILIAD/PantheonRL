@@ -76,7 +76,7 @@ def login_required(view):
             return redirect(url_for('login.main'))
         elif g.user['running']:
                 return redirect(url_for('training.main'))
-
+        session['tb'] = False
         return view(**kwargs)
 
     return wrapped_view

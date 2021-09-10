@@ -7,9 +7,13 @@
     <div class="flash">Error: {{ message }}</div>
 {% endfor %}
 
+{% if session['tb'] %} 
+<div class="notification">Tensorboard created! Click the bottom button to go to the Tensorboard display.</div>
+{% endif %}
+
 {% if training or done %}
     {% if training %}
-        <p>Training in progress!!</p>
+        <div class="notification">Training in progress!!</div>
     {% else %} 
         <div class="notification">Done training!</div>
     {% endif %}
@@ -35,11 +39,21 @@
     <form action="{{ url_for('training.learn') }}" method="post">
         <input type="submit" value="Start Training">
     </form>
+    <br> <br>
 {% endif %}
 {% if not done %}
     <form method="post">
         <input type="submit" value="Check for Updates">
     </form>
+    {% if not session['tb'] %}
+    <form method="post" action="{{ url_for('training.tb') }}">
+        <input type="submit" value="Create Tensorboard">
+    </form>
+    {% else %} 
+    <form method="get" action="{{ tb_url }}">
+        <input type="submit" value="Go To Tensorboard">
+    </form>
+    {% endif %}
     </div>
 {% endif %}
 {% endblock %}

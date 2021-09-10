@@ -114,7 +114,7 @@ def rps():
     return render_template('environments/rps.html', envs=ENV_LIST, selected=True)
 
 def clear_agent_selection():
-    delete_from_session(['egotype', 'partnertype', 'partners', 'ego', 'tb_log', 'tb_name', 'updates'])
+    delete_from_session(['egotype', 'partnertype', 'partners', 'ego', 'tb_log', 'tb_name', 'updates', 'processid'])
 
 def delete_from_session(vars):
     for var in vars:

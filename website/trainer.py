@@ -4,10 +4,10 @@ from flask import (
 )
 from website.constants import ENV_LIST, LAYOUT_LIST
 from website.login import login_required, login_for_training
-from website.data_processing import start_training, read, check_trained
+from website.data_processing import start_training, read, check_trained, gen_tensorboard, stop_tensorboard
 from website.db import get_db
-
-from collections import namedtuple
+from website.constants import generate_url
+from urllib.parse import urlparse
 
 bp = Blueprint("training", __name__, url_prefix="/training")
 
@@ -25,7 +25,7 @@ def main():
 
     elif check_trained(session['tb_log'], session['tb_name']):
         return redirect(url_for('training.done'))
-    return render_template('training.html', training=g.user['running'], done=False)
+    return render_template('training.html', training=g.user['running'], done=False, tb_url=generate_url(urlparse(request.base_url).hostname))
 
 @bp.route("/learn", methods=("POST",))
 @login_required
@@ -54,4 +54,24 @@ def done():
             (False, g.user['id'])
         )
         db.commit()
+    if "processid" in session:
+        stop_tensorboard(session['processid'])
+        session['tb'] = False
     return render_template('training.html', training=g.user['running'], done=True)
+
+@bp.route("/tb", methods=("POST",))
+@login_for_training
+def tb():
+    if g.user['running']:
+        processid, error = gen_tensorboard(session['tb_log'], session['tb_name'])
+
+        if error is not None:
+            flash(error)
+        else:
+            session['tb'] = True
+            session['processid'] = processid
+
+    elif check_trained(session['tb_log'], session['tb_name']):
+        return redirect(url_for('training.done'))
+    
+    return redirect(url_for("training.main"))

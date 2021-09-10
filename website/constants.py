@@ -1,3 +1,4 @@
+
 # lists of options for different settings
 
 # contains environment display names and url names
@@ -14,3 +15,9 @@ LAYOUT_LIST = ['corridor', 'five_by_five', 'mdp_test', 'multiplayer_schelling',
                'scenario2', 'scenario2_s', 'scenario3', 'scenario4',
                'schelling', 'schelling_s', 'simple', 'simple_single',
                'simple_tomato', 'small_corridor', 'unident', 'unident_s']
+
+# for now, tb port is hardcoded
+TB_PORT = "6008"
+
+def generate_url(host):
+    return f"http://{host}:{TB_PORT}/"
