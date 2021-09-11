@@ -124,7 +124,8 @@ def generate_ego(env, args):
 
     if args.ego == 'LOAD':
         model = gen_load(kwargs, kwargs['type'], kwargs['location'])
-        vec_env = DummyVecEnv([lambda: Monitor(env)]) # wrap env in Monitor and VecEnv wrapper
+        # wrap env in Monitor and VecEnv wrapper
+        vec_env = DummyVecEnv([lambda: Monitor(env)])
         model.set_env(vec_env)
         if kwargs['type'] == 'ModularAlgorithm':
             model.policy.do_init_weights(init_partner=True)
@@ -144,6 +145,7 @@ def generate_ego(env, args):
     else:
         raise EnvException("Not a valid policy")
 
+
 def gen_load(config, policy_type, location):
     if policy_type in ADAP_TYPES:
         if 'latent_val' not in config:
@@ -160,6 +162,7 @@ def gen_load(config, policy_type, location):
         raise EnvException("Not a valid FIXED/LOAD policy")
 
     return agent
+
 
 def gen_fixed(config, policy_type, location):
     agent = gen_load(config, policy_type, location)
@@ -354,7 +357,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.preset: args = preset(args, args.preset)
+    if args.preset:
+        args = preset(args, args.preset)
     input_check(args)
 
     if args.share_latent:
