@@ -229,7 +229,7 @@ class TurnBasedEnv(MultiAgentEnv, ABC):
     def __init__(self,
                  probegostart: float = 0.5,
                  partners: Optional[List[Agent]] = None):
-        partners = [partners] if partners is not None else None
+        partners = [partners] if partners else None
         super(TurnBasedEnv, self).__init__(
             ego_ind=0, n_players=2, partners=partners)
         self.probegostart = probegostart
@@ -319,7 +319,7 @@ class SimultaneousEnv(MultiAgentEnv, ABC):
     """
 
     def __init__(self, partners: Optional[List[Agent]] = None):
-        partners = [partners] if partners is not None else None
+        partners = [partners] if partners else None
         super(SimultaneousEnv, self).__init__(
             ego_ind=0, n_players=2, partners=partners)
 

@@ -88,7 +88,7 @@ class TurnBasedRecorder(TurnBasedEnv, MultiRecorder):
 
     def __init__(self, env: gym.Env):
         super(TurnBasedRecorder, self).__init__(
-            probegostart=env.probegostart, partners=env.partners)
+            probegostart=env.probegostart, partners=env.partners[0])
         self.env = env
 
         self.action_space = env.action_space
@@ -168,7 +168,7 @@ class SimultaneousRecorder(SimultaneousEnv, MultiRecorder):
     """
 
     def __init__(self, env):
-        super(SimultaneousRecorder, self).__init__(partners=env.partners)
+        super(SimultaneousRecorder, self).__init__(partners=env.partners[0])
         self.env = env
 
         self.action_space = env.action_space
@@ -253,7 +253,7 @@ class TurnBasedFrameStack(TurnBasedEnv):
                 defaultaltobs: Optional[np.ndarray] = None
             ):
         super(TurnBasedFrameStack, self).__init__(
-            probegostart=env.probegostart, partners=env.partners)
+            probegostart=env.probegostart, partners=env.partners[0])
         self.env = env
         self.numframes = numframes
 
@@ -318,7 +318,7 @@ class SimultaneousFrameStack(SimultaneousEnv):
                 numframes: int,
                 defaultobs: Optional[np.ndarray] = None
             ):
-        super(SimultaneousFrameStack, self).__init__(partners=env.partners)
+        super(SimultaneousFrameStack, self).__init__(partners=env.partners[0])
         self.env = env
         self.numframes = numframes
 
