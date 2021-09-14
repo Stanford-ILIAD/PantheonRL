@@ -18,6 +18,8 @@ from multiagentworld.algos.adap.agent import AdapAgent
 from multiagentworld.algos.modular.learn import ModularAlgorithm
 from multiagentworld.algos.modular.policies import ModularPolicy
 
+from multiagentworld.algos.bc import BCShell, reconstruct_policy
+
 from multiagentworld.envs.rpsgym.rps import RPSEnv, RPSWeightedAgent
 from multiagentworld.envs.blockworldgym import simpleblockworld, blockworld
 from multiagentworld.envs.liargym.liar import LiarEnv, LiarDefaultAgent
@@ -158,6 +160,8 @@ def gen_load(config, policy_type, location):
         agent = PPO.load(location)
     elif policy_type == 'ModularAlgorithm':
         agent = ModularAlgorithm.load(location)
+    elif policy_type == 'BC':
+        agent = BCShell(reconstruct_policy(location))
     else:
         raise EnvException("Not a valid FIXED/LOAD policy")
 

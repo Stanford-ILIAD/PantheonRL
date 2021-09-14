@@ -26,6 +26,11 @@ from multiagentworld.common.util import FeedForward32Policy
 log = utils.configure_logger(verbose=0)  # change to 1 for debugging
 
 
+class BCShell:
+    def __init__(self, policy):
+        self.policy = policy
+
+
 def reconstruct_policy(
     policy_path: str,
     device: Union[th.device, str] = "auto",
@@ -362,5 +367,4 @@ class BC:
         Args:
             policy_path: path to save policy to.
         """
-        th.save(self.policy, policy_path)
         th.save(self.policy, policy_path)

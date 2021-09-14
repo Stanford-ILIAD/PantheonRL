@@ -7,3 +7,7 @@ instance/
 logs/
 *__pycache__*
 *.ipynb_checkpoints*
+trajs/
+models/
+.idea/
+.mypy_cache/
