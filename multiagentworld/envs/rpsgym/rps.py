@@ -16,7 +16,7 @@ class RPSWeightedAgent(Agent):
         weight = r + p + s
         if weight == 0:
             self.c0 = 1./3
-            self.c1 = 1./3
+            self.c1 = 2./3
         else:
             self.c0 = r / weight
             self.c1 = (r + p) / weight
