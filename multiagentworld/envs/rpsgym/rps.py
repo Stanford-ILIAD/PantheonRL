@@ -14,8 +14,12 @@ NULL_OBS = np.array([0])
 class RPSWeightedAgent(Agent):
     def __init__(self, r=1, p=1, s=1, np_random=np.random):
         weight = r + p + s
-        self.c0 = r / weight
-        self.c1 = (r + p) / weight
+        if weight == 0:
+            self.c0 = 1./3
+            self.c1 = 1./3
+        else:
+            self.c0 = r / weight
+            self.c1 = (r + p) / weight
         self.np_random = np_random
 
     def get_action(self, obs, record=True):
