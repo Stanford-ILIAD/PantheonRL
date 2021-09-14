@@ -14,6 +14,8 @@ pip install -e .
 
 ## Web User Interface
 
+The first time the web interface is being run in a new location, the database must be initialized. After that, the ``init-db`` command should not be called again, because this will clear all user account data.
+
 Set environment variables and (re)inititalize the database
 ```
 export FLASK_APP=website
@@ -25,7 +27,6 @@ Start the web user interface
 ```
 flask run --host=0.0.0.0
 ```
-
 
 
 ## Command Line Invocation
