@@ -8,20 +8,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="{{ url_for('static', filename='iliad_logo_image_only.png') }}" type="image/x-icon">
 </head>
-<nav>
-    <h1>MultiAgentWorld</h1>
-    <ul>
-        {% if g.user %}
-            <li><span>{{ g.user['username'] }}</span>
-            <li><a href="{{ url_for('login.logout') }}">Log Out</a>
-        {% else %}
-            <li><a href="{{ url_for('login.main') }}">Register/Log In</a>
-        {% endif %}
-    </ul>
+<nav class="navbar navbar-expand-lg navbar-light bg-light container">
+    <div class="container-fluid">
+        <h1>MultiAgentWorld</h1>
+        <ul>
+            {% if g.user %}
+                <li><span>{{ g.user['username'] }}</span>
+                <li><a href="{{ url_for('login.logout') }}">Log Out</a>
+            {% else %}
+                <li><a href="{{ url_for('login.main') }}">Register/Log In</a>
+            {% endif %}
+        </ul>
+    </div>
+
 </nav>
 <body>
     <br>
-    {% block mainbody %}{% endblock %}
+    <div class="container">
+        {% block mainbody %}{% endblock %}
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
 </body>
 </html>

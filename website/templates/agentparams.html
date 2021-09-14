@@ -4,17 +4,17 @@
 {% if session['egotype'] != None %} 
 <h4>{{ session['egotype'] }} Parameters</h4>
 <form action="{{ url_for('agents.setego', env=env) }}" method="post">
-    <label for="seed">Seed for randomness (optional): </label>
-    <input type="number" name="seed" id="seed" step="1">
+    <label for="seed" class="form-label">Seed for randomness (optional): </label>
+    <input class="form-control" type="number" name="seed" id="seed" step="1">
     <br>
-    <label for="egoname">Save as: </label>
-    <input name="egoname" id="egoname" pattern="[a-zA-Z0-9]+">
-    (if left blank, the trained ego policy will not be saved)
+    <label for="egoname" class="form-label">Save as: (if left blank, the trained ego policy will not be saved)</label>
+    <input class="form-control" name="egoname" id="egoname" pattern="[a-zA-Z0-9]+">
+    
     <br>
-    <label for="timesteps">Number of timesteps to train for: </label>
-    <input type="number" name="timesteps" id="timesteps" value="100000" min="1" max="2000000">
-    <br> <br>
-    <input type="submit" value="Save Ego Agent">
+    <label for="timesteps" class="form-label">Number of timesteps to train for: </label>
+    <input class="form-control" type="number" name="timesteps" id="timesteps" value="100000" min="1" max="2000000">
+    <br>
+    <button class="btn btn-primary btn-lg btn-block" type="submit">Save Ego Agent</button>
 </form>
 {% endif %}
 {% endblock %}
@@ -24,33 +24,33 @@
 <h4>{{ session['partnertype'] }} Parameters</h4>
 <form action="{{ url_for('agents.setpartner', env=env) }}" method="post">
     {% if env == 'rps' and session['partnertype'] == 'DEFAULT' %}
-    <label for='r'>Probability of rock: </label>
-    <input type='number' name='r' id='r' min='0' value='1' required>
-    <br>
-    <label for='p'>Probability of paper: </label>
-    <input type='number' name='p' id='p' min='0' value='1' required>
-    <br>
-    <label for='s'>Probability of scissors: </label>
-    <input type='number' name='s' id='s' min='0' value='1' required>
+        <label for='r' class="form-label">Relative probability of rock: </label>
+        <input class="form-control" type='number' name='r' id='r' min='0' value='1' required>
+        <br>
+        <label for='p' class="form-label">Relative probability of paper: </label>
+        <input class="form-control" type='number' name='p' id='p' min='0' value='1' required>
+        <br>
+        <label for='s' class="form-label">Relative probability of scissors: </label>
+        <input class="form-control" type='number' name='s' id='s' min='0' value='1' required>
     {% elif session['partnertype'] != 'DEFAULT' and session['partnertype'] != 'FIXED' %} 
-    <label for="seed">Seed for randomness (optional): </label>
-    <input type="number" name="seed" id="seed" step="1">
-    <br> <br>
-    <label for="partnername">Save as: </label>
-    <input name="partnername" id="partnername" pattern="[a-zA-Z0-9]+">
-    (if left blank, the trained partner policy will not be saved)
+        <label for="seed" class="form-label">Seed for randomness (optional): </label>
+        <input class="form-control" type="number" name="seed" id="seed" step="1">
+        <br>
+        <label for="partnername" class="form-label">Save as: (if left blank, the trained ego policy will not be saved)</label>
+        <input class="form-control" name="partnername" id="partnername" pattern="[a-zA-Z0-9]+">
     {% elif session['partnertype'] == 'FIXED' %} 
-    <label for="fixedtype">Select a fixed agent: </label>
-    <select name="fixedtype" id="fixedtype">
-        {% for pname, ptype in fixed_options %}
-          <option value="{{ ptype }}/{{ pname }}.zip">{{ pname }} ({{ ptype }})</option>
-        {% endfor %}
-    </select>
+        <label for="fixedtype">Select a fixed agent: </label>
+        <select name="fixedtype" id="fixedtype">
+            {% for pname, ptype in fixed_options %}
+              <option value="{{ ptype }}/{{ pname }}.zip">{{ pname }} ({{ ptype }})</option>
+            {% endfor %}
+        </select>
     {% else %}
-    <p>No parameters to set!</p>
+        <p>No parameters to set!</p>
     {% endif %}
-    <br> <br>
-    <input type="submit" value="Save Partner Agent">
+    
+    <br>
+    <button class="btn btn-primary btn-lg btn-block" type="submit">Save Partner Agent</button>
 </form>
 {% endif %}
 {% endblock %}

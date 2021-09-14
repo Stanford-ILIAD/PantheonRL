@@ -4,17 +4,20 @@
 
 {% block parameters %}
 <form method="post">
-    <label for="probegostart">probability the ego agent starts: </label>
-    <input type="range" name="probegostart" id="probegostart" value="50" min="0" max="100">
-    <span id="output"></span>
+    <label class="form-check-label" for="probegostart">Probability the ego agent starts: </label> <span id="output"></span>
+    <input class="form-range" type="range" name="probegostart" id="probegostart" value="50" min="0" max="100">
+    
     <!-- <br>
     <label for="framestack">Number of frames to stack: </label> -->
     <input type="hidden" name="framestack" id="framestack" value="1" required>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="record" id="record">
+      <label class="form-check-label" for="record">
+        Record Trajectories
+      </label>
+    </div>
     <br>
-    <label for="record">Record Trajectories </label>
-    <input type="checkbox" name="record" id="record">
-    <br> <br>
-    <input type="submit" value="Go">
+    <button class="btn btn-primary btn-lg btn-block" type="submit">Go</button>
 </form>
 <script>
 var slider = document.getElementById("probegostart");

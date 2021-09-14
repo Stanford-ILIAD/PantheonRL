@@ -4,28 +4,40 @@
 
 {% block parameters %}
 <form method="post">
-    <label for="layout_name">Layout Name: </label>
-    <select name="layout_name" value="layout_name" required>
-        {% for name in layouts %}
-        <option value="{{ name }}">{{ name }}</option>
-        {% endfor %}
-    </select>
-    <br> <br>
-    <label for="ego_agent_idx">(Ego Agent) Plays as: </label>
-    <select name="ego_agent_idx" value="ego_agent_idx" required>
-        <option value="0">Player 0</option>
-        <option value="1">Player 1</option>
-    </select>
-    <br> <br>
-    <label for="baselines">Baselines </label>
-    <input type="checkbox" name="baselines" id="baselines">
+    
+    <div class="mb-3">
+        <label for="layout_name">Layout Name: </label>
+        <select class="form-select" name="layout_name" value="layout_name" required>
+            {% for name in layouts %}
+            <option value="{{ name }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+        
+    <div class="mb-3">
+        <label for="ego_agent_idx">(Ego Agent) Plays as: </label>
+        <select class="form-select" name="ego_agent_idx" value="ego_agent_idx" required>
+            <option value="0">Player 0</option>
+            <option value="1">Player 1</option>
+        </select>
+    </div>
+    
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="baselines" id="baselines">
+      <label class="form-check-label" for="baselines">
+        Baselines
+      </label>
+    </div>
     <!-- <br>
     <label for="framestack">Number of frames to stack: </label> -->
     <input type="hidden" name="framestack" id="framestack" value="3" required>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="record" id="record">
+      <label class="form-check-label" for="record">
+        Record Trajectories
+      </label>
+    </div>
     <br>
-    <label for="record">Record Trajectories </label>
-    <input type="checkbox" name="record" id="record">
-    <br> <br>
-    <input type="submit" value="Go">
+    <button class="btn btn-primary btn-lg btn-block" type="submit">Go</button>
 </form>
 {% endblock %}

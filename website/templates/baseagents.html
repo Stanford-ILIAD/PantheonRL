@@ -1,57 +1,74 @@
 {% extends 'base.html' %}
 
 {% block mainbody %}
-<h2>Agent Settings</h2>
-{% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-    <br>
-{% endfor %}
-<div class="row">
-  <div class="column">
-    <h3>Ego Agent</h3>
-    {% if 'ego' in session %}
-    <div class="notification">
-      <p>You have successfully set a {{ session['ego']['type'] }} ego agent. 
-        <br> Filling out this form again will <i>overwrite</i> this selection.</p>
-    </div>
-    {% endif %}
-    <form action="{{ url_for('agents.egotype', env=env) }}" method="post">
-      <label for="egotype">Pick a type of agent:</label>
-      <select name="egotype" id="egotype">
-          {% for typeoption in ego_options %}
-            <option value="{{ typeoption }}">{{ typeoption }}</option>
-          {% endfor %}
-      </select>
-      <input type="submit" value="Select">
-    </form>
-    {% block egoparams %}
-    {% endblock %}
-  </div>
-  <div class="column">
-    <h3>Partner Agent {{ partners + 1 }} {% if partners > 0 %}(Optional){% endif %}</h3>
-    {% if partners > 0 %}
-    <div class="notification">
-      <p>You have successfully set {{ partners }} partner agent(s). 
-        <br> Filling out this form again will add an <i>additional</i> partner.</p>
-    </div>
-    {% endif %}
-    <form action="{{ url_for('agents.partnertype', env=env) }}" method="post">
-      <label for="partnertype">Pick a type of agent:</label>
-      <select name="partnertype" id="partnertype">
-          {% for typeoption in partner_options %}
-            {% if not (env == "overcooked" and typeoption == "DEFAULT") %}
-              <option value="{{ typeoption }}">{{ typeoption }}</option>
+<div class="col-md-12 order-md-1">
+
+    <h2 class="mb-3">Agent Settings</h2>
+    <hr class="mb-4">
+    {% for message in get_flashed_messages() %}
+        <div class="flash">{{ message }}</div>
+        <br>
+    {% endfor %}
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <h3>Ego Agent</h3>
+            {% if 'ego' in session %}
+            <div class="notification">
+              <p>You have successfully set a {{ session['ego']['type'] }} ego agent. 
+                <br> Filling out this form again will <i>overwrite</i> this selection.</p>
+            </div>
             {% endif %}
-          {% endfor %}
-      </select>
-      <input type="submit" value="Select">
+            <form action="{{ url_for('agents.egotype', env=env) }}" method="post">
+              <label for="egotype" class="form-label">Pick a type of agent:</label>
+              <select class="form-select" name="egotype" id="egotype">
+                  {% for typeoption in ego_options %}
+                    <option value="{{ typeoption }}">{{ typeoption }}</option>
+                  {% endfor %}
+              </select>
+              <br>
+              <button class="btn btn-primary btn-lg btn-block" type="submit">Select</button>
+            </form>
+            <br>
+            <div>
+                {% block egoparams %}
+                {% endblock %}
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <h3>Partner Agent {{ partners + 1 }} {% if partners > 0 %}(Optional){% endif %}</h3>
+            {% if partners > 0 %}
+            <div class="notification">
+              <p>You have successfully set {{ partners }} partner agent(s). 
+                <br> Filling out this form again will add an <i>additional</i> partner.</p>
+            </div>
+            {% endif %}
+            <form action="{{ url_for('agents.partnertype', env=env) }}" method="post">
+              <label for="partnertype" class="form-label">Pick a type of agent:</label>
+              <select class="form-select" name="partnertype" id="partnertype">
+                  {% for typeoption in partner_options %}
+                    {% if not (env == "overcooked" and typeoption == "DEFAULT") %}
+                      <option value="{{ typeoption }}">{{ typeoption }}</option>
+                    {% endif %}
+                  {% endfor %}
+              </select>
+              <br>
+              <button class="btn btn-primary btn-lg btn-block" type="submit">Select</button>
+            </form>
+            <br>
+            <div>
+                {% block partnerparams %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+    <hr class="mb-4">
+    <br> 
+    {% if 'ego' in session and partners > 0 %}
+    <form action="{{ url_for('agents.agents', env=env) }}" method="post">
+      <button class="btn btn-primary btn-lg btn-block" type="submit">Train</button>
     </form>
-    {% block partnerparams %}
-    {% endblock %}
-  </div>
+    {% endif %}
+    
 </div>
-<br> 
-<form action="{{ url_for('agents.agents', env=env) }}" method="post">
-  <input type="submit" value="Train!">
-</form>
 {% endblock %}

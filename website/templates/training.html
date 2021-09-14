@@ -1,59 +1,59 @@
 {% extends 'base.html' %}
 
 {% block mainbody %} 
-<div class="column">
+<div class="col-md-8 order-md-1">
+    {% for message in get_flashed_messages() %}
+        <div class="flash">Error: {{ message }}</div>
+    {% endfor %}
 
-{% for message in get_flashed_messages() %}
-    <div class="flash">Error: {{ message }}</div>
-{% endfor %}
-
-{% if session['tb'] %} 
-<div class="notification">Tensorboard created! Click the bottom button to go to the Tensorboard display.</div>
-{% endif %}
-
-{% if training or done %}
-    {% if training %}
-        <div class="notification">Training in progress!!</div>
-    {% else %} 
-        <div class="notification">Done training!</div>
+    {% if session['tb'] %} 
+    <div class="notification">Tensorboard created! Click the bottom button to go to the Tensorboard display.</div>
     {% endif %}
-    {% if 'updates' in session %}
-        <h2>Current Training Data:</h2>
-        <table>
-            {% for key in session['updates'] %}
-                <tr>
-                <th>{{ key }}: </th>
-                <td>{{ session['updates'][key] }}</td>
-                </tr>
-            {% endfor %}
-        </table>
+
+    {% if training or done %}
+        {% if training %}
+            <div class="notification">Training in progress!!</div>
+        {% else %} 
+            <div class="notification">Done training!</div>
+        {% endif %}
+        {% if 'updates' in session %}
+            <h2>Current Training Data:</h2>
+            <table>
+                {% for key in session['updates'] %}
+                    <tr>
+                    <th>{{ key }}: </th>
+                    <td>{{ session['updates'][key] }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <br>
+            {% if done %}
+                <form action="{{ url_for('welcome.main') }}" method="get">
+                    <button class="btn btn-primary btn-lg btn-block" type="submit">Train New Environment</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    {% else %}
+        <h4 class="mb-3">Training not yet started.</h4>
+        <form action="{{ url_for('training.learn') }}" method="post">
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Start Training</button>
+        </form>
         <br>
-        {% if done %}
-            <form action="{{ url_for('welcome.main') }}" method="get">
-                <input type="submit" value="Train New Environment">
-            </form>
+    {% endif %}
+    {% if not done %}
+        <form method="post">
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Check for Updates</button>
+        </form>
+        <br>
+        {% if not session['tb'] %}
+        <form method="post" action="{{ url_for('training.tb') }}">
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Create Tensorboard</button>
+        </form>
+        {% else %}
+        <form method="get" action="{{ tb_url }}">
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Go To Tensorboard</button>
+        </form>
         {% endif %}
     {% endif %}
-{% else %}
-    <p>Training not yet started.</p>
-    <form action="{{ url_for('training.learn') }}" method="post">
-        <input type="submit" value="Start Training">
-    </form>
-    <br> <br>
-{% endif %}
-{% if not done %}
-    <form method="post">
-        <input type="submit" value="Check for Updates">
-    </form>
-    {% if not session['tb'] %}
-    <form method="post" action="{{ url_for('training.tb') }}">
-        <input type="submit" value="Create Tensorboard">
-    </form>
-    {% else %} 
-    <form method="get" action="{{ tb_url }}">
-        <input type="submit" value="Go To Tensorboard">
-    </form>
-    {% endif %}
-    </div>
-{% endif %}
+</div>
 {% endblock %}

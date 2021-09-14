@@ -5,3 +5,5 @@ data/
 instance/
 .*node_modules/
 logs/
+*__pycache__*
+*.ipynb_checkpoints*

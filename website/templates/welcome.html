@@ -1,24 +1,25 @@
 {% extends 'base.html' %}
 
 {% block mainbody %}
-<div class="column">
-<p>Select an environment to get started.</p>
-{% for message in get_flashed_messages() %}
-    <div class="flash">Error: {{ message }}</div>
-{% endfor %}
-<form action="{{ url_for('welcome.main') }}" method="post">
-    <label for="env">Pick one of the following:</label>
-    <select name="env" id="env">
-        {% for possible_env in envs %}
-            <option value="{{ envs[possible_env] }}">{{ possible_env }}</option>
-        {% endfor %}
-    </select>
-    <br> <br>
-    <input type="submit" value="Continue">
-</form>
-{% if selected %}
-<h2>Parameters for {% block title %}{% endblock %}</h2>
-{% block parameters %}{% endblock %}
-{% endif %}
+<div class="col-md-8 order-md-1">
+    <p>Select an environment to get started.</p>
+    {% for message in get_flashed_messages() %}
+        <div class="flash">Error: {{ message }}</div>
+    {% endfor %}
+    <form action="{{ url_for('welcome.main') }}" method="post">
+        <label for="env" class="form-label">Pick one of the following:</label>
+        <select class="form-select" name="env" id="env">
+            {% for possible_env in envs %}
+                <option value="{{ envs[possible_env] }}">{{ possible_env }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Continue</button>
+    </form>
+    {% if selected %}
+    <hr class="mb-4">
+    <h4 class="mb-3">Parameters for {% block title %}{% endblock %}</h4>
+    {% block parameters %}{% endblock %}
+    {% endif %}
 </div>
 {% endblock %}
