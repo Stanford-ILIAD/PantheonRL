@@ -41,11 +41,12 @@ def learn():
             db.commit()
             start_training(g.user['id'], session['env_data'], session['ego'], session['partners'], session['tb_log'], session['tb_name'], db)
 
-        return redirect(url_for('training.done'))
+        return redirect(url_for("training.done"))
 
 @bp.route("/done", methods=("POST", "GET"))
 @login_for_training
 def done():
+    print("entered done")
     if g.user['running'] == True:
         db = get_db()
         db.execute(

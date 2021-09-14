@@ -8,7 +8,7 @@ import datetime
 import tensorflow as tf
 from os import listdir
 from os.path import isfile, join
-from website.constants import PARTNER_LIST, ENV_TO_NAME, TB_PORT
+from website.constants import PARTNER_LIST, ENV_TO_NAME, TB_PORT, ADAP_TYPES
 import subprocess
 import signal
 
@@ -28,9 +28,11 @@ def fixedpartneroptions(id, env):
     else:
         options = []
         for ptype in PARTNER_LIST:
-            if os.path.isdir(join(mypath, ptype)):
-                currpath = join(mypath, ptype)
-                options += [(f.replace('.zip', ''), ptype) for f in listdir(currpath) if isfile(join(currpath, f))]
+            # TODO: add a better fix later
+            if not ptype in ADAP_TYPES:
+                if os.path.isdir(join(mypath, ptype)):
+                    currpath = join(mypath, ptype)
+                    options += [(f.replace('.zip', ''), ptype) for f in listdir(currpath) if isfile(join(currpath, f))]
         return None, options
 
 def common_env_configs(args, id):
@@ -70,7 +72,7 @@ def create_ego_dict(ego_type, args, env, id):
         location = savedegopath(id, ENV_TO_NAME[env], args['egoname'], ego_type)
         if not args['egoname'].isalnum():
             error = "Name to save as must be alphanumeric."
-        elif os.path.exists(location):
+        elif os.path.exists(f"{location}.zip"):
             error = "There already exists an ego agent saved with that name."
 
     ego_dict = {"type": ego_type, "seed": seed, "timesteps": int(args["timesteps"]), "location": location}
@@ -106,7 +108,7 @@ def create_partner_dict(id, partner_type, env, args):
         if "partnername" in args and args['partnername'] != "":
             if not args['partnername'].isalnum():
                 error = "Name to save as must be alphanumeric."
-            elif os.path.exists(savedpartnerpath(id, env, args['partnername'], partner_type)):
+            elif os.path.exists(f"{savedpartnerpath(id, env, args['partnername'], partner_type)}.zip"):
                 error = "There already exists a partner saved with that name."
             save = args['partnername']
         partner_dict['save'] = save
@@ -149,14 +151,11 @@ def create_partner_object(seed):
     return Partner(seed, "auto", False)
 
 def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboard_name, mydatabase):
-    print("started training")
     ego_save = ego_data.pop("location")
     env_args = create_args_object(env_data)
     env, alt_env = generate_env(env_args)
-    print(f"Environment: {env}; Partner env: {alt_env}")
 
     ego_agent = generate_ego(env, create_ego_object(ego_data, len(partners), tensorboard_log))
-    print(f'Ego: {ego_agent}')
 
     partners_to_save = []
     for partner in partners:
@@ -191,7 +190,6 @@ def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboar
     
     if ego_save is not None:
         ego_agent.save(ego_save)
-        print("saved ego agent")
 
     mydatabase.execute(
             'UPDATE user SET running = ?'
