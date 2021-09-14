@@ -1,6 +1,7 @@
 # taken from the Flask tutorial
 
 import sqlite3
+import shutil, os
 
 import click
 from flask import current_app, g
@@ -28,11 +29,20 @@ def init_db():
     with current_app.open_resource('schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
 
+def clear_user_data():
+    # clears all user-created files
+    mydir = "./data"
+    try:
+        shutil.rmtree(mydir)
+    except OSError as e:
+        print ("Error: %s - %s." % (e.filename, e.strerror))
+
 @click.command('init-db')
 @with_appcontext
 def init_db_command():
     """Clear the existing data and create new tables."""
     init_db()
+    clear_user_data()
     click.echo('Initialized the database.')
 
 def init_app(app):
