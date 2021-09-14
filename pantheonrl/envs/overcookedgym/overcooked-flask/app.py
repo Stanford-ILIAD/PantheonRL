@@ -11,8 +11,8 @@ from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld, OvercookedS
 from overcooked_ai_py.planning.planners import MediumLevelPlanner, NO_COUNTERS_PARAMS
 from stable_baselines3 import PPO
 
-from multiagentworld.envs.overcookedgym.overcooked_utils import NAME_TRANSLATION
-from multiagentworld.common.trajsaver import SimultaneousTransitions
+from pantheonrl.envs.overcookedgym.overcooked_utils import NAME_TRANSLATION
+from pantheonrl.common.trajsaver import SimultaneousTransitions
 
 app = Flask(__name__)
 
@@ -57,7 +57,7 @@ def convert_traj_to_simultaneous_transitions(traj_dict, layout_name):
         ego_obs.append( [ process_state(state, layout_name)[0] for state in state_list ] )
         alt_obs.append( [ process_state(state, layout_name)[1] for state in state_list ] )
 
-        # check multiagentworld/common/wrappers.py for flag values
+        # check pantheonrl/common/wrappers.py for flag values
         flag = [0 for state in state_list]
         flag[-1] = 1
         flags.append( flag )

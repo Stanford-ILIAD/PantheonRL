@@ -1,9 +1,9 @@
-# MultiAgentWorld
+# PantheonRL
 
-MultiAgentWorld is a package for training and testing multi-agent reinforcement learning environments. The goal of MultiAgentWorld is to provide a modular and extensible framework for training agent policies, fine-tuning agent policies, ad-hoc pairing of agents, and more. MultiAgentWorld also provides a web user interface suitable for lightweight experimentation and prototyping.
+PantheonRL is a package for training and testing multi-agent reinforcement learning environments. The goal of PantheonRL is to provide a modular and extensible framework for training agent policies, fine-tuning agent policies, ad-hoc pairing of agents, and more. PantheonRL also provides a web user interface suitable for lightweight experimentation and prototyping.
 
 
-MultiAgentWorld is built on top of StableBaselines3 (SB3), allowing direct access to many of SB3's standard RL training algorithms such as PPO. MultiAgentWorld currently follows a decentralized training paradigm -- each agent is equipped with its own replay buffer and update algorithm. The agents objects are designed to be easily manipulable. They can be saved, loaded and plugged into different training procedures such as self-play, ad-hoc / cross-play, round-robin training, or finetuning.
+PantheonRL is built on top of StableBaselines3 (SB3), allowing direct access to many of SB3's standard RL training algorithms such as PPO. PantheonRL currently follows a decentralized training paradigm -- each agent is equipped with its own replay buffer and update algorithm. The agents objects are designed to be easily manipulable. They can be saved, loaded and plugged into different training procedures such as self-play, ad-hoc / cross-play, round-robin training, or finetuning.
 
 
 ## Installation
@@ -45,7 +45,7 @@ python3 tester.py ...
 
 ## Features
 
-| **General Features**        | **MultiAgentWorld** |
+| **General Features**        | **PantheonRL** |
 | --------------------------- | ----------------------|
 | Documentation               | :heavy_check_mark: |
 | Web user interface          | :heavy_check_mark: |
@@ -53,7 +53,7 @@ python3 tester.py ...
 
 
 
-| **Environment Features**    | **MultiAgentWorld** |
+| **Environment Features**    | **PantheonRL** |
 | --------------------------- | ----------------------|
 | Frame stacking (recurrence) | :heavy_check_mark: |
 | Simultaneous multiagent envs| :heavy_check_mark: |
@@ -63,7 +63,7 @@ python3 tester.py ...
 | Custom environments         | :heavy_check_mark: |
 
 
-| **Training Features**           | **MultiAgentWorld** |
+| **Training Features**           | **PantheonRL** |
 | ------------------------------- | ----------------------|
 | Self-play                       | :heavy_check_mark: |
 | Ad-hoc / cross-play             | :heavy_check_mark: |

@@ -1,8 +1,8 @@
 import gym
 import numpy as np
 
-from multiagentworld.common.agents import Agent
-from multiagentworld.common.multiagentenv import SimultaneousEnv
+from pantheonrl.common.agents import Agent
+from pantheonrl.common.multiagentenv import SimultaneousEnv
 
 ACTION_NAMES = ['ROCK', 'PAPER', 'SCISSORS']
 ACTION_SPACE = gym.spaces.Discrete(3)

@@ -1,8 +1,8 @@
 import gym
 import numpy as np
 
-from multiagentworld.common.agents import Agent
-from multiagentworld.common.multiagentenv import TurnBasedEnv
+from pantheonrl.common.agents import Agent
+from pantheonrl.common.multiagentenv import TurnBasedEnv
 
 N = 6  # Num sides per dice
 M = 6  # Num dice per player

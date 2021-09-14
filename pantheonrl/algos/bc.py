@@ -19,9 +19,9 @@ from torch.optim.adam import Adam
 import tqdm.autonotebook as tqdm
 from stable_baselines3.common import policies, utils
 
-from multiagentworld.common.trajsaver import (TransitionsMinimal,
+from pantheonrl.common.trajsaver import (TransitionsMinimal,
                                               transitions_collate_fn)
-from multiagentworld.common.util import FeedForward32Policy
+from pantheonrl.common.util import FeedForward32Policy
 
 log = utils.configure_logger(verbose=0)  # change to 1 for debugging
 

@@ -2,9 +2,9 @@
 import gym
 import numpy as np
 
-from multiagentworld.common.agents import Agent
-from multiagentworld.common.multiagentenv import TurnBasedEnv
-from multiagentworld.envs.blockworldgym.gridutils import HORIZONTAL, VERTICAL, generate_random_world, gravity, place, matches
+from pantheonrl.common.agents import Agent
+from pantheonrl.common.multiagentenv import TurnBasedEnv
+from pantheonrl.envs.blockworldgym.gridutils import HORIZONTAL, VERTICAL, generate_random_world, gravity, place, matches
 
 GRIDLEN = 7  # block world in a 7 x 7 grid
 NUM_BLOCKS = 5  # the number of blocks will be variable in the non-simplified version,

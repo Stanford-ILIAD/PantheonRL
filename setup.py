@@ -4,11 +4,11 @@ from setuptools import setup, find_packages
 import os
 
 os.system(
-    'pip install -e multiagentworld/envs/overcookedgym/human_aware_rl/overcooked_ai')
+    'pip install -e pantheonrl/envs/overcookedgym/human_aware_rl/overcooked_ai')
 
-setup(name='multiagentworld',
+setup(name='pantheonrl',
       version='0.0.1',
-      description='MultiAgentWorld',
+      description='PantheonRL',
       author='',
       author_email='',
       packages=find_packages(),

@@ -1,9 +1,9 @@
 import argparse
 import json
 
-from multiagentworld.algos.bc import BC
-from multiagentworld.common import trajsaver
-from multiagentworld.common.multiagentenv import SimultaneousEnv
+from pantheonrl.algos.bc import BC
+from pantheonrl.common import trajsaver
+from pantheonrl.common.multiagentenv import SimultaneousEnv
 
 from trainer import (generate_env, ENV_LIST, LAYOUT_LIST)
 

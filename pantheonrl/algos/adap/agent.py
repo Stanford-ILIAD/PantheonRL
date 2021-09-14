@@ -3,12 +3,12 @@ from typing import Optional
 import numpy as np
 import torch as th
 
-from multiagentworld.common.util import (action_from_policy, clip_actions,
+from pantheonrl.common.util import (action_from_policy, clip_actions,
                                          resample_noise)
 
 from stable_baselines3.common.utils import configure_logger
 
-from multiagentworld.common.agents import Agent
+from pantheonrl.common.agents import Agent
 from .adap_learn import ADAP
 from .util import SAMPLERS
 from .policies import AdapPolicy

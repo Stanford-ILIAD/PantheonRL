@@ -5,7 +5,7 @@ from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
 from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
 from overcooked_ai_py.planning.planners import MediumLevelPlanner, NO_COUNTERS_PARAMS
 
-from multiagentworld.common.multiagentenv import SimultaneousEnv
+from pantheonrl.common.multiagentenv import SimultaneousEnv
 
 class OvercookedMultiEnv(SimultaneousEnv):
     def __init__(self, layout_name, ego_agent_idx=0, baselines=False):

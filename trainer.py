@@ -8,21 +8,21 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
 
-from multiagentworld.common.wrappers import frame_wrap, recorder_wrap
-from multiagentworld.common.agents import OnPolicyAgent, StaticPolicyAgent
+from pantheonrl.common.wrappers import frame_wrap, recorder_wrap
+from pantheonrl.common.agents import OnPolicyAgent, StaticPolicyAgent
 
-from multiagentworld.algos.adap.adap_learn import ADAP
-from multiagentworld.algos.adap.policies import AdapPolicyMult, AdapPolicy
-from multiagentworld.algos.adap.agent import AdapAgent
+from pantheonrl.algos.adap.adap_learn import ADAP
+from pantheonrl.algos.adap.policies import AdapPolicyMult, AdapPolicy
+from pantheonrl.algos.adap.agent import AdapAgent
 
-from multiagentworld.algos.modular.learn import ModularAlgorithm
-from multiagentworld.algos.modular.policies import ModularPolicy
+from pantheonrl.algos.modular.learn import ModularAlgorithm
+from pantheonrl.algos.modular.policies import ModularPolicy
 
-from multiagentworld.algos.bc import BCShell, reconstruct_policy
+from pantheonrl.algos.bc import BCShell, reconstruct_policy
 
-from multiagentworld.envs.rpsgym.rps import RPSEnv, RPSWeightedAgent
-from multiagentworld.envs.blockworldgym import simpleblockworld, blockworld
-from multiagentworld.envs.liargym.liar import LiarEnv, LiarDefaultAgent
+from pantheonrl.envs.rpsgym.rps import RPSEnv, RPSWeightedAgent
+from pantheonrl.envs.blockworldgym import simpleblockworld, blockworld
+from pantheonrl.envs.liargym.liar import LiarEnv, LiarDefaultAgent
 
 from preset import preset
 
