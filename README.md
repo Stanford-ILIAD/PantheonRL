@@ -9,28 +9,20 @@ MultiAgentWorld is built on top of StableBaselines3 (SB3), allowing direct acces
 ## Installation
 ```
 pip install -e .
-
-cd stable-baselines3
-pip install -e .
-cd ../
-
-cd multiagentworld/envs/overcookedgym/human_aware_rl/overcooked_ai
-pip install -e .
-cd ../../../../../
 ```
 
 
 ## Web User Interface
 
-Inititalize the database
+Set environment variables and (re)inititalize the database
 ```
+export FLASK_APP=website
+export FLASK_ENV=development
 flask init-db
 ```
 
 Start the web user interface
 ```
-export FLASK_APP=website
-export FLASK_ENV=development
 flask run --host=0.0.0.0
 ```
 
