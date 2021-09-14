@@ -86,7 +86,7 @@ python3 tester.py ...
 Adapted from the block construction task from https://github.com/cogtoolslab/compositional-abstractions
 
 <a id="2">[2]</a>
-Adapted from the Human-Aware_Rl / Overcooked AI package from https://github.com/HumanCompatibleAI/human_aware_rl
+Adapted from the Human_Aware_Rl / Overcooked AI package from https://github.com/HumanCompatibleAI/human_aware_rl
 
 
 ## Acknowledgments

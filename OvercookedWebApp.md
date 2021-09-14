@@ -1,4 +1,5 @@
-# Overcooked Web App
+# Overcooked Web App 
+Adapted from the Human_Aware_Rl / Overcooked AI package from https://github.com/HumanCompatibleAI/human_aware_rl
 
 #### Train two agents.
     python3 trainer.py OvercookedMultiEnv-v0 PPO PPO --env-config '{"layout_name":"simple"}' --seed 10 --preset 1

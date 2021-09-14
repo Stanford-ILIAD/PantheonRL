@@ -1,3 +1,4 @@
+import os
 import io
 import json
 import copy
@@ -118,7 +119,9 @@ def updatemodel():
 
         if ARGS.trajs_savepath:
             # Save trajectory (save this to keep reward information)
-            with open("%s.json" % (ARGS.trajs_savepath), 'w') as f:
+            filename = "%s.json" % (ARGS.trajs_savepath)
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+            with open(filename, 'w') as f:
                 json.dump(traj_dict, f)
 
             # Save transitions minimal (only state/action/done, no reward)
