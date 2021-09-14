@@ -5,3 +5,7 @@ data/
 instance/
 .*node_modules/
 logs/
+trajs/
+models/
+.idea/
+.mypy_cache/

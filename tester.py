@@ -1,26 +1,14 @@
 import argparse
 import json
+from time import sleep
 
 import numpy as np
 
-from trainer import generate_env, gen_fixed, gen_default
+from trainer import (generate_env, gen_fixed, gen_default, EnvException,
+                     ENV_LIST, ADAP_TYPES, LAYOUT_LIST)
 
-ENV_LIST = ['RPS-v0', 'BlockEnv-v0', 'BlockEnv-v1', 'LiarsDice-v0',
-            'OvercookedMultiEnv-v0']
-
-ADAP_TYPES = ['ADAP', 'ADAP_MULT']
-EGO_LIST = ['PPO', 'ModularAlgorithm'] + ADAP_TYPES
-PARTNER_LIST = ['PPO', 'DEFAULT'] + ADAP_TYPES
-
-LAYOUT_LIST = ['corridor', 'five_by_five', 'mdp_test', 'multiplayer_schelling',
-               'random0', 'random1', 'random2', 'random3', 'scenario1_s',
-               'scenario2', 'scenario2_s', 'scenario3', 'scenario4',
-               'schelling', 'schelling_s', 'simple', 'simple_single',
-               'simple_tomato', 'small_corridor', 'unident', 'unident_s']
-
-
-class EnvException(Exception):
-    """ Raise when parameters do not align with environment """
+EGO_LIST = ['PPO', 'ModularAlgorithm', 'BC'] + ADAP_TYPES
+PARTNER_LIST = ['PPO', 'DEFAULT', 'BC'] + ADAP_TYPES
 
 
 def input_check(args):
@@ -50,16 +38,23 @@ def generate_agent(env, policy_type, config, location):
     return gen_fixed(config, policy_type, location)
 
 
-def run_test(ego, env, num_episodes):
+def run_test(ego, env, num_episodes, render=False):
     rewards = []
     for game in range(num_episodes):
         obs = env.reset()
         done = False
         reward = 0
+        if render:
+            env.render()
         while not done:
             action = ego.get_action(obs, False)
             obs, newreward, done, _ = env.step(action)
             reward += newreward
+
+            if render:
+                env.render()
+                sleep(1/60)
+
         rewards.append(reward)
 
     env.close()
@@ -174,10 +169,14 @@ if __name__ == '__main__':
     parser.add_argument('--record', '-r',
                         help='Saves joint trajectory into file specified')
 
+    parser.add_argument('--render',
+                        action='store_true',
+                        help='Render the environment as it is being run')
+
     parser.add_argument('--ego-load',
-                        help='File to save the ego agent into')
+                        help='File to load the ego agent from')
     parser.add_argument('--alt-load',
-                        help='File to save the partner agent into')
+                        help='File to load the partner agent from')
 
     args = parser.parse_args()
 
@@ -192,7 +191,7 @@ if __name__ == '__main__':
     env.add_partner_agent(alt)
     print(f'Alt: {alt}')
 
-    run_test(ego, env, args.total_episodes)
+    run_test(ego, env, args.total_episodes, args.render)
 
     if args.record is not None:
         env.get_transitions().write_transition(args.record)
