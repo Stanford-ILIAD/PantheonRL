@@ -35,7 +35,7 @@ def clear_user_data():
     try:
         shutil.rmtree(mydir)
     except OSError as e:
-        print ("Error: %s - %s." % (e.filename, e.strerror))
+        print ("Nothing to erase: %s - %s." % (e.filename, e.strerror))
 
 @click.command('init-db')
 @with_appcontext

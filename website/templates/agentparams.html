@@ -39,8 +39,8 @@
         <label for="partnername" class="form-label">Save as: (if left blank, the trained ego policy will not be saved)</label>
         <input class="form-control" name="partnername" id="partnername" pattern="[a-zA-Z0-9]+">
     {% elif session['partnertype'] == 'FIXED' %} 
-        <label for="fixedtype">Select a fixed agent: </label>
-        <select name="fixedtype" id="fixedtype">
+        <label for="fixedtype" class="form-label">Select a fixed agent: </label>
+        <select class="form-select" name="fixedtype" id="fixedtype">
             {% for pname, ptype in fixed_options %}
               <option value="{{ ptype }}/{{ pname }}.zip">{{ pname }} ({{ ptype }})</option>
             {% endfor %}

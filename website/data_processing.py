@@ -1,6 +1,7 @@
 # functions for saving data, changing formats, etc
 # will change as i change the data formats being used
 import numpy as np
+import copy
 import os
 from collections import namedtuple
 from trainer import generate_env, generate_ego, gen_partner, gen_fixed
@@ -171,7 +172,7 @@ def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboar
             current_partner = gen_fixed({}, partner.pop('ptype'), partner.pop('location'))
         else:
             p_args = create_partner_object(seed)
-            current_partner = gen_partner(ptype, partner, alt_env, ego_agent, p_args)
+            current_partner = gen_partner(ptype, copy.deepcopy(partner), alt_env, ego_agent, p_args)
         env.add_partner_agent(current_partner)
         if save is not None:
             partners_to_save.append((current_partner, save, ptype))
