@@ -44,6 +44,7 @@ class BlockEnv(TurnBasedEnv):
         self.gridworld = generate_random_world(GRIDLEN, NUM_BLOCKS, NUM_COLORS)
         self.constructor_obs = np.zeros((GRIDLEN, GRIDLEN))
         self.last_token = 0
+        self.viewer = None
         return self.get_obs(egofirst)
 
     def get_obs(self, isego):

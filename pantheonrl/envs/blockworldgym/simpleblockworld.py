@@ -82,6 +82,7 @@ class SimpleBlockEnv(TurnBasedEnv):
         self.gridworld = generate_grid_world()
         self.constructor_obs = [[block[0], block[1], block[2], 0] for block in self.gridworld]
         self.last_token = 0
+        self.viewer = None
         return self.get_obs(egofirst)
     
     def get_obs(self, isego):
