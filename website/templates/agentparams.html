@@ -36,7 +36,7 @@
         <label for="seed" class="form-label">Seed for randomness (optional): </label>
         <input class="form-control" type="number" name="seed" id="seed" step="1">
         <br>
-        <label for="partnername" class="form-label">Save as: (if left blank, the trained ego policy will not be saved)</label>
+        <label for="partnername" class="form-label">Save as: (if left blank, the trained partner policy will not be saved)</label>
         <input class="form-control" name="partnername" id="partnername" pattern="[a-zA-Z0-9]+">
     {% elif session['partnertype'] == 'FIXED' %} 
         <label for="fixedtype" class="form-label">Select a fixed agent: </label>

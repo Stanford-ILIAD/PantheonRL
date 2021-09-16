@@ -17,7 +17,7 @@ LAYOUT_LIST = ['corridor', 'five_by_five', 'mdp_test', 'multiplayer_schelling',
                'simple_tomato', 'small_corridor', 'unident', 'unident_s']
 
 # for now, tb port is hardcoded
-TB_PORT = "6008"
+TB_PORT = "5001"
 
 def generate_url(host):
     return f"http://{host}:{TB_PORT}/"
