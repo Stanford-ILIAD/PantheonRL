@@ -29,13 +29,13 @@ flask run --host=0.0.0.0
 ```
 
 <p align="center">
-  <img src="./images/agent_selection_screen.png" width="40%">
+  <img src="./images/agent_selection_screen.png" width="90%">
   <br>
   <i>Agent selection screen. Users can customize the ego and partner agents.</i>
 </p>
 
 <p align="center">
-  <img src="./images/training_screen.png" width="40%">
+  <img src="./images/training_screen.png" width="90%">
   <br>
   <i>Training screen. Users can view basic information, or spawn a Tensorboard tab for full monitoring.</i>
 </p>
