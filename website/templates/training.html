@@ -54,6 +54,10 @@
             <button class="btn btn-primary btn-lg btn-block" type="submit">Go To Tensorboard</button>
         </form>
         {% endif %}
+        <br>
+        <form method="get" action="{{ url_for('training.done') }}">
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Quit Training</button>
+        </form>
     {% endif %}
 </div>
 {% endblock %}

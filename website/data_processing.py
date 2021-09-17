@@ -229,9 +229,17 @@ def gen_tensorboard(tb_log, tb_name):
     mypath = f"{tb_log}/{tb_name}_1"
     if not os.path.isdir(mypath):
         return None, "Please start training before generating the tensorboard."
-    p = subprocess.Popen(["tensorboard", "--logdir", mypath, "--bind_all", "--port", TB_PORT])
-    return p.pid, None
+    p = subprocess.Popen(["tensorboard", "--logdir", mypath, "--bind_all", "--port", TB_PORT], stderr=subprocess.PIPE)
+    try:
+        outs, errs = p.communicate(timeout=10)
+    except subprocess.TimeoutExpired:
+        print("timeout expired")
+        return p.pid, None
+    return None, f"Tensorboard could not bind to port {TB_PORT} as it was already in use. Tensorboard not created."
 
 def stop_tensorboard(processid):
-    os.kill(processid, signal.SIGINT)
+    try:
+        os.kill(processid, signal.SIGINT)
+    except OSError:
+        pass
         

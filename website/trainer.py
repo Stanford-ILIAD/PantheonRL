@@ -46,7 +46,6 @@ def learn():
 @bp.route("/done", methods=("POST", "GET"))
 @login_for_training
 def done():
-    print("entered done")
     if g.user['running'] == True:
         db = get_db()
         db.execute(
