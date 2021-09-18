@@ -8,6 +8,12 @@ PantheonRL is built on top of StableBaselines3 (SB3), allowing direct access to 
 
 ## Installation
 ```
+mkdir PantheonRL
+cd PantheonRL
+git init
+git remote add origin https://github.com/Stanford-ILIAD/PantheonRL.git
+git pull origin master
+git submodule update --init --recursive
 pip install -e .
 ```
 
