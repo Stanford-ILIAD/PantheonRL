@@ -313,7 +313,7 @@ if __name__ == '__main__':
                         default='auto',
                         help='Device to run pytorch on')
     parser.add_argument('--seed', '-s',
-                        default=0,
+                        default=None,
                         type=int,
                         help='Seed for randomness')
 

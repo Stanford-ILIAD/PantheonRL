@@ -59,7 +59,7 @@ def run_test(ego, env, num_episodes, render=False):
 
     env.close()
     print(f"Average Reward: {sum(rewards)/num_episodes}")
-    print(f"Standard Deviance: {np.std(rewards)}")
+    print(f"Standard Deviation: {np.std(rewards)}")
 
 
 if __name__ == '__main__':

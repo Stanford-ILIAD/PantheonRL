@@ -44,17 +44,17 @@ class OvercookedMultiEnv(SimultaneousEnv):
     def _setup_observation_space(self):
         dummy_state = self.mdp.get_standard_start_state()
         obs_shape = self.featurize_fn(dummy_state)[0].shape
-        high = np.ones(obs_shape) * max(self.mdp.soup_cooking_time, self.mdp.num_items_for_soup, 5)
+        high = np.ones(obs_shape, dtype=np.float32) * max(self.mdp.soup_cooking_time, self.mdp.num_items_for_soup, 5)
 
         return gym.spaces.Box(high * 0, high, dtype=np.float32)
 
     def multi_step(self, ego_action, alt_action):
         """
-        action: 
+        action:
             (agent with index self.agent_idx action, other agent action)
             is a tuple with the joint action of the primary and secondary agents in index format
             encoded as an int
-        
+
         returns:
             observation: formatted to be standard input for self.agent_idx's policy
         """
@@ -65,7 +65,7 @@ class OvercookedMultiEnv(SimultaneousEnv):
             joint_action = (alt_action, ego_action)
 
         next_state, reward, done, info = self.base_env.step(joint_action)
-        
+
         # reward shaping
         rew_shape = info['shaped_r']
         reward = reward + rew_shape
@@ -82,7 +82,7 @@ class OvercookedMultiEnv(SimultaneousEnv):
     def multi_reset(self):
         """
         When training on individual maps, we want to randomize which agent is assigned to which
-        starting location, in order to make sure that the agents are trained to be able to 
+        starting location, in order to make sure that the agents are trained to be able to
         complete the task starting at either of the hardcoded positions.
 
         NOTE: a nicer way to do this would be to just randomize starting positions, and not
