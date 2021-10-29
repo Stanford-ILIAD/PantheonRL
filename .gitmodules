@@ -1,3 +1,0 @@
-[submodule "pantheonrl/envs/overcookedgym/human_aware_rl"]
-	path = pantheonrl/envs/overcookedgym/human_aware_rl
-	url = https://github.com/HumanCompatibleAI/human_aware_rl.git

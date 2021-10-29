@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
-import os
-
-os.system(
-    'pip install -e pantheonrl/envs/overcookedgym/human_aware_rl/overcooked_ai')
 
 setup(name='pantheonrl',
       version='0.0.1',
@@ -19,6 +15,7 @@ setup(name='pantheonrl',
         'torch',
         'tensorboard',
         'stable-baselines3 @ https://github.com/DLR-RM/stable-baselines3/archive/2fa06ae8d2.zip#egg=stable-baselines3-1.2.0a0',
+        'overcooked-ai @ https://github.com/HumanCompatibleAI/overcooked_ai/archive/bc2240f.zip#egg=overcooked-ai-1.0.0',
         'scipy'
       ],
       )

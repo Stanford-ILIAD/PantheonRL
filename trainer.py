@@ -33,11 +33,16 @@ ADAP_TYPES = ['ADAP', 'ADAP_MULT']
 EGO_LIST = ['PPO', 'ModularAlgorithm', 'LOAD'] + ADAP_TYPES
 PARTNER_LIST = ['PPO', 'DEFAULT', 'FIXED'] + ADAP_TYPES
 
-LAYOUT_LIST = ['corridor', 'five_by_five', 'mdp_test', 'multiplayer_schelling',
-               'random0', 'random1', 'random2', 'random3', 'scenario1_s',
-               'scenario2', 'scenario2_s', 'scenario3', 'scenario4',
-               'schelling', 'schelling_s', 'simple', 'simple_single',
-               'simple_tomato', 'small_corridor', 'unident', 'unident_s']
+LAYOUT_LIST = [
+    'asymmetric_advantages', 'bottleneck', 'centre_objects',
+    'centre_pots', 'coordination_ring', 'corridor', 'corridor_original',
+    'counter_circuit_o_1order', 'cramped_room', 'cramped_room_o_1order',
+    'cramped_room_o_3orders', 'cramped_room_single', 'five_by_five',
+    'forced_coordination', 'large_room', 'long_cook_time',
+    'multiplayer_schelling', 'pipeline', 'scenario1_s', 'scenario2',
+    'scenario2_s', 'scenario3', 'scenario4', 'schelling', 'schelling_s',
+    'simple_o', 'small_corridor', 'tutorial_0', 'tutorial_2', 'unident',
+    ]
 
 
 class EnvException(Exception):
