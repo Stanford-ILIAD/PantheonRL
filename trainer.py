@@ -201,13 +201,19 @@ def gen_partner(type, config, altenv, ego, args):
     elif type == 'DEFAULT':
         return gen_default(config, altenv)
 
+    agentarg = {
+        'tensorboard_log': args.tensorboard_log,
+        'tb_log_name': args.tensorboard_name + '_alt_' + str(args.partner_num)
+    }
+
     config['env'] = altenv
     config['device'] = args.device
     if args.seed is not None:
         config['seed'] = args.seed
+    config['verbose'] = args.verbose_partner
 
     if type == 'PPO':
-        return OnPolicyAgent(PPO(policy='MlpPolicy', **config))
+        return OnPolicyAgent(PPO(policy='MlpPolicy', **config), **agentarg)
 
     if type == 'ADAP':
         alt = ADAP(policy=AdapPolicy, **config)
@@ -216,12 +222,14 @@ def gen_partner(type, config, altenv, ego, args):
     else:
         raise EnvException("Not a valid policy")
 
-    return AdapAgent(alt, ego.policy if args.share_latent else None)
+    shared = ego.policy if args.share_latent else None
+    return AdapAgent(alt, latent_syncer=shared, **agentarg)
 
 
 def generate_partners(altenv, env, ego, args):
     partners = []
     for i in range(len(args.alt)):
+        args.partner_num = i
         v = gen_partner(args.alt[i],
                         args.alt_config[i],
                         altenv,
@@ -361,6 +369,10 @@ if __name__ == '__main__':
 
     parser.add_argument('--tensorboard-name',
                         help='Name for ego in tensorboard')
+
+    parser.add_argument('--verbose-partner',
+                        action='store_true',
+                        help='True when partners should log to output')
 
     parser.add_argument('--preset', type=int, help='Use preset args')
 
