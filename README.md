@@ -5,6 +5,24 @@ PantheonRL is a package for training and testing multi-agent reinforcement learn
 
 PantheonRL is built on top of StableBaselines3 (SB3), allowing direct access to many of SB3's standard RL training algorithms such as PPO. PantheonRL currently follows a decentralized training paradigm -- each agent is equipped with its own replay buffer and update algorithm. The agents objects are designed to be easily manipulable. They can be saved, loaded and plugged into different training procedures such as self-play, ad-hoc / cross-play, round-robin training, or finetuning.
 
+This package will be presented as a demo at the AAAI-22 Demonstrations Program.
+
+[Demo Paper](https://iliad.stanford.edu/pdfs/publications/sarkar2022pantheonrl.pdf)
+
+[Demo Video](https://youtu.be/3-Pf3zh_Hpo)
+
+```
+"PantheonRL: A MARL Library for Dynamic Training Interactions"
+Bidipta Sarkar*, Aditi Talati*, Andy Shih*, Dorsa Sadigh
+In Proceedings of the 36th AAAI Conference on Artificial Intelligence (Demo Track), 2022
+
+@inproceedings{sarkar2021pantheonRL,
+  title={PantheonRL: A MARL Library for Dynamic Training Interactions},
+  author={Sarkar, Bidipta and Talati, Aditi and Shih, Andy and Sadigh Dorsa},
+  booktitle = {Proceedings of the 36th AAAI Conference on Artificial Intelligence (Demo Track)},
+  year={2022}
+}
+```
 
 ## Installation
 ```
