@@ -115,9 +115,11 @@ class AdapAgent(OnPolicyAgent):
                               self.model.policy.get_context()),
                              axis=1)
         if record:
+            obs_shape = self.model.policy.observation_space.shape
+            act_shape = self.model.policy.action_space.shape
             buf.add(
-                np.reshape(obs, (1, -1)),
-                np.reshape(actions, (1, -1)),
+                np.reshape(obs, (1,) + obs_shape),
+                np.reshape(actions, (1,) + act_shape),
                 [0],
                 self._last_episode_starts,
                 values,

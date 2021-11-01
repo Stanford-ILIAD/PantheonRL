@@ -25,8 +25,3 @@ register(
     id='BlockEnv-v1',
     entry_point='pantheonrl.envs.blockworldgym.blockworld:BlockEnv'
 )
-
-register(
-    id='PartnerBlockEnv-v0',
-    entry_point='pantheonrl.envs.blockworldgym.simpleblockworld:PartnerEnv'
-)

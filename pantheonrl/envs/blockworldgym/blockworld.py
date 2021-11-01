@@ -3,7 +3,7 @@ import gym
 import numpy as np
 
 from pantheonrl.common.agents import Agent
-from pantheonrl.common.multiagentenv import TurnBasedEnv
+from pantheonrl.common.multiagentenv import TurnBasedEnv, DummyEnv
 from pantheonrl.envs.blockworldgym.gridutils import HORIZONTAL, VERTICAL, generate_random_world, gravity, place, matches
 
 GRIDLEN = 7  # block world in a 7 x 7 grid
@@ -17,8 +17,7 @@ RED = 2  # useful for if we add graphics later
 
 NUM_TOKENS = 30  # number of tokens the planner has
 
-PLANNER_ACTION_SPACE = gym.spaces.Discrete(
-    NUM_TOKENS)  # tokens that represent words
+PLANNER_ACTION_SPACE = gym.spaces.Discrete(NUM_TOKENS)  # tokens that represent words
 # it can drop any block from the top, set h/v and color
 CONSTRUCTOR_ACTION_SPACE = gym.spaces.MultiDiscrete([GRIDLEN, 2, NUM_COLORS])
 # plus an extra option to do nothing
@@ -29,6 +28,8 @@ CONSTRUCTOR_OBS_SPACE = gym.spaces.MultiDiscrete([NUM_TOKENS]+gridformat)
 # can see the planned grid and the "real world" grid
 PLANNER_OBS_SPACE = gym.spaces.MultiDiscrete(gridformat + gridformat)
 
+PartnerEnv = DummyEnv(CONSTRUCTOR_OBS_SPACE, CONSTRUCTOR_ACTION_SPACE)
+
 
 class BlockEnv(TurnBasedEnv):
     def __init__(self):
@@ -37,8 +38,11 @@ class BlockEnv(TurnBasedEnv):
         self.partner_observation_space = CONSTRUCTOR_OBS_SPACE
         self.action_space = PLANNER_ACTION_SPACE
         self.partner_action_space = CONSTRUCTOR_ACTION_SPACE
-        self.partner_env = PartnerEnv()
+        self.partner_env = PartnerEnv
         self.viewer = None
+
+    def getDummyEnv(self, player_ind: int):
+        return PartnerEnv if player_ind else self
 
     def multi_reset(self, egofirst):
         self.gridworld = generate_random_world(GRIDLEN, NUM_BLOCKS, NUM_COLORS)
@@ -80,7 +84,7 @@ class BlockEnv(TurnBasedEnv):
 
     def render(self, mode="human"):
         from gym.envs.classic_control import rendering
-        
+
         screen_width = 700
         scale = screen_width/GRIDLEN
         if self.viewer is None:
@@ -113,13 +117,6 @@ class BlockEnv(TurnBasedEnv):
                     elif self.constructor_obs[i][j] == BLUE:
                         newblock.set_color(0.02, 0.02, 0.98)
         return self.viewer.render(return_rgb_array=mode == "rgb_array")
-
-
-class PartnerEnv(gym.Env):
-    def __init__(self):
-        super().__init__()
-        self.observation_space = CONSTRUCTOR_OBS_SPACE
-        self.action_space = CONSTRUCTOR_ACTION_SPACE
 
 
 class DefaultConstructorAgent(Agent):

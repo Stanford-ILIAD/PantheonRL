@@ -161,9 +161,15 @@ class OnPolicyAgent(Agent):
 
         # modify the rollout buffer with newest info
         if record:
+            lastinfo = self.model.ep_info_buffer.pop()
+            lastinfo["l"] += 1
+            self.model.ep_info_buffer.append(lastinfo)
+
+            obs_shape = self.model.policy.observation_space.shape
+            act_shape = self.model.policy.action_space.shape
             buf.add(
-                np.reshape(obs, (1, -1)),
-                np.reshape(actions, (1, -1)),
+                np.reshape(obs, (1,) + obs_shape),
+                np.reshape(actions, (1,) + act_shape),
                 [0],
                 self._last_episode_starts,
                 values,
@@ -190,8 +196,6 @@ class OnPolicyAgent(Agent):
         buf.rewards[buf.pos - 1][0] += reward
         lastinfo = self.model.ep_info_buffer.pop()
         lastinfo["r"] += reward
-        if not done:
-            lastinfo["l"] += 1
         self.model.ep_info_buffer.append(lastinfo)
         if done:
             self.model.ep_info_buffer.append({"r": 0, "l": 0})

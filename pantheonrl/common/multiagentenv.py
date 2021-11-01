@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Dict, Optional
+from dataclasses import dataclass
 
 import gym
 import numpy as np
@@ -9,6 +10,15 @@ from .agents import Agent
 
 class PlayerException(Exception):
     """ Raise when players in the environment are incorrectly set """
+
+
+@dataclass
+class DummyEnv(gym.Env):
+    """
+    Environment representing a partner agent's observation and action space.
+    """
+    observation_space: gym.spaces.Space
+    action_space: gym.spaces.Space
 
 
 class MultiAgentEnv(gym.Env, ABC):
@@ -42,10 +52,20 @@ class MultiAgentEnv(gym.Env, ABC):
 
         self._players: Tuple[int, ...] = tuple()
         self._obs: Tuple[Optional[np.ndarray], ...] = tuple()
+        self._old_ego_obs: Optional[np.ndarray] = None
 
         self.should_update = [False] * (self.n_players - 1)
         self.total_rews = [0] * (self.n_players)
         self.ego_moved = False
+
+    def getDummyEnv(self, player_num: int):
+        """
+        Returns a dummy environment with just an observation and action
+        space that a partner agent can use to construct their policy network.
+
+        :param player_num: the partner number to query
+        """
+        return self
 
     def _get_partner_num(self, player_num: int) -> int:
         if player_num == self.ego_ind:
@@ -57,9 +77,12 @@ class MultiAgentEnv(gym.Env, ABC):
 
     def add_partner_agent(self, agent: Agent, player_num: int = 1) -> None:
         """
-        Add agent to the list of potential partner agents
+        Add agent to the list of potential partner agents. If there are
+        multiple agents that can be a specific player number, the environment
+        randomly samples from them at the start of every episode.
 
         :param agent: Agent to add
+        :param player_num: the player number that this new agent can be
         """
         self.partners[self._get_partner_num(player_num)].append(agent)
 
@@ -136,13 +159,13 @@ class MultiAgentEnv(gym.Env, ABC):
             self.ego_moved = True
 
             if done:
-                return None, ego_rew, done, info
+                return self._old_ego_obs, ego_rew, done, info
 
             if self.ego_ind in self._players:
                 break
 
         ego_obs = self._obs[self._players.index(self.ego_ind)]
-
+        self._old_ego_obs = ego_obs
         return ego_obs, ego_rew, done, info
 
     def reset(self) -> np.ndarray:
@@ -170,7 +193,7 @@ class MultiAgentEnv(gym.Env, ABC):
         ego_obs = self._obs[self._players.index(self.ego_ind)]
 
         assert ego_obs is not None
-
+        self._old_ego_obs = ego_obs
         return ego_obs
 
     @abstractmethod

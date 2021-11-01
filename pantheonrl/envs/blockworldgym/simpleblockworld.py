@@ -5,25 +5,33 @@ import gym
 import numpy as np
 
 from pantheonrl.common.agents import Agent
-from pantheonrl.common.multiagentenv import TurnBasedEnv
+from pantheonrl.common.multiagentenv import TurnBasedEnv, DummyEnv
 
-GRIDLEN = 7 # block world in a 7 x 7 grid
-NUM_BLOCKS = 5 # the number of blocks will be variable in the non-simplified version, 
-               # but allows for a constant sized action space here
-NUM_COLORS = 2 
+GRIDLEN = 7  # block world in a 7 x 7 grid
+NUM_BLOCKS = 5  # the number of blocks will be variable in the non-simplified version,
+# but allows for a constant sized action space here
+NUM_COLORS = 2
 NO_COLOR = 0
-BLUE = 1 
-RED = 2 # useful for if we add graphics later
+BLUE = 1
+RED = 2  # useful for if we add graphics later
 
-NUM_TOKENS = 16 # number of tokens the planner has
+NUM_TOKENS = 16  # number of tokens the planner has
 
-PLANNER_ACTION_SPACE = gym.spaces.Discrete(NUM_TOKENS) # tokens that represent words
-CONSTRUCTOR_ACTION_SPACE = gym.spaces.MultiDiscrete([NUM_BLOCKS, NUM_COLORS + 1]) 
+PLANNER_ACTION_SPACE = gym.spaces.Discrete(
+    NUM_TOKENS)  # tokens that represent words
+CONSTRUCTOR_ACTION_SPACE = gym.spaces.MultiDiscrete(
+    [NUM_BLOCKS, NUM_COLORS + 1])
 # in the simplified version, the constructor's action space is just coloring each block
 
-blocklistformat = [2, GRIDLEN, GRIDLEN, NUM_COLORS + 1]*NUM_BLOCKS # for each block, store h/v, coordinate, and color
-CONSTRUCTOR_OBS_SPACE = gym.spaces.MultiDiscrete([NUM_TOKENS]+blocklistformat)  # in the simplified version, constructor can see blocks
-PLANNER_OBS_SPACE = gym.spaces.MultiDiscrete(blocklistformat + blocklistformat) # constructor's obs space and true colorings
+# for each block, store h/v, coordinate, and color
+blocklistformat = [2, GRIDLEN, GRIDLEN, NUM_COLORS + 1]*NUM_BLOCKS
+# in the simplified version, constructor can see blocks
+CONSTRUCTOR_OBS_SPACE = gym.spaces.MultiDiscrete([NUM_TOKENS]+blocklistformat)
+# constructor's obs space and true colorings
+PLANNER_OBS_SPACE = gym.spaces.MultiDiscrete(blocklistformat + blocklistformat)
+
+PartnerEnv = DummyEnv(CONSTRUCTOR_OBS_SPACE, CONSTRUCTOR_ACTION_SPACE)
+
 
 def generate_grid_world():
     # generates a random GRIDLEN x GRIDLEN world with NUM_BLOCKS blocks
@@ -50,8 +58,8 @@ def generate_grid_world():
         grid_world.append(new_block)
         blocks_so_far += 1
     return grid_world
-        
- 
+
+
 def random_block():
     block = []
     if np.random.randint(2) == 0:
@@ -68,6 +76,7 @@ def random_block():
     block.append(np.random.randint(NUM_COLORS) + 1)
     return block
 
+
 class SimpleBlockEnv(TurnBasedEnv):
     def __init__(self):
         super().__init__(probegostart=1)
@@ -75,24 +84,29 @@ class SimpleBlockEnv(TurnBasedEnv):
         self.partner_observation_space = CONSTRUCTOR_OBS_SPACE
         self.action_space = PLANNER_ACTION_SPACE
         self.partner_action_space = CONSTRUCTOR_ACTION_SPACE
-        self.partner_env = gym.make('PartnerBlockEnv-v0')
+        self.partner_env = PartnerEnv
         self.viewer = None
-    
+
+    def getDummyEnv(self, player_ind: int):
+        return PartnerEnv if player_ind else self
+
     def multi_reset(self, egofirst):
         self.gridworld = generate_grid_world()
-        self.constructor_obs = [[block[0], block[1], block[2], 0] for block in self.gridworld]
+        self.constructor_obs = [[block[0], block[1], block[2], 0]
+                                for block in self.gridworld]
         self.last_token = 0
         self.viewer = None
         return self.get_obs(egofirst)
-    
+
     def get_obs(self, isego):
         if isego:
             return np.array([self.gridworld, self.constructor_obs]).flatten()
         else:
-            observations = [elem for block in self.constructor_obs for elem in block]
+            observations = [
+                elem for block in self.constructor_obs for elem in block]
             output = np.array(([self.last_token]+observations))
             return output
-    
+
     def ego_step(self, action):
         self.last_token = action
         # the planner gets to decide when they are done by taking action NUM_TOKENS - 1
@@ -101,20 +115,20 @@ class SimpleBlockEnv(TurnBasedEnv):
         if done:
             reward = self.get_reward()
         return self.get_obs(False), reward, done, {}
-    
+
     def alt_step(self, action):
-        self.constructor_obs[action[0]][3] = action[1] 
-        return self.get_obs(True), [0,0], False, {}
-    
+        self.constructor_obs[action[0]][3] = action[1]
+        return self.get_obs(True), [0, 0], False, {}
+
     def get_reward(self):
-        # for simplified version, 100 * num blocks colored correctly / total blocks 
+        # for simplified version, 100 * num blocks colored correctly / total blocks
         # (in the actual one, use F1 score)
         correct_blocks = 0
         for i in range(NUM_BLOCKS):
             if self.gridworld[i][3] == self.constructor_obs[i][3]:
                 correct_blocks += 1
-        reward = 100 * correct_blocks / NUM_BLOCKS 
-        return [reward, reward] # since they both get the same reward
+        reward = 100 * correct_blocks / NUM_BLOCKS
+        return [reward, reward]  # since they both get the same reward
 
     # def render(self, mode="human"):
     #     screen_width = 700
@@ -154,14 +168,7 @@ class SimpleBlockEnv(TurnBasedEnv):
     #         if self.constructor_obs[i][3] == BLUE:
     #             self.block_renders[i].set_color(0.02, 0.02, 0.98)
     #     return self.viewer.render(return_rgb_array=mode == "rgb_array")
-                
-                    
 
-class PartnerEnv(gym.Env):
-    def __init__(self):
-        super().__init__()
-        self.observation_space = CONSTRUCTOR_OBS_SPACE
-        self.action_space = CONSTRUCTOR_ACTION_SPACE
 
 class SBWEasyPartner(Agent):
     def get_action(self, obs, recording=True):
@@ -184,10 +191,10 @@ class SBWEasyPartner(Agent):
 class SBWDefaultAgent(Agent):
     def get_action(self, obs, recording=True):
         token = obs[0]
-        if token == 0: # do nothing
+        if token == 0:  # do nothing
             return [0, obs[4]]
         else:
-            blocks = np.reshape(obs[1:],(NUM_BLOCKS, 4))
+            blocks = np.reshape(obs[1:], (NUM_BLOCKS, 4))
             grid = self.gridfromobs(blocks)
             # tokens 1 - 7 mean find the first uncolored one in that row and color it red
             if token <= 7:
@@ -215,12 +222,11 @@ class SBWDefaultAgent(Agent):
             y = blocks[i][1]
             x = blocks[i][2]
             grid[y][x] = i
-            if blocks[i][0] == 0: #horizontal
+            if blocks[i][0] == 0:  # horizontal
                 grid[y][x+1] = i
             else:
                 grid[y+1][x] = i
         return grid
-    
+
     def update(self, reward, done):
         pass
-

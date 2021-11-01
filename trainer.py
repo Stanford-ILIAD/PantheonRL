@@ -103,12 +103,7 @@ def latent_check(args):
 def generate_env(args):
     env = gym.make(args.env, **args.env_config)
 
-    if args.env == 'BlockEnv-v0':
-        altenv = gym.make('PartnerBlockEnv-v0')
-    elif args.env == 'BlockEnv-v1':
-        altenv = blockworld.PartnerEnv()
-    else:
-        altenv = env
+    altenv = env.getDummyEnv(1)
 
     if args.framestack > 1:
         env = frame_wrap(env, args.framestack)
@@ -201,10 +196,13 @@ def gen_partner(type, config, altenv, ego, args):
     elif type == 'DEFAULT':
         return gen_default(config, altenv)
 
-    agentarg = {
-        'tensorboard_log': args.tensorboard_log,
-        'tb_log_name': args.tensorboard_name + '_alt_' + str(args.partner_num)
-    }
+    if args.tensorboard_log is not None:
+        agentarg = {
+            'tensorboard_log': args.tensorboard_log,
+            'tb_log_name': args.tensorboard_name+'_alt_'+str(args.partner_num)
+        }
+    else:
+        agentarg = {}
 
     config['env'] = altenv
     config['device'] = args.device
