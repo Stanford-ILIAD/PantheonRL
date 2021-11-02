@@ -147,9 +147,9 @@ def create_ego_object(ego_data, num_partners, tensorboard_log):
     Ego = namedtuple("Ego", ["ego_config", "tensorboard_log", "alt", "device", "seed", "ego"])
     return Ego(ego_config, tensorboard_log, alt, device, ego_data['seed'], ego_data['type'])
 
-def create_partner_object(seed):
-    Partner = namedtuple("Partner", ["seed", "device", "share_latent"])
-    return Partner(seed, "auto", False)
+def create_partner_object(seed, tensorboard_log, tensorboard_name, partner_num):
+    Partner = namedtuple("Partner", ["seed", "device", "share_latent", "tensorboard_log", "tensorboard_name", "partner_num", "verbose_partner"])
+    return Partner(seed, "auto", False, tensorboard_log, tensorboard_name, partner_num, False)
 
 def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboard_name, mydatabase):
     ego_save = ego_data.pop("location")
@@ -159,7 +159,7 @@ def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboar
     ego_agent = generate_ego(env, create_ego_object(ego_data, len(partners), tensorboard_log))
 
     partners_to_save = []
-    for partner in partners:
+    for i, partner in enumerate(partners):
         ptype = partner.pop("type")
         seed = None
         if "seed" in partner:
@@ -171,7 +171,7 @@ def start_training(id, env_data, ego_data, partners, tensorboard_log, tensorboar
         if ptype == "FIXED":
             current_partner = gen_fixed({}, partner.pop('ptype'), partner.pop('location'))
         else:
-            p_args = create_partner_object(seed)
+            p_args = create_partner_object(seed, tensorboard_log, tensorboard_name, i)
             current_partner = gen_partner(ptype, copy.deepcopy(partner), alt_env, ego_agent, p_args)
         env.add_partner_agent(current_partner)
         if save is not None:

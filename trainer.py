@@ -26,8 +26,6 @@ from pantheonrl.envs.liargym.liar import LiarEnv, LiarDefaultAgent
 
 from overcookedgym.overcooked_utils import LAYOUT_LIST
 
-from preset import preset
-
 ENV_LIST = ['RPS-v0', 'BlockEnv-v0', 'BlockEnv-v1', 'LiarsDice-v0',
             'OvercookedMultiEnv-v0']
 
@@ -228,6 +226,34 @@ def generate_partners(altenv, env, ego, args):
         env.add_partner_agent(v)
         partners.append(v)
     return partners
+
+
+def preset(args, preset_id):
+    '''
+    helpful defaul configuration settings
+    '''
+    
+    if preset_id == 1:
+        env_name = args.env
+        if 'layout_name' in args.env_config:
+            env_name = "%s-%s" % (args.env, args.env_config['layout_name'])
+        
+        if not args.tensorboard_log:
+            args.tensorboard_log = 'logs'
+        if not args.tensorboard_name:
+            args.tensorboard_name = '%s-%s%s-%d' % (
+                env_name, args.ego, args.alt[0], args.seed)
+        if not args.ego_save:
+            args.ego_save = 'models/%s-%s-ego-%d' % (
+                env_name, args.ego, args.seed)
+        if not args.alt_save:
+            args.alt_save = 'models/%s-%s-alt-%d' % (
+                env_name, args.alt[0], args.seed)
+        # if not args.record:
+        #     args.record = 'trajs/%s-%s%s-%d' % (env_name, args.ego, args.alt[0], args.seed)
+    else:
+        raise Exception("Invalid preset id")
+    return args
 
 
 if __name__ == '__main__':

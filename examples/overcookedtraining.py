@@ -1,5 +1,8 @@
 """
 This is a simple example training script for PantheonRL.
+
+To run this script, remember to first install overcooked
+via the instructions in the README.md
 """
 
 import gym

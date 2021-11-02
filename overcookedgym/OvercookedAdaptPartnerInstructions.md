@@ -1,27 +1,5 @@
-
-def preset(args, preset_id):
-    if preset_id == 1:
-        if not args.tensorboard_log:
-            args.tensorboard_log = 'logs'
-        if not args.tensorboard_name:
-            args.tensorboard_name = '%s-%s-%s%s-%d' % (
-                args.env, args.env_config['layout_name'], args.ego, args.alt[0], args.seed)
-        if not args.ego_save:
-            args.ego_save = 'models/%s-%s-%s-ego-%d' % (
-                args.env, args.env_config['layout_name'], args.ego, args.seed)
-        if not args.alt_save:
-            args.alt_save = 'models/%s-%s-%s-alt-%d' % (
-                args.env, args.env_config['layout_name'], args.alt[0], args.seed)
-        # if not args.record:
-        #     args.record = 'trajs/%s-%s-%s%s-%d' % (args.env, args.env_config['layout_name'], args.ego, args.alt[0], args.seed)
-    else:
-        raise Exception("Invalid preset id")
-    return args
-
-
-"""
-Partner Adaptation Workflow:
-
+## Adaptive Partner Experiments. (**Make sure to be in the base directory of PantheonRL**)
+```
 # Train bunch of partners
 python3 trainer.py OvercookedMultiEnv-v0 PPO PPO --env-config '{"layout_name":"simple"}' --seed 10 --preset 1
 python3 trainer.py OvercookedMultiEnv-v0 PPO PPO --env-config '{"layout_name":"simple"}' --seed 11 --preset 1
@@ -53,13 +31,4 @@ python3 trainer.py OvercookedMultiEnv-v0 LOAD FIXED --ego-config '{"type":"PPO",
 
 python3 trainer.py OvercookedMultiEnv-v0 LOAD FIXED --ego-config '{"type":"ModularAlgorithm", "location":"models/OvercookedMultiEnv-v0-simple-ModularAlgorithm-ego-21"}' --alt-config '{"type":"PPO", "location":"models/OvercookedMultiEnv-v0-simple-PPO-alt-14"}' --env-config '{"layout_name":"simple"}' --seed 32 --preset 1
 
-
-
-
-
-
-
-
-
-
-"""
+```

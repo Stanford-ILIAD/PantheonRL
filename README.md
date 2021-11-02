@@ -24,18 +24,50 @@ In Proceedings of the 36th AAAI Conference on Artificial Intelligence (Demo Trac
 }
 ```
 
+-----
+
 ## Installation
 ```
-mkdir PantheonRL
+# Optionally create conda environments
+conda create -n PantheonRL python=3.7
+conda activate PantheonRL
+
+# Clone and install PantheonRL
+git clone https://github.com/Stanford-ILIAD/PantheonRL.git
 cd PantheonRL
-git init
-git remote add origin https://github.com/Stanford-ILIAD/PantheonRL.git
-git pull origin master
-git submodule update --init --recursive
 pip install -e .
+```
+
+
+### Overcooked Installation
+```
+# Optionally install Overcooked environment
+git submodule update --init --recursive
 pip install -e overcookedgym/human_aware_rl/overcooked_ai
 ```
 
+### PettingZoo Installation
+```
+# Optionally install PettingZoo environments
+pip install pettingzoo
+```
+
+## Command Line Invocation
+
+
+#### Example
+```
+python3 trainer.py LiarsDice-v0 PPO PPO --seed 10 --preset 1
+```
+
+```
+# requires Overcooked installation (see above instructions)
+python3 trainer.py OvercookedMultiEnv-v0 PPO PPO --env-config '{"layout_name":"simple"}' --seed 10 --preset 1
+```
+
+For examples on round-robin training followed by partner adaptation, check out these [instructions](overcookedgym/OvercookedAdaptPartnerInstructions.md).
+
+For more examples, check out the ```examples/``` [directory](examples/).
 
 ## Web User Interface
 
@@ -48,9 +80,9 @@ export FLASK_ENV=development
 flask init-db
 ```
 
-Start the web user interface
+Start the web user interface. Make sure that ports 5000 and 5001 (used for Tensorboard) are not taken.
 ```
-flask run --host=0.0.0.0
+flask run --host=0.0.0.0 --port=5000
 ```
 
 <p align="center">
@@ -66,20 +98,6 @@ flask run --host=0.0.0.0
 </p>
 
 
-## Command Line Invocation
-
-
-#### Example
-```
-python3 trainer.py OvercookedMultiEnv-v0 PPO PPO --env-config '{"layout_name":"simple"}' --seed 10 --preset 1
-```
-
-#### Testing the Installation
-```
-python3 tester.py ...
-```
-
-
 ## Features
 
 | **General Features**        | **PantheonRL** |
@@ -87,6 +105,7 @@ python3 tester.py ...
 | Documentation               | :heavy_check_mark: |
 | Web user interface          | :heavy_check_mark: |
 | Built on top of SB3         | :heavy_check_mark: |
+| Supports PettingZoo Envs    | :heavy_check_mark: |
 
 
 
@@ -115,9 +134,10 @@ python3 tester.py ...
 | **Name**              | **Environment Type**  | **Reward Type**  | **Players**     | **Visualization**   |
 | --------------------- | --------------------- | ---------------- | --------------- | ------------------- |
 | Rock Paper Scissors   | SimultaneousEnv       | Competitive      | 2               | :x:                 |
-| Liar's Dice           | TurnBasedEnv          | Competitive       | 2               | :x:                 |
+| Liar's Dice           | TurnBasedEnv          | Competitive      | 2               | :x:                 |
 | Block World [[1]](#1) | TurnBasedEnv          | Cooperative      | 2               | :heavy_check_mark:  |
 | Overcooked [[2]](#2)  | SimultaneousEnv       | Cooperative      | 2               | :heavy_check_mark:  |
+| PettingZoo [[3]](#3)  | Mixed                 | Mixed            | N               | :heavy_check_mark:  |
 
 <a id="1">[1]</a>
 Adapted from the block construction task from https://github.com/cogtoolslab/compositional-abstractions
@@ -125,5 +145,5 @@ Adapted from the block construction task from https://github.com/cogtoolslab/com
 <a id="2">[2]</a>
 Adapted from the Human_Aware_Rl / Overcooked AI package from https://github.com/HumanCompatibleAI/human_aware_rl
 
-
-## Acknowledgments
+<a id="2">[2]</a>
+PettingZoo environments from https://github.com/Farama-Foundation/PettingZoo

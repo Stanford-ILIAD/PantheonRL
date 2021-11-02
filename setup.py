@@ -15,6 +15,7 @@ setup(name='pantheonrl',
         'torch',
         'tensorboard',
         'stable-baselines3 @ https://github.com/DLR-RM/stable-baselines3/archive/2fa06ae8d2.zip#egg=stable-baselines3-1.2.0a0',
-        'scipy'
+        'scipy',
+        'tqdm'
       ],
       )
