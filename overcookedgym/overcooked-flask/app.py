@@ -12,7 +12,7 @@ from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld, OvercookedS
 from overcooked_ai_py.planning.planners import MediumLevelPlanner, NO_COUNTERS_PARAMS
 from stable_baselines3 import PPO
 
-from pantheonrl.envs.overcookedgym.overcooked_utils import NAME_TRANSLATION
+from overcookedgym.overcooked_utils import NAME_TRANSLATION
 from pantheonrl.common.trajsaver import SimultaneousTransitions
 
 app = Flask(__name__)

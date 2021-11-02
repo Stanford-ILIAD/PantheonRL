@@ -11,12 +11,6 @@ register(
 )
 
 register(
-    id='OvercookedMultiEnv-v0',
-    entry_point='pantheonrl.envs.overcookedgym.overcooked:'
-                'OvercookedMultiEnv'
-)
-
-register(
     id='BlockEnv-v0',
     entry_point='pantheonrl.envs.blockworldgym.simpleblockworld:SimpleBlockEnv'
 )

@@ -1,0 +1,4 @@
+
+[submodule "overcookedgym/human_aware_rl"]
+	path = overcookedgym/human_aware_rl
+	url = https://github.com/HumanCompatibleAI/human_aware_rl.git

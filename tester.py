@@ -117,7 +117,7 @@ if __name__ == '__main__':
             Example usage (Overcooked with ADAP agents that share the latent
             space):
 
-            python3 trainer.py OvercookedMultiEnv-v0 ADAP ADAP --env-config
+            python3 tester.py OvercookedMultiEnv-v0 ADAP ADAP --env-config
             '{"layout_name":"random0"}' -l
             ''')
 

@@ -6,10 +6,14 @@ import gym
 from stable_baselines3 import PPO
 
 from pantheonrl.common.agents import OnPolicyAgent
+from overcookedgym.overcooked_utils import LAYOUT_LIST
+
+layout = 'simple'
+assert layout in LAYOUT_LIST
 
 # Since pantheonrl's MultiAgentEnv is a subclass of the gym Env, you can
 # register an environment and construct it using gym.make.
-env = gym.make('OvercookedMultiEnv-v0', layout_name='simple_o')
+env = gym.make('OvercookedMultiEnv-v0', layout_name=layout)
 
 # Before training your ego agent, you first need to add your partner agents
 # to the environment. You can create adaptive partner agents using

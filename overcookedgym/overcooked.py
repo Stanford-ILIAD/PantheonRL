@@ -1,12 +1,11 @@
 import gym
 import numpy as np
 from overcooked_ai_py.mdp.actions import Action
-from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld, Recipe
+from overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
 from overcooked_ai_py.mdp.overcooked_env import OvercookedEnv
 from overcooked_ai_py.planning.planners import MediumLevelPlanner, NO_COUNTERS_PARAMS
 
 from pantheonrl.common.multiagentenv import SimultaneousEnv
-
 
 class OvercookedMultiEnv(SimultaneousEnv):
     def __init__(self, layout_name, ego_agent_idx=0, baselines=False):
@@ -31,21 +30,21 @@ class OvercookedMultiEnv(SimultaneousEnv):
         self.mdp = OvercookedGridworld.from_layout_name(layout_name=layout_name, rew_shaping_params=rew_shaping_params)
         mlp = MediumLevelPlanner.from_pickle_or_compute(self.mdp, NO_COUNTERS_PARAMS, force_compute=False)
 
-        self.base_env = OvercookedEnv.from_mdp(self.mdp, **DEFAULT_ENV_PARAMS)
+        self.base_env = OvercookedEnv(self.mdp, **DEFAULT_ENV_PARAMS)
         self.featurize_fn = lambda x: self.mdp.featurize_state(x, mlp)
 
         if baselines: np.random.seed(0)
 
         self.observation_space = self._setup_observation_space()
         self.lA = len(Action.ALL_ACTIONS)
-        self.action_space = gym.spaces.Discrete(self.lA)
+        self.action_space  = gym.spaces.Discrete( self.lA )
         self.ego_agent_idx = ego_agent_idx
         self.multi_reset()
 
     def _setup_observation_space(self):
         dummy_state = self.mdp.get_standard_start_state()
         obs_shape = self.featurize_fn(dummy_state)[0].shape
-        high = np.ones(obs_shape, dtype=np.float32) * max(*[r.time for r in Recipe.ALL_RECIPES], self.mdp.recipe_config["num_items_for_soup"], 5)
+        high = np.ones(obs_shape, dtype=np.float32) * max(self.mdp.soup_cooking_time, self.mdp.num_items_for_soup, 5)
 
         return gym.spaces.Box(high * 0, high, dtype=np.float32)
 
@@ -53,8 +52,8 @@ class OvercookedMultiEnv(SimultaneousEnv):
         """
         action:
             (agent with index self.agent_idx action, other agent action)
-            is a tuple with the joint action of the primary and secondary
-            agents in index format encoded as an int
+            is a tuple with the joint action of the primary and secondary agents in index format
+            encoded as an int
 
         returns:
             observation: formatted to be standard input for self.agent_idx's policy
@@ -68,7 +67,8 @@ class OvercookedMultiEnv(SimultaneousEnv):
         next_state, reward, done, info = self.base_env.step(joint_action)
 
         # reward shaping
-        reward += sum(info['shaped_r_by_agent'])
+        rew_shape = info['shaped_r']
+        reward = reward + rew_shape
 
         #print(self.base_env.mdp.state_string(next_state))
         ob_p0, ob_p1 = self.featurize_fn(next_state)
@@ -77,7 +77,7 @@ class OvercookedMultiEnv(SimultaneousEnv):
         else:
             ego_obs, alt_obs = ob_p1, ob_p0
 
-        return (ego_obs, alt_obs), (reward, reward), done, {}  # info
+        return (ego_obs, alt_obs), (reward, reward), done, {}#info
 
     def multi_reset(self):
         """

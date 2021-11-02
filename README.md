@@ -33,6 +33,7 @@ git remote add origin https://github.com/Stanford-ILIAD/PantheonRL.git
 git pull origin master
 git submodule update --init --recursive
 pip install -e .
+pip install -e overcookedgym/human_aware_rl/overcooked_ai
 ```
 
 
