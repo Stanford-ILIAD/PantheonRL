@@ -145,5 +145,5 @@ Adapted from the block construction task from https://github.com/cogtoolslab/com
 <a id="2">[2]</a>
 Adapted from the Human_Aware_Rl / Overcooked AI package from https://github.com/HumanCompatibleAI/human_aware_rl
 
-<a id="2">[2]</a>
+<a id="3">[3]</a>
 PettingZoo environments from https://github.com/Farama-Foundation/PettingZoo
