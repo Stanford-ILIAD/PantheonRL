@@ -238,15 +238,15 @@ def preset(args, preset_id):
         if 'layout_name' in args.env_config:
             env_name = "%s-%s" % (args.env, args.env_config['layout_name'])
 
-        if not args.tensorboard_log:
+        if args.tensorboard_log is None:
             args.tensorboard_log = 'logs'
-        if not args.tensorboard_name:
+        if args.tensorboard_name is None:
             args.tensorboard_name = '%s-%s%s-%d' % (
                 env_name, args.ego, args.alt[0], args.seed)
-        if not args.ego_save:
+        if args.ego_save is None:
             args.ego_save = 'models/%s-%s-ego-%d' % (
                 env_name, args.ego, args.seed)
-        if not args.alt_save:
+        if args.alt_save is None:
             args.alt_save = 'models/%s-%s-alt-%d' % (
                 env_name, args.alt[0], args.seed)
         # if not args.record:
@@ -408,17 +408,17 @@ if __name__ == '__main__':
     partners = generate_partners(altenv, env, ego, args)
 
     learn_config = {'total_timesteps': args.total_timesteps}
-    if args.tensorboard_log is not None:
+    if args.tensorboard_log:
         learn_config['tb_log_name'] = args.tensorboard_name
     ego.learn(**learn_config)
 
-    if args.record is not None:
+    if args.record:
         transition = env.get_transitions()
         transition.write_transition(args.record)
 
-    if args.ego_save is not None:
+    if args.ego_save:
         ego.save(args.ego_save)
-    if args.alt_save is not None:
+    if args.alt_save:
         if len(partners) == 1:
             try:
                 partners[0].model.save(args.alt_save)
