@@ -50,6 +50,9 @@ pip install -e overcookedgym/human_aware_rl/overcooked_ai
 ```
 # Optionally install PettingZoo environments
 pip install pettingzoo
+
+# to install a group of pettingzoo environments
+pip install "pettingzoo[classic]"
 ```
 
 ## Command Line Invocation

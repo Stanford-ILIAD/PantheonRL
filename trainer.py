@@ -232,12 +232,12 @@ def preset(args, preset_id):
     '''
     helpful defaul configuration settings
     '''
-    
+
     if preset_id == 1:
         env_name = args.env
         if 'layout_name' in args.env_config:
             env_name = "%s-%s" % (args.env, args.env_config['layout_name'])
-        
+
         if not args.tensorboard_log:
             args.tensorboard_log = 'logs'
         if not args.tensorboard_name:
@@ -420,7 +420,13 @@ if __name__ == '__main__':
         ego.save(args.ego_save)
     if args.alt_save is not None:
         if len(partners) == 1:
-            partners[0].model.save(args.alt_save)
+            try:
+                partners[0].model.save(args.alt_save)
+            except AttributeError:
+                print("FIXED or DEFAULT partners are not saved")
         else:
             for i in range(len(partners)):
-                partners[i].model.save(f"{args.alt_save}/{i}")
+                try:
+                    partners[i].model.save(f"{args.alt_save}/{i}")
+                except AttributeError:
+                    print("FIXED or DEFAULT partners are not saved")
