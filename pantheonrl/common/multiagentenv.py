@@ -27,12 +27,15 @@ class MultiAgentEnv(gym.Env, ABC):
 
     :param ego_ind: The player that the ego represents
     :param n_players: The number of players in the game
+    :param resample_policy: The resampling policy to use
+    - (see set_resample_policy)
     :param partners: Lists of agents to choose from for the partner players
     """
 
     def __init__(self,
                  ego_ind: int = 0,
                  n_players: int = 2,
+                 resample_policy: str = "default",
                  partners: Optional[List[List[Agent]]] = None):
         self.ego_ind = ego_ind
         self.n_players = n_players
@@ -57,6 +60,8 @@ class MultiAgentEnv(gym.Env, ABC):
         self.should_update = [False] * (self.n_players - 1)
         self.total_rews = [0] * (self.n_players)
         self.ego_moved = False
+
+        self.set_resample_policy(resample_policy)
 
     def getDummyEnv(self, player_num: int):
         """
@@ -96,10 +101,41 @@ class MultiAgentEnv(gym.Env, ABC):
         assert(agent_id >= 0 and agent_id < len(self.partners[partner_num]))
         self.partnerids[partner_num] = agent_id
 
-    def resample_partner(self) -> None:
-        """ Resample the partner agent used """
+    def resample_random(self) -> None:
+        """ Randomly resamples each partner policy """
         self.partnerids = [np.random.randint(len(plist))
                            for plist in self.partners]
+
+    def resample_round_robin(self) -> None:
+        """
+        Sets the partner policy to the next option on the list for round-robin
+        sampling.
+
+        Note: This function is only valid for 2-player environments
+        """
+        self.partnerids = [(self.partnerids[0] + 1) % len(self.partners[0])]
+
+    def set_resample_policy(self, resample_policy: str) -> None:
+        """
+        Set the resample_partner method to round "robin" or "random"
+
+        :param resample_policy: The new resampling policy to use.
+        - Valid values are: "default", "robin", "random"
+        """
+        if resample_policy == "default":
+            resample_policy = "robin" if self.n_players == 2 else "random"
+
+        if resample_policy == "robin" and self.n_players != 2:
+            raise PlayerException(
+                "Cannot do round robin resampling for >2 players")
+
+        if resample_policy == "robin":
+            self.resample_partner = self.resample_round_robin
+        elif resample_policy == "random":
+            self.resample_partner = self.resample_random
+        else:
+            raise PlayerException(
+                f"Invalid resampling policy: {resample_policy}")
 
     def _get_actions(self, players, obs, ego_act=None):
         actions = []

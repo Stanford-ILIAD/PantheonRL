@@ -169,9 +169,9 @@ def gen_default(config, altenv):
     if config:
         raise EnvException("No config possible for this default agent")
 
-    if isinstance(altenv, simpleblockworld.PartnerEnv):
+    if altenv == simpleblockworld.PartnerEnv:
         return simpleblockworld.SBWDefaultAgent()
-    elif isinstance(altenv, blockworld.PartnerEnv):
+    elif altenv == blockworld.PartnerEnv:
         return blockworld.DefaultConstructorAgent()
     elif isinstance(altenv, LiarEnv):
         return LiarDefaultAgent()
