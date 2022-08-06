@@ -44,9 +44,9 @@ class OvercookedMultiEnv(SimultaneousEnv):
     def _setup_observation_space(self):
         dummy_state = self.mdp.get_standard_start_state()
         obs_shape = self.featurize_fn(dummy_state)[0].shape
-        high = np.ones(obs_shape, dtype=np.float32) * max(self.mdp.soup_cooking_time, self.mdp.num_items_for_soup, 5)
+        high = np.ones(obs_shape, dtype=np.float32) * np.inf  # max(self.mdp.soup_cooking_time, self.mdp.num_items_for_soup, 5)
 
-        return gym.spaces.Box(high * 0, high, dtype=np.float32)
+        return gym.spaces.Box(-high, high, dtype=np.float64)
 
     def multi_step(self, ego_action, alt_action):
         """
