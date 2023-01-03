@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict, Optional, Callable, Any, Union
 from dataclasses import dataclass
 
 import gym
 import numpy as np
 
 from .agents import Agent
+from .observation import Observation, extract_obs
 
 
 class PlayerException(Exception):
@@ -30,13 +31,16 @@ class MultiAgentEnv(gym.Env, ABC):
     :param resample_policy: The resampling policy to use
     - (see set_resample_policy)
     :param partners: Lists of agents to choose from for the partner players
+    :param ego_extractor: Function to extract Observation into the type the
+        ego expects
     """
 
     def __init__(self,
                  ego_ind: int = 0,
                  n_players: int = 2,
                  resample_policy: str = "default",
-                 partners: Optional[List[List[Agent]]] = None):
+                 partners: Optional[List[List[Agent]]] = None,
+                 ego_extractor: Callable[[Observation], Any] = extract_obs):
         self.ego_ind = ego_ind
         self.n_players = n_players
         if partners is not None:
@@ -63,6 +67,8 @@ class MultiAgentEnv(gym.Env, ABC):
 
         self.set_resample_policy(resample_policy)
 
+        self.ego_extractor = ego_extractor
+
     def getDummyEnv(self, player_num: int):
         """
         Returns a dummy environment with just an observation and action
@@ -71,6 +77,9 @@ class MultiAgentEnv(gym.Env, ABC):
         :param player_num: the partner number to query
         """
         return self
+
+    def set_ego_extractor(self, ego_extractor: Callable[[Observation], Any]):
+        self.ego_extractor = ego_extractor
 
     def _get_partner_num(self, player_num: int) -> int:
         if player_num == self.ego_ind:
@@ -163,7 +172,7 @@ class MultiAgentEnv(gym.Env, ABC):
     def step(
                 self,
                 action: np.ndarray
-            ) -> Tuple[Optional[np.ndarray], float, bool, Dict]:
+            ) -> Tuple[Union[Observation, Any], float, bool, Dict]:
         """
         Run one timestep from the perspective of the ego-agent. This involves
         calling the ego_step function and the alt_step function to get to the
@@ -195,16 +204,17 @@ class MultiAgentEnv(gym.Env, ABC):
             self.ego_moved = True
 
             if done:
-                return self._old_ego_obs, ego_rew, done, info
+                ego_obs = self._old_ego_obs
+                return self.ego_extractor(ego_obs), ego_rew, done, info
 
             if self.ego_ind in self._players:
                 break
 
         ego_obs = self._obs[self._players.index(self.ego_ind)]
         self._old_ego_obs = ego_obs
-        return ego_obs, ego_rew, done, info
+        return self.ego_extractor(ego_obs), ego_rew, done, info
 
-    def reset(self) -> np.ndarray:
+    def reset(self) -> Union[Observation, Any]:
         """
         Reset environment to an initial state and return the first observation
         for the ego agent.
@@ -230,14 +240,14 @@ class MultiAgentEnv(gym.Env, ABC):
 
         assert ego_obs is not None
         self._old_ego_obs = ego_obs
-        return ego_obs
+        return self.ego_extractor(ego_obs)
 
     @abstractmethod
     def n_step(
                     self,
                     actions: List[np.ndarray],
                 ) -> Tuple[Tuple[int, ...],
-                           Tuple[Optional[np.ndarray], ...],
+                           Tuple[Optional[Observation], ...],
                            Tuple[float, ...],
                            bool,
                            Dict]:
@@ -261,7 +271,7 @@ class MultiAgentEnv(gym.Env, ABC):
 
     @abstractmethod
     def n_reset(self) -> Tuple[Tuple[int, ...],
-                               Tuple[Optional[np.ndarray], ...]]:
+                               Tuple[Optional[Observation], ...]]:
         """
         Reset the environment and return which agents will move first along
         with their initial observations.
@@ -298,7 +308,7 @@ class TurnBasedEnv(MultiAgentEnv, ABC):
                     self,
                     actions: List[np.ndarray],
                 ) -> Tuple[Tuple[int, ...],
-                           Tuple[Optional[np.ndarray], ...],
+                           Tuple[Optional[Observation], ...],
                            Tuple[float, ...],
                            bool,
                            Dict]:
@@ -308,13 +318,13 @@ class TurnBasedEnv(MultiAgentEnv, ABC):
 
         self.ego_next = not self.ego_next
 
-        return agents, (obs,), rews, done, info
+        return agents, (Observation(obs),), rews, done, info
 
     def n_reset(self) -> Tuple[Tuple[int, ...],
                                Tuple[Optional[np.ndarray], ...]]:
         self.ego_next = (np.random.rand() < self.probegostart)
-
-        return (0 if self.ego_next else 1,), (self.multi_reset(self.ego_next),)
+        obs = self.multi_reset(self.ego_next)
+        return (0 if self.ego_next else 1,), (Observation(obs),)
 
     @abstractmethod
     def ego_step(
@@ -386,15 +396,17 @@ class SimultaneousEnv(MultiAgentEnv, ABC):
                     self,
                     actions: List[np.ndarray],
                 ) -> Tuple[Tuple[int, ...],
-                           Tuple[Optional[np.ndarray], ...],
+                           Tuple[Optional[Observation], ...],
                            Tuple[float, ...],
                            bool,
                            Dict]:
-        return ((0, 1),) + self.multi_step(actions[0], actions[1])
+        (obs0, obs1), r, d, i = self.multi_step(actions[0], actions[1])
+        return ((0, 1), (Observation(obs0), Observation(obs1)), r, d, i)
 
     def n_reset(self) -> Tuple[Tuple[int, ...],
-                               Tuple[Optional[np.ndarray], ...]]:
-        return (0, 1), self.multi_reset()
+                               Tuple[Optional[Observation], ...]]:
+        (obs0, obs1) = self.multi_reset()
+        return (0, 1), (Observation(obs0), Observation(obs1))
 
     @abstractmethod
     def multi_step(

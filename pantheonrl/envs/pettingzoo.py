@@ -5,6 +5,7 @@ import gymnasium
 import gym
 
 from pantheonrl.common.multiagentenv import MultiAgentEnv, DummyEnv
+from pantheonrl.common.observation import Observation
 
 
 def gymnasium_to_gym(space: gymnasium.spaces.Space) -> gym.Space:
@@ -54,7 +55,7 @@ class PettingZooAECWrapper(MultiAgentEnv):
                     self,
                     actions: List[np.ndarray],
                 ) -> Tuple[Tuple[int, ...],
-                           Tuple[Optional[np.ndarray], ...],
+                           Tuple[Optional[Observation], ...],
                            Tuple[float, ...],
                            bool,
                            Dict]:
@@ -98,10 +99,11 @@ class PettingZooAECWrapper(MultiAgentEnv):
         # print(self.base_env.terminations)
         # done = all(self.base_env.dones.values())
         info = self.base_env.infos[self.base_env.possible_agents[self.ego_ind]]
+        obs = Observation(obs=obs, action_mask=self._action_mask)
         return (agent_idx,), (obs,), tuple(rewards), done, info
 
     def n_reset(self) -> Tuple[Tuple[int, ...],
-                               Tuple[Optional[np.ndarray], ...]]:
+                               Tuple[Optional[Observation], ...]]:
         """
         Reset the environment and return which agents will move first along
         with their initial observations.
@@ -122,4 +124,5 @@ class PettingZooAECWrapper(MultiAgentEnv):
             obs = obs['observation']
 
         self.agent_counts = [0] * self.n_players
+        obs = Observation(obs=obs, action_mask=self._action_mask)
         return (agent_idx,), (obs,)

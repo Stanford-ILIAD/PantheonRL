@@ -9,6 +9,7 @@ import torch as th
 
 from .util import action_from_policy, clip_actions, resample_noise
 from .trajsaver import TransitionsMinimal
+from .observation import Observation
 
 from stable_baselines3.common.utils import (
     configure_logger,
@@ -26,7 +27,7 @@ class Agent(ABC):
     """
 
     @abstractmethod
-    def get_action(self, obs: np.ndarray, record: bool = True) -> np.ndarray:
+    def get_action(self, obs: Observation, record: bool = True) -> np.ndarray:
         """
         Return an action given an observation.
 
@@ -60,7 +61,7 @@ class StaticPolicyAgent(Agent):
     def __init__(self, policy: ActorCriticPolicy):
         self.policy = policy
 
-    def get_action(self, obs: np.ndarray, record: bool = True) -> np.ndarray:
+    def get_action(self, obs: Observation, record: bool = True) -> np.ndarray:
         """
         Return an action given an observation.
 
@@ -68,7 +69,7 @@ class StaticPolicyAgent(Agent):
         :param record: Whether to record the obs, action (unused)
         :returns: The action to take
         """
-        actions, _, _ = action_from_policy(obs, self.policy)
+        actions, _, _ = action_from_policy(obs.obs, self.policy)
         return clip_actions(actions, self.policy)[0]
 
     def update(self, reward: float, done: bool) -> None:
@@ -107,7 +108,7 @@ class OnPolicyAgent(Agent):
         self.iteration = 0
         self.model.ep_info_buffer = deque([{"r": 0, "l": 0}], maxlen=100)
 
-    def get_action(self, obs: np.ndarray, record: bool = True) -> np.ndarray:
+    def get_action(self, obs: Observation, record: bool = True) -> np.ndarray:
         """
         Return an action given an observation.
 
@@ -118,6 +119,7 @@ class OnPolicyAgent(Agent):
         :param record: Whether to record the obs, action (True when training)
         :returns: The action to take
         """
+        obs = obs.obs
         buf = self.model.rollout_buffer
 
         # train the model if the buffer is full
@@ -242,7 +244,7 @@ class OffPolicyAgent(Agent):
             self.model.verbose, tensorboard_log, tb_log_name))
         self.model.ep_info_buffer = deque([{"r": 0, "l": 0}], maxlen=100)
 
-    def get_action(self, obs: np.ndarray, record: bool = True) -> np.ndarray:
+    def get_action(self, obs: Observation, record: bool = True) -> np.ndarray:
         """
         Return an action given an observation.
 
@@ -253,6 +255,7 @@ class OffPolicyAgent(Agent):
         :param record: Whether to record the obs, action (True when training)
         :returns: The action to take
         """
+        obs = obs.obs
         if record:
             if self.old_buffer_action is not None:
                 buf = self.model.replay_buffer
@@ -374,7 +377,7 @@ class RecordingAgentWrapper(Agent):
         self.allobs: List[np.ndarray] = []
         self.allacts: List[np.ndarray] = []
 
-    def get_action(self, obs: np.ndarray, record: bool = True) -> np.ndarray:
+    def get_action(self, obs: Observation, record: bool = True) -> np.ndarray:
         """
         Return an action given an observation.
 
@@ -386,7 +389,7 @@ class RecordingAgentWrapper(Agent):
         :returns: The action to take
         """
         action = self.realagent.get_action(obs, record)
-        self.allobs.append(obs)
+        self.allobs.append(obs.obs)
         self.allacts.append(action)
         return action
 

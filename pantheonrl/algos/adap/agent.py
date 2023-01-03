@@ -12,6 +12,7 @@ from stable_baselines3.common.utils import configure_logger
 from stable_baselines3.common.utils import safe_mean
 
 from pantheonrl.common.agents import OnPolicyAgent
+from pantheonrl.common.observation import Observation
 from .adap_learn import ADAP
 from .util import SAMPLERS
 from .policies import AdapPolicy
@@ -55,7 +56,7 @@ class AdapAgent(OnPolicyAgent):
         buf.obs_shape = self.model.full_obs_shape
         buf.reset()
 
-    def get_action(self, obs: np.ndarray, record: bool = True) -> np.ndarray:
+    def get_action(self, obs: Observation, record: bool = True) -> np.ndarray:
         """
         Return an action given an observation.
 
@@ -66,6 +67,7 @@ class AdapAgent(OnPolicyAgent):
         :param record: Whether to record the obs, action (True when training)
         :returns: The action to take
         """
+        obs = obs.obs
         if self.latent_syncer is not None:
             self.model.policy.set_context(self.latent_syncer.get_context())
 
