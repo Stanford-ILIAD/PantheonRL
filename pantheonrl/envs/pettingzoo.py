@@ -1,9 +1,26 @@
 from typing import Tuple, Optional, List, Dict
 
 import numpy as np
-from gym import spaces
+import gymnasium
+import gym
 
 from pantheonrl.common.multiagentenv import MultiAgentEnv, DummyEnv
+
+
+def gymnasium_to_gym(space: gymnasium.spaces.Space) -> gym.Space:
+    """
+    Converter from gymnasium spaces to gym spaces for SB3 compatibility
+    """
+    if isinstance(space, gymnasium.spaces.box.Box):
+        return gym.spaces.Box(space.low, space.high, dtype=space.dtype)
+    if isinstance(space, gymnasium.spaces.discrete.Discrete):
+        return gym.spaces.Discrete(space.n)
+    if isinstance(space, gymnasium.spaces.multi_discrete.MultiDiscrete):
+        return gym.spaces.MultiDiscrete(space.nvec)
+    if isinstance(space, gymnasium.spaces.multi_binary.MultiBinary):
+        return gym.spaces.MultiBinary(space.n)
+
+    raise NotImplementedError(f"Space {space} not implemented yet for gymnasium to gym conversion")
 
 
 class PettingZooAECWrapper(MultiAgentEnv):
@@ -16,20 +33,21 @@ class PettingZooAECWrapper(MultiAgentEnv):
         super(PettingZooAECWrapper, self).__init__(
             ego_ind, base_env.max_num_agents)
         ego_agent = base_env.possible_agents[ego_ind]
-        self.action_space = base_env.action_space(ego_agent)
+        self.action_space = gymnasium_to_gym(base_env.action_space(ego_agent))
 
         obs_space = base_env.observation_space(ego_agent)
-        if isinstance(obs_space, spaces.Dict):
+        if isinstance(obs_space, gymnasium.spaces.dict.Dict):
             obs_space = obs_space.spaces['observation']
-        self.observation_space = obs_space
+        self.observation_space = gymnasium_to_gym(obs_space)
         self._action_mask = None
 
     def getDummyEnv(self, player_ind: int):
         agent = self.base_env.possible_agents[player_ind]
         ospace = self.base_env.observation_space(agent)
-        if isinstance(ospace, spaces.Dict):
+        if isinstance(ospace, gymnasium.spaces.dict.Dict):
             ospace = ospace.spaces['observation']
-        aspace = self.base_env.action_space(agent)
+        ospace = gymnasium_to_gym(ospace)
+        aspace = gymnasium_to_gym(self.base_env.action_space(agent))
         return DummyEnv(ospace, aspace)
 
     def n_step(
@@ -76,7 +94,9 @@ class PettingZooAECWrapper(MultiAgentEnv):
         for key, val in self.base_env.rewards.items():
             rewards[self.base_env.possible_agents.index(key)] = val
 
-        done = all(self.base_env.dones.values())
+        done = all([self.base_env.terminations[x] or self.base_env.truncations[x] for x in self.base_env.possible_agents])
+        # print(self.base_env.terminations)
+        # done = all(self.base_env.dones.values())
         info = self.base_env.infos[self.base_env.possible_agents[self.ego_ind]]
         return (agent_idx,), (obs,), tuple(rewards), done, info
 
