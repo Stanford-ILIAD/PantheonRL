@@ -29,6 +29,7 @@ def randRoll():
 class LiarDefaultAgent(Agent):
 
     def get_action(self, obs, record=True):
+        obs = obs.obs
         obs = obs.tolist()
         hand = obs[:N]
         maxval = max(hand)

@@ -172,6 +172,7 @@ class SimpleBlockEnv(TurnBasedEnv):
 
 class SBWEasyPartner(Agent):
     def get_action(self, obs, recording=True):
+        obs = obs.obs
         token = obs[0]
         if token > 10:
             token = token//2
@@ -190,6 +191,7 @@ class SBWEasyPartner(Agent):
 
 class SBWDefaultAgent(Agent):
     def get_action(self, obs, recording=True):
+        obs = obs.obs
         token = obs[0]
         if token == 0:  # do nothing
             return [0, obs[4]]

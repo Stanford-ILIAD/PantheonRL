@@ -121,6 +121,7 @@ class BlockEnv(TurnBasedEnv):
 
 class DefaultConstructorAgent(Agent):
     def get_action(self, obs, recording=True):
+        obs = obs.obs
         token = int(obs[0])
         if token == 0 or token == 29:
             return [GRIDLEN - 1, VERTICAL, 0]

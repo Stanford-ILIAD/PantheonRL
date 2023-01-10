@@ -39,6 +39,7 @@ def generate_agent(env, policy_type, config, location):
 
 
 def run_test(ego, env, num_episodes, render=False):
+    env.set_ego_extractor(lambda obs: obs)
     rewards = []
     for game in range(num_episodes):
         obs = env.reset()
