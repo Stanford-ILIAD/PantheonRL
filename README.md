@@ -7,7 +7,7 @@ PantheonRL is built on top of StableBaselines3 (SB3), allowing direct access to 
 
 This package will be presented as a demo at the AAAI-22 Demonstrations Program.
 
-[Demo Paper](https://iliad.stanford.edu/pdfs/publications/sarkar2022pantheonrl.pdf)
+[Demo Paper](https://arxiv.org/abs/2112.07013)
 
 [Demo Video](https://youtu.be/3-Pf3zh_Hpo)
 
