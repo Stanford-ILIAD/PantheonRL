@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pantheonrl"
+version = "0.0.1"
+description = "A package for training and testing in multi-agent reinforcement learning environments"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+  { name="Bidipta Sarkar", email="bidiptas@stanford.edu" },
+]
+keywords = ["reinforcement-learning", "multi-agent-reinforcement-learning", "gymnasium", "stable-baselines3"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "stable-baselines3",
+    "tensorboard",
+    "tqdm",
+    "flask",
+    "scipy",
+    "pyglet==1.5.14",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Stanford-ILIAD/PantheonRL"
+"Bug Tracker" = "https://github.com/Stanford-ILIAD/PantheonRL/issues"

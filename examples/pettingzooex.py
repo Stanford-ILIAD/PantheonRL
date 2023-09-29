@@ -29,13 +29,13 @@ print(env.n_players)
 # understands their specific observation/action space, use the getDummyEnv
 # function.
 for i in range(env.n_players - 1):
-    partner = OnPolicyAgent(PPO('MlpPolicy', env.getDummyEnv(i), verbose=1))
+    partner = OnPolicyAgent(PPO('MlpPolicy', env.getDummyEnv(i+1), verbose=1))
 
     # The second parameter ensures that the partner is assigned to a certain
     # player number. Forgetting this parameter would mean that all of the
     # partner agents can be picked as `player 2`, but none of them can be
     # picked as `player 3`.
-    env.add_partner_agent(partner, player_num=i + 1)
+    env.unwrapped.add_partner_agent(partner, player_num=i+1)
 
 ego = PPO('MlpPolicy', env, verbose=1)
 ego.learn(total_timesteps=100000)
