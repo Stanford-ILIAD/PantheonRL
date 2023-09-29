@@ -1,5 +1,7 @@
 # PantheonRL
 
+NOTE: This is an experimental branch for updating to the latest SB3 release
+
 PantheonRL is a package for training and testing multi-agent reinforcement learning environments. The goal of PantheonRL is to provide a modular and extensible framework for training agent policies, fine-tuning agent policies, ad-hoc pairing of agents, and more. PantheonRL also provides a web user interface suitable for lightweight experimentation and prototyping.
 
 
