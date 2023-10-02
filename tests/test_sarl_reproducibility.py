@@ -1,12 +1,13 @@
 import gymnasium as gym
 import stable_baselines3
-from stable_baselines3 import PPO, A2C
+from stable_baselines3 import PPO, A2C, DQN
 
 import numpy as np
 
 import overcookedgym
 
 from pantheonrl.common.agents import Agent
+from pantheonrl.common.multiagentenv import KillEnvException
 
 import copy
 
@@ -19,7 +20,8 @@ import pytest
 class FakeAgent(Agent):
     def __init__(self, env):
         self.env = env
-        self.env.action_space.seed(0)
+        self.action_space = copy.deepcopy(self.env.action_space)
+        self.action_space.seed(0)
 
     def get_action(self, obs, record: bool = True):
         """
@@ -29,13 +31,40 @@ class FakeAgent(Agent):
         :param record: Whether to record the obs, action (unused)
         :returns: The action to take
         """
-        return self.env.action_space.sample()
+        return self.action_space.sample()
 
     def update(self, reward: float, done: bool) -> None:
         """
         Update does nothing since the agent does not learn.
         """
         pass
+
+
+class VerboseEnv(gym.Env):
+    def __init__(self, base_env):
+        self.base_env = base_env
+        self.timestep = 0
+
+    @property
+    def observation_space(self) -> gym.spaces.Space:
+        return self.base_env.observation_space
+
+    @property
+    def action_space(self) -> gym.spaces.Space:
+        return self.base_env.action_space
+
+    def step(self, action):
+        print("Timestep", self.timestep)
+        self.timestep += 1
+        print("ACTION is", action)
+        returns = self.base_env.step(action)
+        print("Step returns", returns)
+        return returns
+
+    def reset(self, **kwargs):
+        returns = self.base_env.reset(**kwargs)
+        print("Reset returns", returns)
+        return returns
 
 
 class ReplayAgent(Agent):
@@ -56,12 +85,13 @@ class ReplayAgent(Agent):
 class FakeEgo:
     def __init__(self, env):
         self.env = env
-        self.env.action_space.seed(0)
+        self.action_space = copy.deepcopy(self.env.action_space)
+        self.action_space.seed(0)
 
     def learn(self, dummy_env, total_timesteps):
         self.env.reset()
         while dummy_env.steps < total_timesteps:
-            _, _, done, _, _ = self.env.step(self.env.action_space.sample())
+            _, _, done, _, _ = self.env.step(self.action_space.sample())
             if done:
                 self.env.reset()
 
@@ -115,7 +145,7 @@ def run_reversed(ALGO, timesteps, option, n_steps):
             while True:
                 partner.learn(total_timesteps=partner.n_steps, reset_num_timesteps=False)
                 dumped_buffer[0] = copy.deepcopy(partner.rollout_buffer)
-        except Exception:
+        except KillEnvException:
             pass
             # dummy_env.unwrapped.close()
 
@@ -141,7 +171,78 @@ def check_equivalent_models(model1, model2):
             return False
     return True
 
+def run_standard_dqn(ALGO, timesteps, option, n_steps):
+    stable_baselines3.common.utils.set_random_seed(0)
 
+    env = make_env(option)
+    env.unwrapped.ego_ind = 0
+    ego = ALGO('MlpPolicy', env, train_freq=n_steps, verbose=0, learning_starts=32, batch_size=32, seed=0)
+    partner = FakeAgent(env.unwrapped.getDummyEnv(1))
+    env.unwrapped.add_partner_agent(partner)
+
+    print('ego start', sum([param.data.mean() for param in ego.policy.parameters()]))
+    ego.learn(total_timesteps=timesteps)
+    print('gradient updates', ego._n_updates)
+    # print(ego.rollout_buffer.observations, ego.rollout_buffer.actions, ego.rollout_buffer.rewards)
+    print('ego end', sum([param.data.mean() for param in ego.policy.parameters()]))
+    return ego.policy
+
+
+def run_reversed_dqn(ALGO, timesteps, option, n_steps):
+    stable_baselines3.common.utils.set_random_seed(0)
+
+    env = make_env(option)
+    env.unwrapped.ego_ind = 1
+    ego = FakeEgo(env)
+    dummy_env = env.unwrapped.construct_single_agent_interface(0)
+    partner = ALGO('MlpPolicy', dummy_env, train_freq=n_steps, verbose=0, learning_starts=32, batch_size=32, seed=0)
+    # print("ADDED PARTNER AGENT")
+
+    def learn_thread():
+        try:
+            while True:
+                partner.learn(total_timesteps=timesteps, reset_num_timesteps=False)
+        except KillEnvException:
+            return
+        except Exception:
+            import signal
+            import traceback
+            # threading.current_thread().interrupt_main()
+            traceback.print_exc()
+            signal.raise_signal(signal.SIGTERM)
+        print("DO NOT RESTART")
+
+    print('ego start', sum([param.data.mean() for param in partner.policy.parameters()]))
+    t = Thread(target=learn_thread, daemon=True)
+    t.start()
+    ego.learn(dummy_env, total_timesteps=timesteps)
+    # env.step(env.action_space.sample())
+    with dummy_env.obs_cv:
+        dummy_env.dead = True
+        dummy_env.obs_cv.notify()
+    print('gradient updates', partner._n_updates)
+    print('ego end', sum([param.data.mean() for param in partner.policy.parameters()]))
+    t.join()
+    # print('ego timesteps', dummy_env.steps)
+    return partner.policy
+
+
+@pytest.mark.timeout(60)
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize("ALGO", [DQN])
+@pytest.mark.parametrize("epochs", [1, 5])
+@pytest.mark.parametrize("option", [0, 1])
+@pytest.mark.parametrize("n_steps", [10, 100, 1000])
+def test_dqn(ALGO, epochs, option, n_steps):
+    model1 = run_standard_dqn(ALGO, n_steps * epochs, option, n_steps)
+    model2 = run_reversed_dqn(ALGO, n_steps * epochs, option, n_steps)
+    assert check_equivalent_models(model1, model2), "NOT IDENTICAL MODELS"
+
+    assert threading.active_count() == 1, "DID NOT KILL THREADS"
+
+
+@pytest.mark.timeout(60)
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.parametrize("ALGO", [PPO, A2C])
@@ -154,6 +255,7 @@ def test_sarl(ALGO, epochs, option, n_steps):
     assert check_equivalent_models(model1, model2), "NOT IDENTICAL MODELS"
 
     assert threading.active_count() == 1, "DID NOT KILL THREADS"
+
 
 # def printifdiff(r1, r2, val):
 #     if not np.array_equal(r1.__dict__[val], r2.__dict__[val]):

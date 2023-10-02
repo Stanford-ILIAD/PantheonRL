@@ -24,6 +24,8 @@ dependencies = [
     "flask",
     "scipy",
     "pyglet==1.5.14",
+    "pytest",
+    "pytest-timeout"
 ]
 
 [project.urls]

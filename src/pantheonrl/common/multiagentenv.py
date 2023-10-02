@@ -14,6 +14,9 @@ from threading import Condition
 class PlayerException(Exception):
     """ Raise when players in the environment are incorrectly set """
 
+class KillEnvException(Exception):
+    """ Raise when the DummyEnv is killed """
+
 
 class DummyEnv(gym.Env):
     """
@@ -55,7 +58,7 @@ class DummyEnv(gym.Env):
             while self._obs is None:
                 self.obs_cv.wait()
                 if self.dead:
-                    raise Exception("Killing dummy environment")
+                    raise KillEnvException("Killing dummy environment")
             to_return = self.extractor(self._obs), self._rew, self._done, False, {}
             if not self._done:
                 self._obs = None
