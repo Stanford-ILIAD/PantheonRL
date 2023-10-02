@@ -1,9 +1,10 @@
 import argparse
 import json
-import gym
+import gymnasium as gym
 
 import torch as th
 
+import stable_baselines3
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
@@ -92,7 +93,7 @@ def latent_check(args):
 def generate_env(args):
     env = gym.make(args.env, **args.env_config)
 
-    altenv = env.getDummyEnv(1)
+    altenv = env.unwrapped.getDummyEnv(1)
 
     if args.framestack > 1:
         env = frame_wrap(env, args.framestack)
@@ -223,7 +224,7 @@ def generate_partners(altenv, env, ego, args):
                         ego,
                         args)
         print(f'Partner {i}: {v}')
-        env.add_partner_agent(v)
+        env.unwrapped.add_partner_agent(v)
         partners.append(v)
     return partners
 
@@ -393,6 +394,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    if args.seed is not None:
+        stable_baselines3.common.utils.set_random_seed(args.seed)
+
     if args.preset:
         args = preset(args, args.preset)
     input_check(args)
@@ -411,9 +415,10 @@ if __name__ == '__main__':
     if args.tensorboard_log:
         learn_config['tb_log_name'] = args.tensorboard_name
     ego.learn(**learn_config)
+    env.step(env.action_space.sample())
 
     if args.record:
-        transition = env.get_transitions()
+        transition = env.unwrapped.get_transitions()
         transition.write_transition(args.record)
 
     if args.ego_save:

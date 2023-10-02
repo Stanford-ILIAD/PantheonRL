@@ -39,21 +39,22 @@ def generate_agent(env, policy_type, config, location):
 
 
 def run_test(ego, env, num_episodes, render=False):
-    env.set_ego_extractor(lambda obs: obs)
+    env.unwrapped.set_ego_extractor(lambda obs: obs)
     rewards = []
     for game in range(num_episodes):
-        obs = env.reset()
+        obs, _ = env.unwrapped.reset()
         done = False
         reward = 0
         if render:
-            env.render()
+            env.unwrapped.render()
         while not done:
             action = ego.get_action(obs, False)
-            obs, newreward, done, _ = env.step(action)
+            obs, newreward, terminated, truncated, _ = env.unwrapped.step(action)
+            done = terminated or truncated
             reward += newreward
 
             if render:
-                env.render()
+                env.unwrapped.render()
                 sleep(1/60)
 
         rewards.append(reward)
@@ -189,10 +190,10 @@ if __name__ == '__main__':
     ego = generate_agent(env, args.ego, args.ego_config, args.ego_load)
     print(f'Ego: {ego}')
     alt = generate_agent(altenv, args.alt, args.alt_config, args.alt_load)
-    env.add_partner_agent(alt)
+    env.unwrapped.add_partner_agent(alt)
     print(f'Alt: {alt}')
 
     run_test(ego, env, args.total_episodes, args.render)
 
     if args.record is not None:
-        env.get_transitions().write_transition(args.record)
+        env.unwrapped.get_transitions().write_transition(args.record)
