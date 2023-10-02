@@ -3,7 +3,7 @@ import gymnasium as gym
 import numpy as np
 
 from pantheonrl.common.agents import Agent
-from pantheonrl.common.multiagentenv import TurnBasedEnv, DummyEnv
+from pantheonrl.common.multiagentenv import TurnBasedEnv
 from pantheonrl.envs.blockworldgym.gridutils import HORIZONTAL, VERTICAL, generate_random_world, gravity, place, matches
 
 import pantheonrl.envs.blockworldgym.rendering as rendering
@@ -32,24 +32,14 @@ CONSTRUCTOR_OBS_SPACE = gym.spaces.MultiDiscrete([NUM_TOKENS]+gridformat)
 # can see the planned grid and the "real world" grid
 PLANNER_OBS_SPACE = gym.spaces.MultiDiscrete(gridformat + gridformat)
 
-PartnerEnv = DummyEnv(CONSTRUCTOR_OBS_SPACE, CONSTRUCTOR_ACTION_SPACE)
-
 
 class BlockEnv(TurnBasedEnv):
     def __init__(self):
-        super().__init__(probegostart=1)
-        self.observation_space = PLANNER_OBS_SPACE
-        self.partner_observation_space = CONSTRUCTOR_OBS_SPACE
-        self.action_space = PLANNER_ACTION_SPACE
-        self.partner_action_space = CONSTRUCTOR_ACTION_SPACE
-        self.partner_env = PartnerEnv
+        super().__init__([PLANNER_OBS_SPACE, CONSTRUCTOR_OBS_SPACE], [PLANNER_ACTION_SPACE, CONSTRUCTOR_ACTION_SPACE], probegostart=1)
         self.viewer = None
 
-    def getDummyEnv(self, player_ind: int):
-        return PartnerEnv if player_ind else self
-
     def multi_reset(self, egofirst):
-        self.gridworld = generate_random_world(GRIDLEN, NUM_BLOCKS, NUM_COLORS)
+        self.gridworld = generate_random_world(GRIDLEN, NUM_BLOCKS, NUM_COLORS, self.np_random)
         self.constructor_obs = np.zeros((GRIDLEN, GRIDLEN))
         self.last_token = 0
         self.viewer = None

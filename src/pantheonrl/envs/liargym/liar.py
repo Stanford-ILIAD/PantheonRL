@@ -45,10 +45,8 @@ class LiarDefaultAgent(Agent):
 class LiarEnv(TurnBasedEnv):
 
     def __init__(self, probegostart=0.5):
-        super(LiarEnv, self).__init__(probegostart=probegostart)
+        super(LiarEnv, self).__init__([OBS_SPACE] * 2, [ACTION_SPACE] * 2, probegostart=probegostart)
         self.history = []
-        self.observation_space = OBS_SPACE
-        self.action_space = ACTION_SPACE
 
     def getObs(self, isego):
         prevmove = self.history + DEFAULT * \

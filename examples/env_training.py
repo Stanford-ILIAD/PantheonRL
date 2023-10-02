@@ -1,3 +1,4 @@
+
 """
 This is a simple example training script for PantheonRL.
 """
@@ -23,4 +24,4 @@ env.unwrapped.add_partner_agent(partner)
 
 # Finally, you can construct an ego agent and train it in the environment
 ego = PPO('MlpPolicy', env, verbose=1)
-ego.learn(total_timesteps=1000)
+ego.learn(total_timesteps=10000)

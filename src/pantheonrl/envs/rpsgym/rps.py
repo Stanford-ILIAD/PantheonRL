@@ -33,10 +33,8 @@ class RPSWeightedAgent(Agent):
 class RPSEnv(SimultaneousEnv):
 
     def __init__(self):
-        super(RPSEnv, self).__init__()
+        super(RPSEnv, self).__init__([OBS_SPACE] * 2, [ACTION_SPACE] * 2)
         self.history = []
-        self.observation_space = OBS_SPACE
-        self.action_space = ACTION_SPACE
 
     def multi_step(self, ego_action, alt_action):
         outcome = (ego_action - alt_action + 3) % 3

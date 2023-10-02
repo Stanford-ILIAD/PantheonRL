@@ -13,7 +13,6 @@ class OvercookedMultiEnv(SimultaneousEnv):
         base_env: OvercookedEnv
         featurize_fn: what function is used to featurize states returned in the 'both_agent_obs' field
         """
-        super(OvercookedMultiEnv, self).__init__()
 
         DEFAULT_ENV_PARAMS = {
             "horizon": 400
@@ -35,10 +34,11 @@ class OvercookedMultiEnv(SimultaneousEnv):
 
         if baselines: np.random.seed(0)
 
-        self.observation_space = self._setup_observation_space()
+        observation_space = self._setup_observation_space()
         self.lA = len(Action.ALL_ACTIONS)
-        self.action_space  = gym.spaces.Discrete( self.lA )
+        action_space  = gym.spaces.Discrete( self.lA )
         self.ego_agent_idx = ego_agent_idx
+        super(OvercookedMultiEnv, self).__init__([observation_space] * 2, [action_space] * 2)
         self.multi_reset()
 
     def _setup_observation_space(self):

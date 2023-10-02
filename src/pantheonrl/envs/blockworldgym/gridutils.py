@@ -5,25 +5,25 @@ import warnings
 HORIZONTAL = 0
 VERTICAL = 1
 
-def generate_random_world(width, num_blocks, num_colors):
+def generate_random_world(width, num_blocks, num_colors, np_random):
     gridworld = np.zeros((width, width))
     blocks_placed = 0
     while blocks_placed < num_blocks:
-        if drop_random(width, gridworld, num_colors) != -1:
+        if drop_random(width, gridworld, num_colors, np_random) != -1:
             blocks_placed += 1
     return gridworld
 
-def drop_random(width, gridworld, num_colors):
-    orientation = np.random.randint(2) 
+def drop_random(width, gridworld, num_colors, np_random):
+    orientation = np_random.integers(0, 2) 
     if orientation == HORIZONTAL: 
-        x = np.random.randint(width - 1) # can't drop at the last coordinate if horizontal
+        x = np_random.integers(0, width - 1) # can't drop at the last coordinate if horizontal
     else:
-        x = np.random.randint(width)
+        x = np_random.integers(0, width)
     y = gravity(gridworld, orientation, x)
     if y == -1:
         return -1 # error
     else:
-        color = np.random.randint(num_colors) + 1
+        color = np_random.integers(0, num_colors) + 1
         place(gridworld, x, y, color, orientation)
     return 0
 

@@ -5,7 +5,7 @@ import gymnasium as gym
 import numpy as np
 
 from pantheonrl.common.agents import Agent
-from pantheonrl.common.multiagentenv import TurnBasedEnv, DummyEnv
+from pantheonrl.common.multiagentenv import TurnBasedEnv
 
 GRIDLEN = 7  # block world in a 7 x 7 grid
 NUM_BLOCKS = 5  # the number of blocks will be variable in the non-simplified version,
@@ -30,17 +30,15 @@ CONSTRUCTOR_OBS_SPACE = gym.spaces.MultiDiscrete([NUM_TOKENS]+blocklistformat)
 # constructor's obs space and true colorings
 PLANNER_OBS_SPACE = gym.spaces.MultiDiscrete(blocklistformat + blocklistformat)
 
-PartnerEnv = DummyEnv(CONSTRUCTOR_OBS_SPACE, CONSTRUCTOR_ACTION_SPACE)
 
-
-def generate_grid_world():
+def generate_grid_world(np_random):
     # generates a random GRIDLEN x GRIDLEN world with NUM_BLOCKS blocks
     # will be replaced in the true version with their generate gridworld function, which has gravity/var blocks/etc
     world = np.zeros((GRIDLEN, GRIDLEN))
     blocks_so_far = 0
     grid_world = []
     while blocks_so_far < NUM_BLOCKS:
-        new_block = random_block()
+        new_block = random_block(np_random)
         y = new_block[1]
         x = new_block[2]
         if new_block[0] == 0:
@@ -60,38 +58,30 @@ def generate_grid_world():
     return grid_world
 
 
-def random_block():
+def random_block(np_random):
     block = []
-    if np.random.randint(2) == 0:
+    if np_random.integers(0, 2) == 0:
         # horizontal
         block.append(0)
-        x = np.random.randint(GRIDLEN - 1)
-        y = np.random.randint(GRIDLEN)
+        x = np_random.integers(0, GRIDLEN - 1)
+        y = np_random.integers(0, GRIDLEN)
     else:
         block.append(1)
-        x = np.random.randint(GRIDLEN)
-        y = np.random.randint(GRIDLEN - 1)
+        x = np_random.integers(0, GRIDLEN)
+        y = np_random.integers(0, GRIDLEN - 1)
     block.append(y)
     block.append(x)
-    block.append(np.random.randint(NUM_COLORS) + 1)
+    block.append(np_random.integers(0, NUM_COLORS) + 1)
     return block
 
 
 class SimpleBlockEnv(TurnBasedEnv):
     def __init__(self):
-        super().__init__(probegostart=1)
-        self.observation_space = PLANNER_OBS_SPACE
-        self.partner_observation_space = CONSTRUCTOR_OBS_SPACE
-        self.action_space = PLANNER_ACTION_SPACE
-        self.partner_action_space = CONSTRUCTOR_ACTION_SPACE
-        self.partner_env = PartnerEnv
+        super().__init__([PLANNER_OBS_SPACE, CONSTRUCTOR_OBS_SPACE], [PLANNER_ACTION_SPACE, CONSTRUCTOR_ACTION_SPACE], probegostart=1)
         self.viewer = None
 
-    def getDummyEnv(self, player_ind: int):
-        return PartnerEnv if player_ind else self
-
     def multi_reset(self, egofirst):
-        self.gridworld = generate_grid_world()
+        self.gridworld = generate_grid_world(self.np_random)
         self.constructor_obs = [[block[0], block[1], block[2], 0]
                                 for block in self.gridworld]
         self.last_token = 0

@@ -3,7 +3,7 @@ from typing import Tuple, Optional, List, Dict
 import numpy as np
 import gymnasium as gym
 
-from pantheonrl.common.multiagentenv import MultiAgentEnv, DummyEnv
+from pantheonrl.common.multiagentenv import MultiAgentEnv
 from pantheonrl.common.observation import Observation
 
 
@@ -14,25 +14,20 @@ class PettingZooAECWrapper(MultiAgentEnv):
 
     def __init__(self, base_env, ego_ind=0):
         self.base_env = base_env
+        observation_spaces = []
+        action_spaces = []
+        for player_ind in range(base_env.max_num_agents):
+            agent = self.base_env.possible_agents[player_ind]
+            ospace = self.base_env.observation_space(agent)
+            if isinstance(ospace, gym.spaces.dict.Dict):
+                ospace = ospace.spaces['observation']
+            aspace = self.base_env.action_space(agent)
+            observation_spaces.append(ospace)
+            action_spaces.append(aspace)
         super(PettingZooAECWrapper, self).__init__(
+            observation_spaces, action_spaces,
             ego_ind, base_env.max_num_agents)
-        ego_agent = base_env.possible_agents[ego_ind]
-        self.action_space = base_env.action_space(ego_agent)
-
-        obs_space = base_env.observation_space(ego_agent)
-        if isinstance(obs_space, gym.spaces.dict.Dict):
-            obs_space = obs_space.spaces['observation']
-        self.observation_space = obs_space
         self._action_mask = None
-
-    def getDummyEnv(self, player_ind: int):
-        agent = self.base_env.possible_agents[player_ind]
-        ospace = self.base_env.observation_space(agent)
-        if isinstance(ospace, gym.spaces.dict.Dict):
-            ospace = ospace.spaces['observation']
-        ospace = ospace
-        aspace = self.base_env.action_space(agent)
-        return DummyEnv(ospace, aspace)
 
     def n_step(
                     self,

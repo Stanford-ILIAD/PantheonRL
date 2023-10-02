@@ -14,6 +14,7 @@ from stable_baselines3 import PPO, A2C, DQN
 from pantheonrl import OnPolicyAgent, OffPolicyAgent
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("env_name", ['RPS-v0', 'LiarsDice-v0', 'BlockEnv-v0', 'BlockEnv-v1'])
 def test_PPO(env_name):
     try:
@@ -26,6 +27,7 @@ def test_PPO(env_name):
         assert False, f"Exception raised on {env_name}: {e}"
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("env_name", ['RPS-v0', 'LiarsDice-v0', 'BlockEnv-v0', 'BlockEnv-v1'])
 def test_A2C(env_name):
     try:
@@ -38,6 +40,7 @@ def test_A2C(env_name):
         assert False, f"Exception raised on {env_name}: {e}"
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("env_name", ['RPS-v0'])
 def test_DQN(env_name):
     try:

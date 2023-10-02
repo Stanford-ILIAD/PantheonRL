@@ -19,6 +19,7 @@ import overcookedgym
 LAYOUTS = ['simple', 'random1', 'random3', 'unident_s', 'random0']
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("env_name", LAYOUTS)
 def test_PPO(env_name):
     try:
@@ -31,6 +32,7 @@ def test_PPO(env_name):
         assert False, f"Exception raised on {env_name}: {e}"
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("env_name", LAYOUTS)
 def test_A2C(env_name):
     try:
@@ -43,6 +45,7 @@ def test_A2C(env_name):
         assert False, f"Exception raised on {env_name}: {e}"
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.parametrize("env_name", LAYOUTS)
 def test_DQN(env_name):
     try:

@@ -20,6 +20,8 @@ from stable_baselines3.common.on_policy_algorithm import OnPolicyAlgorithm
 from stable_baselines3.common.off_policy_algorithm import OffPolicyAlgorithm
 from stable_baselines3.common.utils import safe_mean
 
+from threading import Condition
+
 
 class Agent(ABC):
     """
@@ -49,6 +51,47 @@ class Agent(ABC):
         :param reward: The reward receieved from the previous action step
         :param done: Whether the game is done
         """
+
+
+class DummyAgent(Agent):
+    """
+    Agent wrapper for standard SARL algorithms assuming a gym interface
+    """
+
+    def __init__(self, dummy_env):
+        # print("Constructing Dummy Agent")
+        self.rew = 0
+        self.done = False
+        self.dummy_env = dummy_env
+
+        self._action = None
+        self.action_cv = Condition()
+
+        self.dummy_env.associated_agent = self
+
+    def get_action(self, obs: Observation, record: bool = True) -> np.ndarray:
+        # print("Dummy Agent: got new observation")
+        with self.dummy_env.obs_cv:
+            self.dummy_env._obs = obs
+            self.dummy_env._rew = self.rew
+            self.dummy_env._done = self.done
+            self.rew = 0
+            self.done = False
+            # print("Dummy Agent: sent observation notification")
+            self.dummy_env.obs_cv.notify()
+
+        with self.action_cv:
+            # print("Dummy Agent: waiting for action")
+            while self._action is None:
+                self.action_cv.wait()
+            to_return = self._action
+            self._action = None
+            # print("Dummy Agent: got action")
+        return to_return
+
+    def update(self, reward: float, done: bool) -> None:
+        self.rew += reward
+        self.done = self.done or done
 
 
 class StaticPolicyAgent(Agent):
@@ -93,8 +136,20 @@ class OnPolicyAgent(Agent):
                  model: OnPolicyAlgorithm,
                  log_interval=None,
                  tensorboard_log=None,
+                 # callback=None,
                  tb_log_name="OnPolicyAgent"):
         self.model = model
+
+        # self.total_timesteps, self.callback = self.model._setup_learn(
+        #     0,
+        #     callback,
+        #     True,
+        #     tb_log_name,
+        #     False
+        # )
+
+        # self.callback.on_training_start(locals(), globals())
+
         self._last_episode_starts = [True]
         self.n_steps = 0
         self.values: th.Tensor = th.empty(0)
@@ -107,6 +162,8 @@ class OnPolicyAgent(Agent):
         self.log_interval = log_interval or (1 if model.verbose else None)
         self.iteration = 0
         self.model.ep_info_buffer = deque([{"r": 0, "l": 0}], maxlen=100)
+
+        self.model.policy.set_training_mode(False)
 
     def get_action(self, obs: Observation, record: bool = True) -> np.ndarray:
         """
@@ -153,6 +210,7 @@ class OnPolicyAgent(Agent):
                 self.model.logger.dump(step=self.num_timesteps)
 
             self.model.train()
+            self.model.policy.set_training_mode(False)
             self.iteration += 1
             buf.reset()
             self.n_steps = 0
@@ -167,11 +225,11 @@ class OnPolicyAgent(Agent):
             lastinfo["l"] += 1
             self.model.ep_info_buffer.append(lastinfo)
 
-            obs_shape = self.model.policy.observation_space.shape
-            act_shape = self.model.policy.action_space.shape
+            # obs_shape = self.model.policy.observation_space.shape
+            # act_shape = self.model.policy.action_space.shape
             buf.add(
-                np.reshape(obs, (1,) + obs_shape),
-                np.reshape(actions, (1,) + act_shape),
+                np.array(obs),
+                np.array(actions),
                 [0],
                 self._last_episode_starts,
                 values,
@@ -263,7 +321,8 @@ class OffPolicyAgent(Agent):
                 buf = self.model.replay_buffer
                 buf.observations[buf.pos] = np.array(obs).copy()
                 self.model._store_transition(
-                    buf, self.old_buffer_action, obs, np.array([self.old_reward]),
+                    buf, self.old_buffer_action,
+                    obs, np.array([self.old_reward]),
                     np.array([self.old_done]), [self.old_info])
 
             if self.old_done:
