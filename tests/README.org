@@ -1,12 +1,12 @@
 * PantheonRL Tests
 
-** TODOS [0/7]
+** TODOS [1/7]
 - [-] Arbitrary SARL algorithm wrappers
   - [X] Initial Implementation
   - [X] Testing
   - [ ] Polish interface
-- [ ] Fix SB3-specific Agents
-  - [ ] Testing
+- [X] Fix SB3-specific Agents
+  - [X] Testing
 - [ ] Add relevant example scripts
 - [ ] Add test cases for scripts
   - [ ] trainer.py

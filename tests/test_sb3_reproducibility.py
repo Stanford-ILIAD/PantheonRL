@@ -6,7 +6,7 @@ import numpy as np
 
 import overcookedgym
 
-from pantheonrl.common.agents import Agent
+from pantheonrl.common.agents import Agent, OnPolicyAgent, OffPolicyAgent
 from pantheonrl.common.multiagentenv import KillEnvException
 
 import copy
@@ -81,6 +81,20 @@ class ReplayAgent(Agent):
     def update(self, reward, done):
         pass
 
+class CounterAgent(Agent):
+    def __init__(self, agent):
+        self.agent = agent
+        self.steps = 0
+
+    def get_action(self, obs, record:bool = True):
+        self.steps += 1
+        toreturn = self.agent.get_action(obs, record)
+        # print("ACTION is", toreturn)
+        return toreturn
+
+    def update(self, reward, done):
+        self.agent.update(reward, done)
+
 
 class FakeEgo:
     def __init__(self, env):
@@ -90,7 +104,7 @@ class FakeEgo:
 
     def learn(self, dummy_env, total_timesteps):
         self.env.reset()
-        while dummy_env.steps < total_timesteps:
+        while dummy_env.steps <= total_timesteps:
             _, _, done, _, _ = self.env.step(self.action_space.sample())
             if done:
                 self.env.reset()
@@ -115,16 +129,16 @@ def run_standard(ALGO, timesteps, option, n_steps):
     stable_baselines3.common.utils.set_random_seed(0)
 
     env = make_env(option)
-    ego = ALGO('MlpPolicy', env, n_steps=n_steps, verbose=0)
+    ego = ALGO('MlpPolicy', env, n_steps=n_steps, verbose=1)
     partner = FakeAgent(env.unwrapped.getDummyEnv(1))
     env.unwrapped.ego_ind = 0
     env.unwrapped.add_partner_agent(partner)
 
-    # print('ego start', sum([param.data.mean() for param in ego.policy.parameters()]))
+    print('ego start', sum([param.data.mean() for param in ego.policy.parameters()]))
     ego.learn(total_timesteps=timesteps)
     rb = copy.deepcopy(ego.rollout_buffer)
     # print(ego.rollout_buffer.observations, ego.rollout_buffer.actions, ego.rollout_buffer.rewards)
-    # print('ego end', sum([param.data.mean() for param in ego.policy.parameters()]))
+    print('ego end', sum([param.data.mean() for param in ego.policy.parameters()]))
     return ego.policy, rb
 
 
@@ -134,41 +148,18 @@ def run_reversed(ALGO, timesteps, option, n_steps):
     env = make_env(option)
     env.unwrapped.ego_ind = 1
     ego = FakeEgo(env)
-    dummy_env = env.unwrapped.construct_single_agent_interface(0)
-    partner = ALGO('MlpPolicy', dummy_env, n_steps=n_steps, verbose=0)
+    dummy_env = env.unwrapped.getDummyEnv(0)
+    partner = CounterAgent(OnPolicyAgent(ALGO('MlpPolicy', dummy_env, n_steps=n_steps, verbose=0), working_timesteps=timesteps))
+    env.unwrapped.add_partner_agent(partner, 0)
     # print("ADDED PARTNER AGENT")
-
-    dumped_buffer = [None]
-
-    def learn_thread():
-        try:
-            while True:
-                partner.learn(total_timesteps=partner.n_steps, reset_num_timesteps=False)
-                dumped_buffer[0] = copy.deepcopy(partner.rollout_buffer)
-        except KillEnvException:
-            pass
-            # dummy_env.unwrapped.close()
-
-    # print('ego start', sum([param.data.mean() for param in partner.policy.parameters()]))
-    t = Thread(target=learn_thread, daemon=True)
-    t.start()
-    ego.learn(dummy_env, total_timesteps=timesteps)
-    with dummy_env.obs_cv:
-        dummy_env.dead = True
-        dummy_env.obs_cv.notify()
-    t.join()
-    rb = dumped_buffer[0]
-    # print('ego end', sum([param.data.mean() for param in partner.policy.parameters()]))
+    print('ego start', sum([param.data.mean() for param in partner.agent.model.policy.parameters()]))
+    ego.learn(partner, total_timesteps=timesteps)
+    rb = partner.agent.old_buffer
+    # print(rb.observations, rb.actions, rb.rewards)
+    print('ego end', sum([param.data.mean() for param in partner.agent.model.policy.parameters()]))
     # print('ego timesteps', dummy_env.steps)
-    return partner.policy, rb
+    return partner.agent.model.policy, rb
 
-
-def check_equivalent_models(model1, model2):
-    for p1, p2 in zip(model1.parameters(), model2.parameters()):
-        # print(p1.data, p2.data)
-        if p1.data.ne(p2.data).sum() > 0:
-            return False
-    return True
 
 def run_standard_dqn(ALGO, timesteps, option, n_steps):
     stable_baselines3.common.utils.set_random_seed(0)
@@ -181,10 +172,11 @@ def run_standard_dqn(ALGO, timesteps, option, n_steps):
 
     print('ego start', sum([param.data.mean() for param in ego.policy.parameters()]))
     ego.learn(total_timesteps=timesteps)
-    print('gradient updates', ego._n_updates)
+    # rb = copy.deepcopy(ego.rollout_buffer)
     # print(ego.rollout_buffer.observations, ego.rollout_buffer.actions, ego.rollout_buffer.rewards)
     print('ego end', sum([param.data.mean() for param in ego.policy.parameters()]))
-    return ego.policy
+    print(ego._n_updates, ego._n_calls)
+    return ego.policy, ego.replay_buffer
 
 
 def run_reversed_dqn(ALGO, timesteps, option, n_steps):
@@ -193,37 +185,59 @@ def run_reversed_dqn(ALGO, timesteps, option, n_steps):
     env = make_env(option)
     env.unwrapped.ego_ind = 1
     ego = FakeEgo(env)
-    dummy_env = env.unwrapped.construct_single_agent_interface(0)
-    partner = ALGO('MlpPolicy', dummy_env, train_freq=n_steps, verbose=0, learning_starts=32, batch_size=32, seed=0)
+    dummy_env = env.unwrapped.getDummyEnv(0)
+    partner = CounterAgent(OffPolicyAgent(ALGO('MlpPolicy', dummy_env, train_freq=n_steps, verbose=0, learning_starts=32, batch_size=32, seed=0), working_timesteps=timesteps))
+    env.unwrapped.add_partner_agent(partner, 0)
     # print("ADDED PARTNER AGENT")
-
-    def learn_thread():
-        try:
-            while True:
-                partner.learn(total_timesteps=timesteps, reset_num_timesteps=False)
-        except KillEnvException:
-            return
-        except Exception:
-            import signal
-            import traceback
-            # threading.current_thread().interrupt_main()
-            traceback.print_exc()
-            signal.raise_signal(signal.SIGTERM)
-        print("DO NOT RESTART")
-
-    print('ego start', sum([param.data.mean() for param in partner.policy.parameters()]))
-    t = Thread(target=learn_thread, daemon=True)
-    t.start()
-    ego.learn(dummy_env, total_timesteps=timesteps)
-    # env.step(env.action_space.sample())
-    with dummy_env.obs_cv:
-        dummy_env.dead = True
-        dummy_env.obs_cv.notify()
-    print('gradient updates', partner._n_updates)
-    print('ego end', sum([param.data.mean() for param in partner.policy.parameters()]))
-    t.join()
+    print('ego start', sum([param.data.mean() for param in partner.agent.model.policy.parameters()]))
+    ego.learn(partner, total_timesteps=timesteps)
+    # print(rb.observations, rb.actions, rb.rewards)
+    print('ego end', sum([param.data.mean() for param in partner.agent.model.policy.parameters()]))
     # print('ego timesteps', dummy_env.steps)
-    return partner.policy
+    print(partner.agent.model._n_updates, partner.agent.model._n_calls)
+    return partner.agent.model.policy, partner.agent.model.replay_buffer
+
+
+def check_equivalent_models(model1, model2):
+    for p1, p2 in zip(model1.parameters(), model2.parameters()):
+        # print(p1.data, p2.data)
+        if p1.data.ne(p2.data).sum() > 0:
+            return False
+    return True
+
+def printifdiff(r1, r2, val):
+    v1 = r1.__dict__[val].flatten()
+    v2 = r2.__dict__[val].flatten()
+    if not np.array_equal(v1, v2):
+        print(val, False, v1, v2, v1==v2)
+        # idx = np.where(r1.__dict__[val] != r2.__dict__[val])[0][0]
+        # print(val, False, idx, "Standard", r1.__dict__[val][idx], "Reversed", r2.__dict__[val][idx])
+    else:
+        print(val, True)
+
+def check_equivalent_buffers(rb1, rb2):
+    printifdiff(rb1, rb2, "observations")
+    printifdiff(rb1, rb2, "actions")
+    printifdiff(rb1, rb2, "rewards")
+    printifdiff(rb1, rb2, "advantages")
+    printifdiff(rb1, rb2, "returns")
+    printifdiff(rb1, rb2, "episode_starts")
+    printifdiff(rb1, rb2, "log_probs")
+    printifdiff(rb1, rb2, "values")
+
+    
+def check_equivalent_rbuffers(rb1, rb2):
+    printifdiff(rb1, rb2, "observations")
+    printifdiff(rb1, rb2, "next_observations")
+    printifdiff(rb1, rb2, "actions")
+    printifdiff(rb1, rb2, "rewards")
+    printifdiff(rb1, rb2, "dones")
+    printifdiff(rb1, rb2, "timeouts")
+    # printifdiff(rb1, rb2, "advantages")
+    # printifdiff(rb1, rb2, "returns")
+    # printifdiff(rb1, rb2, "episode_starts")
+    # printifdiff(rb1, rb2, "log_probs")
+    # printifdiff(rb1, rb2, "values")
 
 
 @pytest.mark.timeout(60)
@@ -234,11 +248,9 @@ def run_reversed_dqn(ALGO, timesteps, option, n_steps):
 @pytest.mark.parametrize("option", [0, 1])
 @pytest.mark.parametrize("n_steps", [10, 100, 1000])
 def test_dqn(ALGO, epochs, option, n_steps):
-    model1 = run_standard_dqn(ALGO, n_steps * epochs, option, n_steps)
-    model2 = run_reversed_dqn(ALGO, n_steps * epochs, option, n_steps)
+    model1, rb1 = run_standard_dqn(ALGO, n_steps * epochs, option, n_steps)
+    model2, rb2 = run_reversed_dqn(ALGO, n_steps * epochs, option, n_steps)
     assert check_equivalent_models(model1, model2), "NOT IDENTICAL MODELS"
-
-    assert threading.active_count() == 1, "DID NOT KILL THREADS"
 
 
 @pytest.mark.timeout(60)
@@ -248,31 +260,12 @@ def test_dqn(ALGO, epochs, option, n_steps):
 @pytest.mark.parametrize("epochs", [1, 5])
 @pytest.mark.parametrize("option", [0, 1, 2, 3, 4])
 @pytest.mark.parametrize("n_steps", [10, 100, 1000])
-def test_sarl(ALGO, epochs, option, n_steps):
+def test_onpolicy(ALGO, epochs, option, n_steps):
     model1, rb1 = run_standard(ALGO, n_steps * epochs, option, n_steps)
     model2, rb2 = run_reversed(ALGO, n_steps * epochs, option, n_steps)
     assert check_equivalent_models(model1, model2), "NOT IDENTICAL MODELS"
 
-    assert threading.active_count() == 1, "DID NOT KILL THREADS"
-
-
-# def printifdiff(r1, r2, val):
-#     if not np.array_equal(r1.__dict__[val], r2.__dict__[val]):
-#         # print(val, False, r1.__dict__[val].flatten(), r2.__dict__[val].flatten())
-#         idx = np.where(r1.__dict__[val] != r2.__dict__[val])[0][0]
-#         print(val, False, idx, "Standard", r1.__dict__[val][idx], "Reversed", r2.__dict__[val][idx])
-#     else:
-#         print(val, True)
-
-# def check_equivalent_buffers(rb1, rb2):
-#     printifdiff(rb1, rb2, "observations")
-#     printifdiff(rb1, rb2, "actions")
-#     printifdiff(rb1, rb2, "rewards")
-#     printifdiff(rb1, rb2, "advantages")
-#     printifdiff(rb1, rb2, "returns")
-#     printifdiff(rb1, rb2, "episode_starts")
-#     printifdiff(rb1, rb2, "log_probs")
-#     printifdiff(rb1, rb2, "values")
+# test_sarl(PPO, 5, 0, 1000)
 
 # def verify_actions(rb1, timesteps):
 #     stable_baselines3.common.utils.set_random_seed(0)
