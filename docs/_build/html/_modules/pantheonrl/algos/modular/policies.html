@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pantheonrl.algos.modular.policies &mdash; PantheonRL 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            PantheonRL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/install.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../_autosummary/pantheonrl.html">pantheonrl</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PantheonRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pantheonrl.algos.modular.policies</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pantheonrl.algos.modular.policies</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
+<span class="kn">import</span> <span class="nn">torch</span> <span class="k">as</span> <span class="nn">th</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">stable_baselines3</span> <span class="kn">import</span> <span class="n">PPO</span>
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.preprocessing</span> <span class="kn">import</span> <span class="n">preprocess_obs</span><span class="p">,</span> <span class="n">is_image_space</span><span class="p">,</span> <span class="n">get_action_dim</span>
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.torch_layers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">FlattenExtractor</span><span class="p">,</span> <span class="n">BaseFeaturesExtractor</span><span class="p">,</span> <span class="n">create_mlp</span><span class="p">,</span>
+                                                   <span class="n">NatureCNN</span><span class="p">,</span> <span class="n">MlpExtractor</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.utils</span> <span class="kn">import</span> <span class="n">get_device</span><span class="p">,</span> <span class="n">is_vectorized_observation</span>
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.vec_env</span> <span class="kn">import</span> <span class="n">VecTransposeImage</span>
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.distributions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">make_proba_distribution</span><span class="p">,</span> <span class="n">Distribution</span><span class="p">,</span>
+                                                    <span class="n">DiagGaussianDistribution</span><span class="p">,</span> <span class="n">CategoricalDistribution</span><span class="p">,</span>
+                                                    <span class="n">MultiCategoricalDistribution</span><span class="p">,</span> <span class="n">BernoulliDistribution</span><span class="p">,</span>
+                                                    <span class="n">StateDependentNoiseDistribution</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.policies</span> <span class="kn">import</span> <span class="n">BasePolicy</span>
+
+<div class="viewcode-block" id="ModularPolicy">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.modular.policies.ModularPolicy.html#pantheonrl.algos.modular.policies.ModularPolicy">[docs]</a>
+<span class="k">class</span> <span class="nc">ModularPolicy</span><span class="p">(</span><span class="n">BasePolicy</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Policy class for actor-critic algorithms (has both policy and value prediction).</span>
+<span class="sd">    Used by A2C, PPO and the likes.</span>
+<span class="sd">    :param observation_space: (gym.spaces.Space) Observation space</span>
+<span class="sd">    :param action_space: (gym.spaces.Space) Action space</span>
+<span class="sd">    :param lr_schedule: (Callable) Learning rate schedule (could be constant)</span>
+<span class="sd">    :param net_arch: ([int or dict]) The specification of the policy and value networks.</span>
+<span class="sd">    :param device: (str or th.device) Device on which the code should run.</span>
+<span class="sd">    :param activation_fn: (Type[nn.Module]) Activation function</span>
+<span class="sd">    :param ortho_init: (bool) Whether to use or not orthogonal initialization</span>
+<span class="sd">    :param use_sde: (bool) Whether to use State Dependent Exploration or not</span>
+<span class="sd">    :param log_std_init: (float) Initial value for the log standard deviation</span>
+<span class="sd">    :param full_std: (bool) Whether to use (n_features x n_actions) parameters</span>
+<span class="sd">        for the std instead of only (n_features,) when using gSDE</span>
+<span class="sd">    :param sde_net_arch: ([int]) Network architecture for extracting features</span>
+<span class="sd">        when using gSDE. If None, the latent features from the policy will be used.</span>
+<span class="sd">        Pass an empty list to use the states as features.</span>
+<span class="sd">    :param use_expln: (bool) Use ``expln()`` function instead of ``exp()`` to ensure</span>
+<span class="sd">        a positive standard deviation (cf paper). It allows to keep variance</span>
+<span class="sd">        above zero and prevent it from growing too fast. In practice, ``exp()`` is usually enough.</span>
+<span class="sd">    :param squash_output: (bool) Whether to squash the output using a tanh function,</span>
+<span class="sd">        this allows to ensure boundaries when using gSDE.</span>
+<span class="sd">    :param features_extractor_class: (Type[BaseFeaturesExtractor]) Features extractor to use.</span>
+<span class="sd">    :param features_extractor_kwargs: (Optional[Dict[str, Any]]) Keyword arguments</span>
+<span class="sd">        to pass to the feature extractor.</span>
+<span class="sd">    :param normalize_images: (bool) Whether to normalize images or not,</span>
+<span class="sd">         dividing by 255.0 (True by default)</span>
+<span class="sd">    :param optimizer_class: (Type[th.optim.Optimizer]) The optimizer to use,</span>
+<span class="sd">        ``th.optim.Adam`` by default</span>
+<span class="sd">    :param optimizer_kwargs: (Optional[Dict[str, Any]]) Additional keyword arguments,</span>
+<span class="sd">        excluding the learning rate, to pass to the optimizer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">observation_space</span><span class="p">:</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Space</span><span class="p">,</span>
+                 <span class="n">action_space</span><span class="p">:</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Space</span><span class="p">,</span>
+                 <span class="n">lr_schedule</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+                 <span class="n">net_arch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">device</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+                 <span class="n">activation_fn</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">,</span>
+                 <span class="n">ortho_init</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">use_sde</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">log_std_init</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">full_std</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">sde_net_arch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">use_expln</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">squash_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">features_extractor_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">BaseFeaturesExtractor</span><span class="p">]</span> <span class="o">=</span> <span class="n">FlattenExtractor</span><span class="p">,</span>
+                 <span class="n">features_extractor_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">normalize_images</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">optimizer_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">]</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">,</span>
+                 <span class="n">optimizer_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+
+                 <span class="c1"># my additional arguments</span>
+                 <span class="n">num_partners</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">partner_net_arch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># net arch for each partner-specific module</span>
+                 <span class="n">baseline</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">nomain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">optimizer_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">optimizer_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># Small values to avoid NaN in Adam optimizer</span>
+            <span class="k">if</span> <span class="n">optimizer_class</span> <span class="o">==</span> <span class="n">th</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">:</span>
+                <span class="n">optimizer_kwargs</span><span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-5</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ModularPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">observation_space</span><span class="p">,</span>
+                                                <span class="n">action_space</span><span class="p">,</span>
+                                                <span class="n">features_extractor_class</span><span class="p">,</span>
+                                                <span class="n">features_extractor_kwargs</span><span class="p">,</span>
+                                                <span class="n">optimizer_class</span><span class="o">=</span><span class="n">optimizer_class</span><span class="p">,</span>
+                                                <span class="n">optimizer_kwargs</span><span class="o">=</span><span class="n">optimizer_kwargs</span><span class="p">,</span>
+                                                <span class="n">squash_output</span><span class="o">=</span><span class="n">squash_output</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_partners</span> <span class="o">=</span> <span class="n">num_partners</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CUDA: &quot;</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">partner_net_arch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">features_extractor_class</span> <span class="o">==</span> <span class="n">FlattenExtractor</span><span class="p">:</span>
+                <span class="n">partner_net_arch</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">pi</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span> <span class="n">vf</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">])]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">partner_net_arch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partner_net_arch</span> <span class="o">=</span> <span class="n">partner_net_arch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">baseline</span> <span class="o">=</span> <span class="n">baseline</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nomain</span> <span class="o">=</span> <span class="n">nomain</span>
+
+
+        <span class="c1"># Default network architecture, from stable-baselines</span>
+        <span class="k">if</span> <span class="n">net_arch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">features_extractor_class</span> <span class="o">==</span> <span class="n">FlattenExtractor</span><span class="p">:</span>
+                <span class="n">net_arch</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">pi</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span> <span class="n">vf</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">])]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">net_arch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net_arch</span> <span class="o">=</span> <span class="n">net_arch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation_fn</span> <span class="o">=</span> <span class="n">activation_fn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ortho_init</span> <span class="o">=</span> <span class="n">ortho_init</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">features_extractor</span> <span class="o">=</span> <span class="n">features_extractor_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span>
+                                                           <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">features_extractor_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features_extractor</span><span class="o">.</span><span class="n">features_dim</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_images</span> <span class="o">=</span> <span class="n">normalize_images</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_std_init</span> <span class="o">=</span> <span class="n">log_std_init</span>
+        <span class="n">dist_kwargs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Keyword arguments for gSDE distribution</span>
+        <span class="k">if</span> <span class="n">use_sde</span><span class="p">:</span>
+            <span class="n">dist_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;full_std&#39;</span><span class="p">:</span> <span class="n">full_std</span><span class="p">,</span>
+                <span class="s1">&#39;squash_output&#39;</span><span class="p">:</span> <span class="n">squash_output</span><span class="p">,</span>
+                <span class="s1">&#39;use_expln&#39;</span><span class="p">:</span> <span class="n">use_expln</span><span class="p">,</span>
+                <span class="s1">&#39;learn_features&#39;</span><span class="p">:</span> <span class="n">sde_net_arch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sde_features_extractor</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sde_net_arch</span> <span class="o">=</span> <span class="n">sde_net_arch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_sde</span> <span class="o">=</span> <span class="n">use_sde</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_kwargs</span> <span class="o">=</span> <span class="n">dist_kwargs</span>
+
+        <span class="c1"># Action distribution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span> <span class="o">=</span> <span class="n">make_proba_distribution</span><span class="p">(</span><span class="n">action_space</span><span class="p">,</span> <span class="n">use_sde</span><span class="o">=</span><span class="n">use_sde</span><span class="p">,</span> <span class="n">dist_kwargs</span><span class="o">=</span><span class="n">dist_kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr_schedule</span> <span class="o">=</span> <span class="n">lr_schedule</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_build</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lr_schedule</span><span class="p">)</span>
+
+    <span class="c1"># freeze / unfreeze the module networks</span>
+    <span class="k">def</span> <span class="nf">set_freeze_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">freeze</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
+            <span class="n">param</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">freeze</span>
+    <span class="k">def</span> <span class="nf">set_freeze_main</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freeze</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_freeze_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mlp_extractor</span><span class="p">,</span> <span class="n">freeze</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_freeze_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_net</span><span class="p">,</span> <span class="n">freeze</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_freeze_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value_net</span><span class="p">,</span> <span class="n">freeze</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">set_freeze_partner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freeze</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">partner_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_partners</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_freeze_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partner_mlp_extractor</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">],</span> <span class="n">freeze</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_freeze_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partner_action_net</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">],</span> <span class="n">freeze</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_freeze_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partner_value_net</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">],</span> <span class="n">freeze</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_data</span><span class="p">()</span>
+
+        <span class="n">default_none_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_kwargs</span> <span class="ow">or</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">net_arch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">net_arch</span><span class="p">,</span>
+            <span class="n">activation_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activation_fn</span><span class="p">,</span>
+            <span class="n">use_sde</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_sde</span><span class="p">,</span>
+            <span class="n">log_std_init</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_std_init</span><span class="p">,</span>
+            <span class="n">squash_output</span><span class="o">=</span><span class="n">default_none_kwargs</span><span class="p">[</span><span class="s1">&#39;squash_output&#39;</span><span class="p">],</span>
+            <span class="n">full_std</span><span class="o">=</span><span class="n">default_none_kwargs</span><span class="p">[</span><span class="s1">&#39;full_std&#39;</span><span class="p">],</span>
+            <span class="n">sde_net_arch</span><span class="o">=</span><span class="n">default_none_kwargs</span><span class="p">[</span><span class="s1">&#39;sde_net_arch&#39;</span><span class="p">],</span>
+            <span class="n">use_expln</span><span class="o">=</span><span class="n">default_none_kwargs</span><span class="p">[</span><span class="s1">&#39;use_expln&#39;</span><span class="p">],</span>
+            <span class="n">lr_schedule</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dummy_schedule</span><span class="p">,</span>  <span class="c1"># dummy lr schedule, not needed for loading policy alone</span>
+            <span class="n">ortho_init</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ortho_init</span><span class="p">,</span>
+            <span class="n">optimizer_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer_class</span><span class="p">,</span>
+            <span class="n">optimizer_kwargs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer_kwargs</span><span class="p">,</span>
+            <span class="n">features_extractor_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">features_extractor_class</span><span class="p">,</span>
+            <span class="n">features_extractor_kwargs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">features_extractor_kwargs</span>
+        <span class="p">))</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+<div class="viewcode-block" id="ModularPolicy.reset_noise">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.modular.policies.ModularPolicy.html#pantheonrl.algos.modular.policies.ModularPolicy.reset_noise">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_envs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sample new weights for the exploration matrix.</span>
+<span class="sd">        :param n_envs: (int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="p">,</span>
+                          <span class="n">StateDependentNoiseDistribution</span><span class="p">),</span> <span class="s1">&#39;reset_noise() is only available when using gSDE&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="o">.</span><span class="n">sample_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_std</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">n_envs</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">make_action_dist_net</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_dim_pi</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">latent_sde_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">action_net</span><span class="p">,</span> <span class="n">log_std</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="p">,</span> <span class="n">DiagGaussianDistribution</span><span class="p">):</span>
+            <span class="n">action_net</span><span class="p">,</span> <span class="n">log_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="o">.</span><span class="n">proba_distribution_net</span><span class="p">(</span><span class="n">latent_dim</span><span class="o">=</span><span class="n">latent_dim_pi</span><span class="p">,</span>
+                                                                                    <span class="n">log_std_init</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_std_init</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="p">,</span> <span class="n">StateDependentNoiseDistribution</span><span class="p">):</span>
+            <span class="n">latent_sde_dim</span> <span class="o">=</span> <span class="n">latent_dim_pi</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sde_net_arch</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">latent_sde_dim</span>
+            <span class="n">action_net</span><span class="p">,</span> <span class="n">log_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="o">.</span><span class="n">proba_distribution_net</span><span class="p">(</span><span class="n">latent_dim</span><span class="o">=</span><span class="n">latent_dim_pi</span><span class="p">,</span>
+                                                                                    <span class="n">latent_sde_dim</span><span class="o">=</span><span class="n">latent_sde_dim</span><span class="p">,</span>
+                                                                                    <span class="n">log_std_init</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_std_init</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="p">,</span> <span class="n">CategoricalDistribution</span><span class="p">):</span>
+            <span class="n">action_net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="o">.</span><span class="n">proba_distribution_net</span><span class="p">(</span><span class="n">latent_dim</span><span class="o">=</span><span class="n">latent_dim_pi</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="p">,</span> <span class="n">MultiCategoricalDistribution</span><span class="p">):</span>
+            <span class="n">action_net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="o">.</span><span class="n">proba_distribution_net</span><span class="p">(</span><span class="n">latent_dim</span><span class="o">=</span><span class="n">latent_dim_pi</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="p">,</span> <span class="n">BernoulliDistribution</span><span class="p">):</span>
+            <span class="n">action_net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="o">.</span><span class="n">proba_distribution_net</span><span class="p">(</span><span class="n">latent_dim</span><span class="o">=</span><span class="n">latent_dim_pi</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported distribution &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">action_net</span><span class="p">,</span> <span class="n">log_std</span>
+
+    <span class="k">def</span> <span class="nf">build_mlp_action_value_net</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">net_arch</span><span class="p">):</span>
+        <span class="n">mlp_extractor</span> <span class="o">=</span> <span class="n">MlpExtractor</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">net_arch</span><span class="o">=</span><span class="n">net_arch</span><span class="p">,</span>
+                                          <span class="n">activation_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activation_fn</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">action_net</span><span class="p">,</span> <span class="n">log_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_action_dist_net</span><span class="p">(</span><span class="n">mlp_extractor</span><span class="o">.</span><span class="n">latent_dim_pi</span><span class="p">)</span>
+        <span class="n">value_net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">mlp_extractor</span><span class="o">.</span><span class="n">latent_dim_vf</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mlp_extractor</span><span class="p">,</span> <span class="n">action_net</span><span class="p">,</span> <span class="n">log_std</span><span class="p">,</span> <span class="n">value_net</span>
+
+    <span class="k">def</span> <span class="nf">do_init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_main</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">init_partner</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="c1"># Values from stable-baselines.</span>
+        <span class="c1"># feature_extractor/mlp values are</span>
+        <span class="c1"># originally from openai/baselines (default gains/init_scales).</span>
+
+        <span class="c1"># # Init weights: use orthogonal initialization</span>
+        <span class="c1"># # with small initial weight for the output</span>
+        <span class="c1"># if self.ortho_init:</span>
+        <span class="n">module_gains</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">init_main</span><span class="p">:</span>
+            <span class="n">module_gains</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features_extractor</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">module_gains</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mlp_extractor</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">module_gains</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">action_net</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.01</span>
+            <span class="n">module_gains</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">value_net</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">init_partner</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_partners</span><span class="p">):</span>
+                <span class="n">module_gains</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">partner_mlp_extractor</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">module_gains</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">partner_action_net</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">0.01</span>
+                <span class="n">module_gains</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">partner_value_net</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">module</span><span class="p">,</span> <span class="n">gain</span> <span class="ow">in</span> <span class="n">module_gains</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">module</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init_weights</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="n">gain</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lr_schedule</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the networks and the optimizer.</span>
+<span class="sd">        :param lr_schedule: (Callable) Learning rate schedule</span>
+<span class="sd">            lr_schedule(1) is the initial learning rate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Note: If net_arch is None and some features extractor is used,</span>
+        <span class="c1">#       net_arch here is an empty list and mlp_extractor does not</span>
+        <span class="c1">#       really contain any layers (acts like an identity module).</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp_extractor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_net</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_std</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_mlp_action_value_net</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">features_dim</span><span class="p">,</span> <span class="n">net_arch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">net_arch</span><span class="p">)</span>
+
+        <span class="n">partner_builds</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">build_mlp_action_value_net</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mlp_extractor</span><span class="o">.</span><span class="n">latent_dim_pi</span><span class="p">,</span> <span class="n">net_arch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partner_net_arch</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_partners</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline</span><span class="p">:</span> <span class="c1"># use the same partner module for all partners</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Baseline architecture: using the same partner module.&quot;</span><span class="p">)</span>
+            <span class="n">partner_builds</span> <span class="o">=</span> <span class="p">[</span><span class="n">partner_builds</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_partners</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">partner_mlp_extractor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_action_net</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_log_std</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_value_net</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">partner_builds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partner_mlp_extractor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partner_mlp_extractor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partner_action_net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partner_action_net</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partner_value_net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partner_value_net</span><span class="p">)</span>
+
+        <span class="c1"># Setup optimizer with initial learning rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr_schedule</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">do_init_weights</span><span class="p">(</span><span class="n">init_main</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">init_partner</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">overwrite_main</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp_extractor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_net</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_std</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_net</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">mlp_extractor</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">action_net</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">log_std</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">value_net</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lr_schedule</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer_kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ModularPolicy.forward">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.modular.policies.ModularPolicy.html#pantheonrl.algos.modular.policies.ModularPolicy.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+                <span class="n">partner_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="n">deterministic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Forward pass in all the networks (actor and critic)</span>
+<span class="sd">        :param obs: (th.Tensor) Observation</span>
+<span class="sd">        :param deterministic: (bool) Whether to sample or use deterministic actions</span>
+<span class="sd">        :return: (Tuple[th.Tensor, th.Tensor, th.Tensor]) action, value and log probability of the action</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">latent_pi</span><span class="p">,</span> <span class="n">latent_vf</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_latent</span><span class="p">(</span><span class="n">obs</span><span class="o">=</span><span class="n">obs</span><span class="p">)</span>
+        <span class="n">partner_latent_pi</span><span class="p">,</span> <span class="n">partner_latent_vf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_mlp_extractor</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">](</span><span class="n">latent_pi</span><span class="p">)</span>
+
+        <span class="n">distribution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_action_dist_from_latent</span><span class="p">(</span><span class="n">latent_pi</span><span class="p">,</span> <span class="n">partner_latent_pi</span><span class="p">,</span> <span class="n">partner_idx</span><span class="o">=</span><span class="n">partner_idx</span><span class="p">)</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="n">distribution</span><span class="o">.</span><span class="n">get_actions</span><span class="p">(</span><span class="n">deterministic</span><span class="o">=</span><span class="n">deterministic</span><span class="p">)</span>
+        <span class="n">log_prob</span> <span class="o">=</span> <span class="n">distribution</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_net</span><span class="p">(</span><span class="n">latent_vf</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_value_net</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">](</span><span class="n">partner_latent_vf</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">actions</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">log_prob</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_get_latent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the latent code (i.e., activations of the last layer of each network)</span>
+<span class="sd">        for the different networks.</span>
+<span class="sd">        :param obs: (th.Tensor) Observation</span>
+<span class="sd">        :return: (Tuple[th.Tensor, th.Tensor, th.Tensor]) Latent codes</span>
+<span class="sd">            for the actor, the value function and for gSDE function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Preprocess the observation if needed</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_features</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
+        <span class="n">latent_pi</span><span class="p">,</span> <span class="n">latent_vf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp_extractor</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="c1"># Features for sde</span>
+        <span class="n">latent_sde</span> <span class="o">=</span> <span class="n">latent_pi</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sde_features_extractor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">latent_sde</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sde_features_extractor</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">latent_pi</span><span class="p">,</span> <span class="n">latent_vf</span><span class="p">,</span> <span class="n">latent_sde</span>
+
+    <span class="k">def</span> <span class="nf">_get_action_dist_from_latent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latent_pi</span><span class="p">:</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+                                     <span class="n">partner_latent_pi</span><span class="p">:</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+                                     <span class="n">partner_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                                     <span class="n">latent_sde</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                     <span class="n">action_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Distribution</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve action distribution given the latent codes.</span>
+<span class="sd">        :param latent_pi: (th.Tensor) Latent code for the actor</span>
+<span class="sd">        :param latent_sde: (Optional[th.Tensor]) Latent code for the gSDE exploration function</span>
+<span class="sd">        :return: (Distribution) Action distribution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">main_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_net</span><span class="p">(</span><span class="n">latent_pi</span><span class="p">)</span>
+        <span class="n">partner_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_action_net</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">](</span><span class="n">partner_latent_pi</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nomain</span><span class="p">:</span>
+            <span class="n">mean_actions</span> <span class="o">=</span> <span class="n">partner_logits</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mean_actions</span> <span class="o">=</span> <span class="n">main_logits</span> <span class="o">+</span> <span class="n">partner_logits</span>
+        
+        <span class="n">large_exponent</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="k">if</span> <span class="n">action_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">action_mask</span> <span class="o">=</span> <span class="n">action_mask</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">mean_actions</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">mean_actions</span> <span class="o">=</span> <span class="n">mean_actions</span> <span class="o">-</span> <span class="n">large_exponent</span><span class="o">*</span><span class="p">(</span><span class="o">~</span><span class="n">action_mask</span><span class="p">)</span>
+        <span class="n">th</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">mean_actions</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">1</span><span class="o">*</span><span class="n">large_exponent</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="p">,</span> <span class="n">DiagGaussianDistribution</span><span class="p">):</span>
+            <span class="n">log_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_std</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_log_std</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="o">.</span><span class="n">proba_distribution</span><span class="p">(</span><span class="n">mean_actions</span><span class="p">,</span> <span class="n">log_std</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="p">,</span> <span class="n">CategoricalDistribution</span><span class="p">):</span>
+            <span class="c1"># Here mean_actions are the logits before the softmax</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="o">.</span><span class="n">proba_distribution</span><span class="p">(</span><span class="n">action_logits</span><span class="o">=</span><span class="n">mean_actions</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="p">,</span> <span class="n">MultiCategoricalDistribution</span><span class="p">):</span>
+            <span class="c1"># Here mean_actions are the flattened logits</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="o">.</span><span class="n">proba_distribution</span><span class="p">(</span><span class="n">action_logits</span><span class="o">=</span><span class="n">mean_actions</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="p">,</span> <span class="n">BernoulliDistribution</span><span class="p">):</span>
+            <span class="c1"># Here mean_actions are the logits (before rounding to get the binary actions)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="o">.</span><span class="n">proba_distribution</span><span class="p">(</span><span class="n">action_logits</span><span class="o">=</span><span class="n">mean_actions</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="p">,</span> <span class="n">StateDependentNoiseDistribution</span><span class="p">):</span>
+            <span class="n">log_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_std</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_log_std</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_dist</span><span class="o">.</span><span class="n">proba_distribution</span><span class="p">(</span><span class="n">mean_actions</span><span class="p">,</span> <span class="n">log_std</span><span class="p">,</span> <span class="n">latent_sde</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid action distribution&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation</span><span class="p">:</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">partner_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">deterministic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the action according to the policy for a given observation.</span>
+<span class="sd">        :param observation: (th.Tensor)</span>
+<span class="sd">        :param deterministic: (bool) Whether to use stochastic or deterministic actions</span>
+<span class="sd">        :return: (th.Tensor) Taken action according to the policy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">actions</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">obs</span><span class="o">=</span><span class="n">observation</span><span class="p">,</span> <span class="n">partner_idx</span><span class="o">=</span><span class="n">partner_idx</span><span class="p">,</span> <span class="n">deterministic</span><span class="o">=</span><span class="n">deterministic</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">actions</span>
+
+<div class="viewcode-block" id="ModularPolicy.evaluate_actions">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.modular.policies.ModularPolicy.html#pantheonrl.algos.modular.policies.ModularPolicy.evaluate_actions">[docs]</a>
+    <span class="k">def</span> <span class="nf">evaluate_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+                         <span class="n">actions</span><span class="p">:</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+                         <span class="n">partner_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                         <span class="n">action_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate actions according to the current policy,</span>
+<span class="sd">        given the observations.</span>
+<span class="sd">        :param obs: (th.Tensor)</span>
+<span class="sd">        :param actions: (th.Tensor)</span>
+<span class="sd">        :return: (th.Tensor, th.Tensor, th.Tensor) estimated value, log likelihood of taking those actions</span>
+<span class="sd">            and entropy of the action distribution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">latent_pi</span><span class="p">,</span> <span class="n">latent_vf</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_latent</span><span class="p">(</span><span class="n">obs</span><span class="o">=</span><span class="n">obs</span><span class="p">)</span>
+        <span class="n">partner_latent_pi</span><span class="p">,</span> <span class="n">partner_latent_vf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_mlp_extractor</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">](</span><span class="n">latent_pi</span><span class="p">)</span>
+
+        <span class="n">distribution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_action_dist_from_latent</span><span class="p">(</span><span class="n">latent_pi</span><span class="p">,</span> <span class="n">partner_latent_pi</span><span class="p">,</span> <span class="n">partner_idx</span><span class="o">=</span><span class="n">partner_idx</span><span class="p">,</span> <span class="n">action_mask</span><span class="o">=</span><span class="n">action_mask</span><span class="p">)</span>
+        <span class="n">log_prob</span> <span class="o">=</span> <span class="n">distribution</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_net</span><span class="p">(</span><span class="n">latent_vf</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_value_net</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">](</span><span class="n">partner_latent_vf</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">values</span><span class="p">,</span> <span class="n">log_prob</span><span class="p">,</span> <span class="n">distribution</span><span class="o">.</span><span class="n">entropy</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">get_action_logits_from_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">partner_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">latent_pi</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_latent</span><span class="p">(</span><span class="n">obs</span><span class="o">=</span><span class="n">obs</span><span class="p">)</span>
+        <span class="n">partner_latent_pi</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_mlp_extractor</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">](</span><span class="n">latent_pi</span><span class="p">)</span>
+
+        <span class="n">main_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_net</span><span class="p">(</span><span class="n">latent_pi</span><span class="p">)</span>
+        <span class="n">partner_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partner_action_net</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">](</span><span class="n">partner_latent_pi</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">action_mask</span><span class="p">:</span> 
+            <span class="n">main_logits</span> <span class="o">=</span> <span class="n">main_logits</span> <span class="o">*</span> <span class="n">action_mask</span>   <span class="c1"># set masked out options to 0</span>
+            <span class="n">partner_logits</span> <span class="o">=</span> <span class="n">partner_logits</span> <span class="o">*</span> <span class="n">action_mask</span>
+
+        <span class="k">return</span> <span class="n">main_logits</span><span class="p">,</span> <span class="n">partner_logits</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Stanford ILIAD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

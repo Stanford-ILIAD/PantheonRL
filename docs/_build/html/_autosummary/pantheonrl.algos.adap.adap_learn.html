@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pantheonrl.algos.adap.adap_learn &mdash; PantheonRL 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pantheonrl.algos.adap.adap_learn.ADAP" href="pantheonrl.algos.adap.adap_learn.ADAP.html" />
+    <link rel="prev" title="pantheonrl.algos.adap" href="pantheonrl.algos.adap.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PantheonRL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/install.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pantheonrl.html">pantheonrl</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pantheonrl.algos.html">pantheonrl.algos</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pantheonrl.algos.adap.html">pantheonrl.algos.adap</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pantheonrl.algos.adap.adap_learn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.algos.adap.agent.html">pantheonrl.algos.adap.agent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.algos.adap.policies.html">pantheonrl.algos.adap.policies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.algos.adap.util.html">pantheonrl.algos.adap.util</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pantheonrl.algos.bc.html">pantheonrl.algos.bc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pantheonrl.algos.modular.html">pantheonrl.algos.modular</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pantheonrl.common.html">pantheonrl.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pantheonrl.envs.html">pantheonrl.envs</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PantheonRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pantheonrl.html">pantheonrl</a></li>
+          <li class="breadcrumb-item"><a href="pantheonrl.algos.html">pantheonrl.algos</a></li>
+          <li class="breadcrumb-item"><a href="pantheonrl.algos.adap.html">pantheonrl.algos.adap</a></li>
+      <li class="breadcrumb-item active">pantheonrl.algos.adap.adap_learn</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pantheonrl.algos.adap.adap_learn">
+<span id="pantheonrl-algos-adap-adap-learn"></span><h1>pantheonrl.algos.adap.adap_learn<a class="headerlink" href="#module-pantheonrl.algos.adap.adap_learn" title="Link to this heading"></a></h1>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pantheonrl.algos.adap.adap_learn.ADAP.html#pantheonrl.algos.adap.adap_learn.ADAP" title="pantheonrl.algos.adap.adap_learn.ADAP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ADAP</span></code></a></p></td>
+<td><p>Borrows from Proximal Policy Optimization algorithm (PPO) (clip version) Paper: <a class="reference external" href="https://arxiv.org/abs/1707.06347">https://arxiv.org/abs/1707.06347</a> Code: This implementation borrows code from OpenAI Spinning Up (<a class="reference external" href="https://github.com/openai/spinningup/">https://github.com/openai/spinningup/</a>) <a class="reference external" href="https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail">https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail</a> and and Stable Baselines (PPO2 from <a class="reference external" href="https://github.com/hill-a/stable-baselines">https://github.com/hill-a/stable-baselines</a>) Introduction to PPO: <a class="reference external" href="https://spinningup.openai.com/en/latest/algorithms/ppo.html">https://spinningup.openai.com/en/latest/algorithms/ppo.html</a> :param policy: The policy model to use (MlpPolicy, CnnPolicy, ...) :param env: The environment to learn from     (if registered in Gym, can be str) :param learning_rate: The learning rate, it can be a function     of the current progress remaining (from 1 to 0) :param n_steps: The number of steps to run for each environment per update     (i.e. rollout buffer size is n_steps * n_envs where n_envs is number of     environment copies running in parallel)     NOTE: n_steps * n_envs must be greater than 1 (because of the advantage     normalization) See <a class="reference external" href="https://github.com/pytorch/pytorch/issues/29372">https://github.com/pytorch/pytorch/issues/29372</a> :param batch_size: Minibatch size :param n_epochs: Number of epoch when optimizing the surrogate loss :param gamma: Discount factor :param gae_lambda: Factor for trade-off of bias vs variance for Generalized     Advantage Estimator :param clip_range: Clipping parameter, it can be a function of the current     progress remaining (from 1 to 0). :param clip_range_vf: Clipping parameter for the value function,     it can be a function of the current progress remaining (from 1 to 0). This is a parameter specific to the OpenAI implementation. If None is     passed (default), no clipping will be done on the value function. IMPORTANT: this clipping depends on the reward scaling. :param ent_coef: Entropy coefficient for the loss calculation :param vf_coef: Value function coefficient for the loss calculation :param max_grad_norm: The maximum value for the gradient clipping :param use_sde: Whether to use generalized State Dependent Exploration     (gSDE) instead of action noise exploration (default: False) :param sde_sample_freq: Sample a new noise matrix every n steps when using     gSDE     Default: -1 (only sample at the beginning of the rollout) :param target_kl: Limit the KL divergence between updates,     because the clipping is not enough to prevent large update     see issue #213     (cf <a class="reference external" href="https://github.com/hill-a/stable-baselines/issues/213">https://github.com/hill-a/stable-baselines/issues/213</a>)     By default, there is no limit on the kl div. :param tensorboard_log: the log location for tensorboard     (if None, no logging) :param create_eval_env: Whether to create a second environment that will be     used for evaluating the agent periodically. (Only available when     passing string for the environment) :param policy_kwargs: additional arguments to be passed to the policy on     creation :param verbose: the verbosity level: 0 no output, 1 info, 2 debug :param seed: Seed for the pseudo random generators :param device: Device (cpu, cuda, ...) on which the code should be run. Setting it to auto, the code will be run on the GPU if possible. :param _init_setup_model: Whether or not to build the network at the     creation of the instance.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pantheonrl.algos.adap.html" class="btn btn-neutral float-left" title="pantheonrl.algos.adap" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pantheonrl.algos.adap.adap_learn.ADAP.html" class="btn btn-neutral float-right" title="pantheonrl.algos.adap.adap_learn.ADAP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Stanford ILIAD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pantheonrl.common.trajsaver &mdash; PantheonRL 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PantheonRL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/install.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/pantheonrl.html">pantheonrl</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PantheonRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pantheonrl.common.trajsaver</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pantheonrl.common.trajsaver</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">overload</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span> <span class="k">as</span> <span class="nn">th</span>
+<span class="kn">from</span> <span class="nn">torch.utils</span> <span class="kn">import</span> <span class="n">data</span> <span class="k">as</span> <span class="n">th_data</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data._utils.collate</span> <span class="kn">import</span> <span class="n">default_collate</span>
+
+<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">get_space_size</span>
+
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="transitions_collate_fn">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.transitions_collate_fn.html#pantheonrl.common.trajsaver.transitions_collate_fn">[docs]</a>
+<span class="k">def</span> <span class="nf">transitions_collate_fn</span><span class="p">(</span>
+    <span class="n">batch</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is from HumanCompatibleAI&#39;s imitation repo:</span>
+<span class="sd">    https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/</span>
+<span class="sd">    data/types.py</span>
+
+<span class="sd">    Custom `torch.utils.data.DataLoader` collate_fn for `TransitionsMinimal`.</span>
+<span class="sd">    Use this as the `collate_fn` argument to `DataLoader` if using an instance</span>
+<span class="sd">    of `TransitionsMinimal` as the `dataset` argument.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">batch_no_infos</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">batch</span>
+    <span class="p">]</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">default_collate</span><span class="p">(</span><span class="n">batch_no_infos</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="dataclass_quick_asdict">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.dataclass_quick_asdict.html#pantheonrl.common.trajsaver.dataclass_quick_asdict">[docs]</a>
+<span class="k">def</span> <span class="nf">dataclass_quick_asdict</span><span class="p">(</span><span class="n">dataclass_instance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is from HumanCompatibleAI&#39;s imitation repo:</span>
+<span class="sd">    https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/</span>
+<span class="sd">    data/types.py</span>
+
+<span class="sd">    Extract dataclass to items using `dataclasses.fields` + dict comprehension.</span>
+<span class="sd">    This is a quick alternative to `dataclasses.asdict`, which expensively and</span>
+<span class="sd">    undocumentedly deep-copies every numpy array value.</span>
+<span class="sd">    See https://stackoverflow.com/a/52229565/1091722.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">dataclass_instance</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">obj</span><span class="p">)}</span>
+    <span class="k">return</span> <span class="n">d</span></div>
+
+
+
+<div class="viewcode-block" id="TransitionsMinimal">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.TransitionsMinimal.html#pantheonrl.common.trajsaver.TransitionsMinimal">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">TransitionsMinimal</span><span class="p">(</span><span class="n">th_data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is modified from HumanCompatibleAI&#39;s imitation repo:</span>
+<span class="sd">    https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/</span>
+<span class="sd">    data/types.py</span>
+
+<span class="sd">    A Torch-compatible `Dataset` of obs-act transitions.</span>
+<span class="sd">    This class and its subclasses are usually instantiated via</span>
+<span class="sd">    `imitation.data.rollout.flatten_trajectories`.</span>
+<span class="sd">    Indexing an instance `trans` of TransitionsMinimal with an integer `i`</span>
+<span class="sd">    returns the `i`th `Dict[str, np.ndarray]` sample, whose keys are the field</span>
+<span class="sd">    names of each dataclass field and whose values are the ith elements of each</span>
+<span class="sd">    field value.</span>
+<span class="sd">    Slicing returns a possibly empty instance of `TransitionsMinimal` where</span>
+<span class="sd">    each field has been sliced.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">obs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Previous observations. Shape: (batch_size, ) + observation_shape.</span>
+<span class="sd">    The i&#39;th observation `obs[i]` in this array is the observation seen</span>
+<span class="sd">    by the agent when choosing action `acts[i]`. `obs[i]` is not required to</span>
+<span class="sd">    be from the timestep preceding `obs[i+1]`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">acts</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Actions. Shape: (batch_size,) + action_shape.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns number of transitions. Always positive.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs input validation: check shapes &amp; dtypes match docstring.</span>
+<span class="sd">        Also make array values read-only.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">setflags</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acts</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;obs and acts must have same number of timesteps: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span><span class="si">}</span><span class="s2"> != </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acts</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">slice</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+        <span class="k">pass</span>  <span class="c1"># pragma: no cover</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="k">pass</span>  <span class="c1"># pragma: no cover</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;See TransitionsMinimal docstring for indexing and slicing semantics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">dataclass_quick_asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">d_item</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+            <span class="c1"># Return type is the same as this dataclass. Replace field value</span>
+            <span class="c1"># with slices.</span>
+            <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">d_item</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+            <span class="c1"># Return type is a dictionary. Array values have no batch dimension</span>
+            <span class="c1">#</span>
+            <span class="c1"># Dictionary of np.ndarray values is a convenient</span>
+            <span class="c1"># torch.util.data.Dataset return type, as a</span>
+            <span class="c1"># torch.util.data.DataLoader taking in this `Dataset` as its first</span>
+            <span class="c1"># argument knows how to automatically concatenate several</span>
+            <span class="c1"># dictionaries together to make a single dictionary batch with</span>
+            <span class="c1"># `torch.Tensor` values.</span>
+            <span class="k">return</span> <span class="n">d_item</span>
+
+    <span class="k">def</span> <span class="nf">write_transition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+        <span class="n">full_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">acts</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">full_list</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">read_transition</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">obs_space</span><span class="p">,</span> <span class="n">act_space</span><span class="p">):</span>
+        <span class="n">full_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">obs_size</span> <span class="o">=</span> <span class="n">get_space_size</span><span class="p">(</span><span class="n">obs_space</span><span class="p">)</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">full_list</span><span class="p">[:,</span> <span class="p">:</span><span class="n">obs_size</span><span class="p">]</span>
+        <span class="n">acts</span> <span class="o">=</span> <span class="n">full_list</span><span class="p">[:,</span> <span class="n">obs_size</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="n">TransitionsMinimal</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">acts</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="MultiTransitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.MultiTransitions.html#pantheonrl.common.trajsaver.MultiTransitions">[docs]</a>
+<span class="k">class</span> <span class="nc">MultiTransitions</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Base class for all classes that store multiple transitions &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MultiTransitions.get_ego_transitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.MultiTransitions.html#pantheonrl.common.trajsaver.MultiTransitions.get_ego_transitions">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_ego_transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransitionsMinimal</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns the ego&#39;s transitions &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="MultiTransitions.get_alt_transitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.MultiTransitions.html#pantheonrl.common.trajsaver.MultiTransitions.get_alt_transitions">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_alt_transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransitionsMinimal</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns the partner&#39;s transitions &quot;&quot;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TurnBasedTransitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.TurnBasedTransitions.html#pantheonrl.common.trajsaver.TurnBasedTransitions">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">TurnBasedTransitions</span><span class="p">(</span><span class="n">MultiTransitions</span><span class="p">):</span>
+    <span class="n">obs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">acts</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+
+<div class="viewcode-block" id="TurnBasedTransitions.get_ego_transitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.TurnBasedTransitions.html#pantheonrl.common.trajsaver.TurnBasedTransitions.get_ego_transitions">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_ego_transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransitionsMinimal</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns the ego&#39;s transitions &quot;&quot;&quot;</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">TransitionsMinimal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">acts</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="TurnBasedTransitions.get_alt_transitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.TurnBasedTransitions.html#pantheonrl.common.trajsaver.TurnBasedTransitions.get_alt_transitions">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_alt_transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransitionsMinimal</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns the partner&#39;s transitions &quot;&quot;&quot;</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">TransitionsMinimal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">acts</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span></div>
+
+
+    <span class="k">def</span> <span class="nf">write_transition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="nb">len</span> <span class="o">=</span> <span class="n">flags</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">acts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acts</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">full_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">obs</span><span class="p">,</span> <span class="n">acts</span><span class="p">,</span> <span class="n">flags</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">full_list</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">read_transition</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">obs_space</span><span class="p">,</span> <span class="n">act_space</span><span class="p">):</span>
+        <span class="n">full_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">obs_size</span> <span class="o">=</span> <span class="n">get_space_size</span><span class="p">(</span><span class="n">obs_space</span><span class="p">)</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">full_list</span><span class="p">[:,</span> <span class="p">:</span><span class="n">obs_size</span><span class="p">]</span>
+        <span class="n">acts</span> <span class="o">=</span> <span class="n">full_list</span><span class="p">[:,</span> <span class="n">obs_size</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">full_list</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">TurnBasedTransitions</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">acts</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="SimultaneousTransitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.SimultaneousTransitions.html#pantheonrl.common.trajsaver.SimultaneousTransitions">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">SimultaneousTransitions</span><span class="p">(</span><span class="n">MultiTransitions</span><span class="p">):</span>
+    <span class="n">egoobs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">egoacts</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">altobs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">altacts</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+
+<div class="viewcode-block" id="SimultaneousTransitions.get_ego_transitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.SimultaneousTransitions.html#pantheonrl.common.trajsaver.SimultaneousTransitions.get_ego_transitions">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_ego_transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransitionsMinimal</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns the ego&#39;s transitions &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TransitionsMinimal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">egoobs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">egoacts</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SimultaneousTransitions.get_alt_transitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.trajsaver.SimultaneousTransitions.html#pantheonrl.common.trajsaver.SimultaneousTransitions.get_alt_transitions">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_alt_transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransitionsMinimal</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns the partner&#39;s transitions &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TransitionsMinimal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">altobs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">altacts</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">write_transition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="nb">len</span> <span class="o">=</span> <span class="n">flags</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">egoobs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">egoobs</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">egoacts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">egoacts</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">altobs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">altobs</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">altacts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">altacts</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">full_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">egoobs</span><span class="p">,</span> <span class="n">egoacts</span><span class="p">,</span> <span class="n">altobs</span><span class="p">,</span> <span class="n">altacts</span><span class="p">,</span> <span class="n">flags</span><span class="p">),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">full_list</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">read_transition</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">obs_space</span><span class="p">,</span> <span class="n">act_space</span><span class="p">):</span>
+        <span class="n">full_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">obs_size</span> <span class="o">=</span> <span class="n">get_space_size</span><span class="p">(</span><span class="n">obs_space</span><span class="p">)</span>
+        <span class="n">act_size</span> <span class="o">=</span> <span class="n">get_space_size</span><span class="p">(</span><span class="n">act_space</span><span class="p">)</span>
+        <span class="n">egoobs</span> <span class="o">=</span> <span class="n">full_list</span><span class="p">[:,</span> <span class="p">:</span><span class="n">obs_size</span><span class="p">]</span>
+        <span class="n">egoacts</span> <span class="o">=</span> <span class="n">full_list</span><span class="p">[:,</span> <span class="n">obs_size</span><span class="p">:(</span><span class="n">obs_size</span> <span class="o">+</span> <span class="n">act_size</span><span class="p">)]</span>
+        <span class="n">altobs</span> <span class="o">=</span> <span class="n">full_list</span><span class="p">[:,</span> <span class="p">(</span><span class="n">obs_size</span> <span class="o">+</span> <span class="n">act_size</span><span class="p">):(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">obs_size</span> <span class="o">+</span> <span class="n">act_size</span><span class="p">)]</span>
+        <span class="n">altacts</span> <span class="o">=</span> <span class="n">full_list</span><span class="p">[:,</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">obs_size</span> <span class="o">+</span> <span class="n">act_size</span><span class="p">):</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">full_list</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">SimultaneousTransitions</span><span class="p">(</span><span class="n">egoobs</span><span class="p">,</span> <span class="n">egoacts</span><span class="p">,</span> <span class="n">altobs</span><span class="p">,</span> <span class="n">altacts</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Stanford ILIAD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

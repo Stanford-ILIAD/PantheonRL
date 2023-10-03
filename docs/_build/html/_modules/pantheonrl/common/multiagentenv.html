@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pantheonrl.common.multiagentenv &mdash; PantheonRL 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PantheonRL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/install.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/pantheonrl.html">pantheonrl</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PantheonRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pantheonrl.common.multiagentenv</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pantheonrl.common.multiagentenv</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.agents</span> <span class="kn">import</span> <span class="n">Agent</span><span class="p">,</span> <span class="n">DummyAgent</span>
+<span class="kn">from</span> <span class="nn">.observation</span> <span class="kn">import</span> <span class="n">Observation</span><span class="p">,</span> <span class="n">extract_obs</span>
+
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Condition</span>
+
+
+<div class="viewcode-block" id="PlayerException">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.PlayerException.html#pantheonrl.common.multiagentenv.PlayerException">[docs]</a>
+<span class="k">class</span> <span class="nc">PlayerException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Raise when players in the environment are incorrectly set &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="KillEnvException">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.KillEnvException.html#pantheonrl.common.multiagentenv.KillEnvException">[docs]</a>
+<span class="k">class</span> <span class="nc">KillEnvException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Raise when the DummyEnv is killed &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="DummyEnv">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.DummyEnv.html#pantheonrl.common.multiagentenv.DummyEnv">[docs]</a>
+<span class="k">class</span> <span class="nc">DummyEnv</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Environment representing a partner agent&#39;s observation and action space.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_env</span><span class="p">,</span> <span class="n">agent_ind</span><span class="p">,</span> <span class="n">extractor</span><span class="o">=</span><span class="n">extract_obs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_env</span> <span class="o">=</span> <span class="n">base_env</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent_ind</span> <span class="o">=</span> <span class="n">agent_ind</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_env</span><span class="o">.</span><span class="n">observation_spaces</span><span class="p">[</span><span class="n">agent_ind</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_env</span><span class="o">.</span><span class="n">action_spaces</span><span class="p">[</span><span class="n">agent_ind</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rew</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_done</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_cv</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractor</span> <span class="o">=</span> <span class="n">extractor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">associated_agent</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dead</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="DummyEnv.step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.DummyEnv.html#pantheonrl.common.multiagentenv.DummyEnv.step">[docs]</a>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Observation</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+        <span class="k">assert</span> <span class="n">threading</span><span class="o">.</span><span class="n">current_thread</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">threading</span><span class="o">.</span><span class="n">main_thread</span><span class="p">()</span>
+        <span class="c1"># print(&quot;Dummy Env: got new action in step function&quot;, self.steps)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">associated_agent</span><span class="o">.</span><span class="n">action_cv</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">associated_agent</span><span class="o">.</span><span class="n">_action</span> <span class="o">=</span> <span class="n">action</span>
+            <span class="c1"># print(&quot;Dummy Env: sending action notification&quot;)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">associated_agent</span><span class="o">.</span><span class="n">action_cv</span><span class="o">.</span><span class="n">notify</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_cv</span><span class="p">:</span>
+            <span class="c1"># print(&quot;Dummy Env: waiting for observation&quot;)</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">obs_cv</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dead</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">KillEnvException</span><span class="p">(</span><span class="s2">&quot;Killing dummy environment&quot;</span><span class="p">)</span>
+            <span class="n">to_return</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extractor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obs</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rew</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># else:</span>
+                <span class="c1"># print(&quot;DUMMY ENV THINKS DONE&quot;)</span>
+            <span class="c1"># print(&quot;Dummy Env: got observation&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">to_return</span></div>
+
+
+<div class="viewcode-block" id="DummyEnv.reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.DummyEnv.html#pantheonrl.common.multiagentenv.DummyEnv.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Observation</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done</span>
+        <span class="k">assert</span> <span class="n">threading</span><span class="o">.</span><span class="n">current_thread</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">threading</span><span class="o">.</span><span class="n">main_thread</span><span class="p">()</span>
+        <span class="c1"># print(&quot;Dummy Env: reset called&quot;)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_cv</span><span class="p">:</span>
+            <span class="c1"># print(&quot;Dummy Env: waiting for observation (reset)&quot;)</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">obs_cv</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="n">to_return</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extractor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obs</span><span class="p">),</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_done</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># print(&quot;Dummy Env: got observation (reset)&quot;)</span>
+        <span class="c1"># print(to_return)</span>
+        <span class="k">return</span> <span class="n">to_return</span></div>
+
+
+<div class="viewcode-block" id="DummyEnv.close">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.DummyEnv.html#pantheonrl.common.multiagentenv.DummyEnv.close">[docs]</a>
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">associated_agent</span><span class="o">.</span><span class="n">_action</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">associated_agent</span><span class="o">.</span><span class="n">dummy_env</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">associated_agent</span><span class="o">.</span><span class="n">action_cv</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">associated_agent</span><span class="o">.</span><span class="n">action_cv</span><span class="o">.</span><span class="n">notify</span><span class="p">()</span>
+
+        <span class="kn">import</span> <span class="nn">warnings</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Partner agent</span><span class="se">\&#39;</span><span class="s1">s dummy environment is dead. Remember to set the the learning time for the partner to be much larger than the program lifetime&#39;</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MultiAgentEnv">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv">[docs]</a>
+<span class="k">class</span> <span class="nc">MultiAgentEnv</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for all Multi-agent environments.</span>
+
+<span class="sd">    This is some extra information that should not be in the gist.</span>
+
+<span class="sd">    :param ego_ind: The player that the ego represents</span>
+<span class="sd">    :param n_players: The number of players in the game</span>
+<span class="sd">    :param resample_policy: The resampling policy to use (see set_resample_policy)</span>
+<span class="sd">    :param partners: Lists of agents to choose from for the partner players</span>
+<span class="sd">    :param ego_extractor: Function to extract Observation into the type the</span>
+<span class="sd">        ego expects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">observation_spaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Space</span><span class="p">],</span>
+                 <span class="n">action_spaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Space</span><span class="p">],</span>
+                 <span class="n">ego_ind</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">n_players</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                 <span class="n">resample_policy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+                 <span class="n">partners</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Agent</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">ego_extractor</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Observation</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">extract_obs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_spaces</span> <span class="o">=</span> <span class="n">observation_spaces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_spaces</span> <span class="o">=</span> <span class="n">action_spaces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span> <span class="o">=</span> <span class="n">ego_ind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_players</span> <span class="o">=</span> <span class="n">n_players</span>
+
+        <span class="k">if</span> <span class="n">partners</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">partners</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_players</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PlayerException</span><span class="p">(</span>
+                    <span class="s2">&quot;The number of partners needs to equal the number </span><span class="se">\</span>
+<span class="s2">                    of non-ego players&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">plist</span> <span class="ow">in</span> <span class="n">partners</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plist</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">plist</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">PlayerException</span><span class="p">(</span>
+                        <span class="s2">&quot;Sublist for each partner must be nonempty list&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">partners</span> <span class="o">=</span> <span class="n">partners</span> <span class="ow">or</span> <span class="p">[[]]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_players</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partnerids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_players</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_old_ego_obs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">should_update</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_players</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_rews</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_players</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ego_moved</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_resample_policy</span><span class="p">(</span><span class="n">resample_policy</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ego_extractor</span> <span class="o">=</span> <span class="n">ego_extractor</span>
+
+<div class="viewcode-block" id="MultiAgentEnv.getDummyEnv">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.getDummyEnv">[docs]</a>
+    <span class="k">def</span> <span class="nf">getDummyEnv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">player_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dummy environment with just an observation and action</span>
+<span class="sd">        space that a partner agent can use to construct their policy network.</span>
+
+<span class="sd">        :param player_num: the partner number to query</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DummyEnv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">player_num</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">construct_single_agent_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">player_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">dummyEnv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDummyEnv</span><span class="p">(</span><span class="n">player_num</span><span class="p">)</span>
+        <span class="n">dummyAgent</span> <span class="o">=</span> <span class="n">DummyAgent</span><span class="p">(</span><span class="n">dummyEnv</span><span class="p">)</span>
+
+        <span class="n">partner_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_partner_num</span><span class="p">(</span><span class="n">player_num</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="p">[</span><span class="n">partner_num</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PlayerException</span><span class="p">(</span><span class="s2">&quot;Cannot construct multiple single agent </span><span class="se">\</span>
+<span class="s2">            interfaces for the same player_num&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_partner_agent</span><span class="p">(</span><span class="n">dummyAgent</span><span class="p">,</span> <span class="n">player_num</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dummyEnv</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">observation_space</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Space</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_spaces</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">action_space</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Space</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_spaces</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">set_ego_extractor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ego_extractor</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Observation</span><span class="p">],</span> <span class="n">Any</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ego_extractor</span> <span class="o">=</span> <span class="n">ego_extractor</span>
+
+    <span class="k">def</span> <span class="nf">_get_partner_num</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">player_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">player_num</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PlayerException</span><span class="p">(</span>
+                <span class="s2">&quot;Ego agent is not set by the environment&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">player_num</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">player_num</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">player_num</span>
+
+<div class="viewcode-block" id="MultiAgentEnv.add_partner_agent">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.add_partner_agent">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_partner_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="p">:</span> <span class="n">Agent</span><span class="p">,</span> <span class="n">player_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add agent to the list of potential partner agents. If there are</span>
+<span class="sd">        multiple agents that can be a specific player number, the environment</span>
+<span class="sd">        randomly samples from them at the start of every episode.</span>
+
+<span class="sd">        :param agent: Agent to add</span>
+<span class="sd">        :param player_num: the player number that this new agent can be</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_partner_num</span><span class="p">(</span><span class="n">player_num</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MultiAgentEnv.set_partnerid">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.set_partnerid">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_partnerid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">player_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the current partner agent to use</span>
+
+<span class="sd">        :param agent_id: agent_id to use as current partner</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">partner_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_partner_num</span><span class="p">(</span><span class="n">player_num</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">agent_id</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">agent_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="p">[</span><span class="n">partner_num</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partnerids</span><span class="p">[</span><span class="n">partner_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">agent_id</span></div>
+
+
+<div class="viewcode-block" id="MultiAgentEnv.resample_random">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.resample_random">[docs]</a>
+    <span class="k">def</span> <span class="nf">resample_random</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Randomly resamples each partner policy &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partnerids</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">plist</span><span class="p">))</span>
+                           <span class="k">for</span> <span class="n">plist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="MultiAgentEnv.resample_round_robin">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.resample_round_robin">[docs]</a>
+    <span class="k">def</span> <span class="nf">resample_round_robin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the partner policy to the next option on the list for round-robin</span>
+<span class="sd">        sampling.</span>
+
+<span class="sd">        Note: This function is only valid for 2-player environments</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partnerids</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">partnerids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span></div>
+
+
+<div class="viewcode-block" id="MultiAgentEnv.set_resample_policy">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.set_resample_policy">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_resample_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample_policy</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the resample_partner method to round &quot;robin&quot; or &quot;random&quot;</span>
+
+<span class="sd">        :param resample_policy: The new resampling policy to use.</span>
+<span class="sd">        - Valid values are: &quot;default&quot;, &quot;robin&quot;, &quot;random&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">resample_policy</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+            <span class="n">resample_policy</span> <span class="o">=</span> <span class="s2">&quot;robin&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_players</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">&quot;random&quot;</span>
+
+        <span class="k">if</span> <span class="n">resample_policy</span> <span class="o">==</span> <span class="s2">&quot;robin&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_players</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PlayerException</span><span class="p">(</span>
+                <span class="s2">&quot;Cannot do round robin resampling for &gt;2 players&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">resample_policy</span> <span class="o">==</span> <span class="s2">&quot;robin&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resample_partner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resample_round_robin</span>
+        <span class="k">elif</span> <span class="n">resample_policy</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resample_partner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resample_random</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PlayerException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Invalid resampling policy: </span><span class="si">{</span><span class="n">resample_policy</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_get_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">players</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">ego_act</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">player</span><span class="p">,</span> <span class="n">ob</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">players</span><span class="p">,</span> <span class="n">obs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">player</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span><span class="p">:</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ego_act</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_partner_num</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+                <span class="n">agent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="p">[</span><span class="n">p</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">partnerids</span><span class="p">[</span><span class="n">p</span><span class="p">]]</span>
+                <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">get_action</span><span class="p">(</span><span class="n">ob</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_update</span><span class="p">[</span><span class="n">p</span><span class="p">]:</span>
+                    <span class="n">agent</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_rews</span><span class="p">[</span><span class="n">player</span><span class="p">],</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">should_update</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_players</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_players</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">nextrew</span> <span class="o">=</span> <span class="n">rews</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_update</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">partnerids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nextrew</span><span class="p">,</span> <span class="n">done</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_players</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_rews</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">rews</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+<div class="viewcode-block" id="MultiAgentEnv.step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.step">[docs]</a>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Observation</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run one timestep from the perspective of the ego-agent. This involves</span>
+<span class="sd">        calling the ego_step function and the alt_step function to get to the</span>
+<span class="sd">        next observation of the ego agent.</span>
+
+<span class="sd">        Accepts the ego-agent&#39;s action and returns a tuple of (observation,</span>
+<span class="sd">        reward, done, info) from the perspective of the ego agent.</span>
+
+<span class="sd">        Note that when the environment is done, the final observation is the</span>
+<span class="sd">        latest observation provided by the environment, which may be the same</span>
+<span class="sd">        as the previous observation given to the agent, especially in turn-based</span>
+<span class="sd">        settings.</span>
+
+<span class="sd">        :param action: An action provided by the ego-agent.</span>
+
+<span class="sd">        :returns:</span>
+<span class="sd">            observation: Ego-agent&#39;s next observation</span>
+<span class="sd">            reward: Amount of reward returned after previous action</span>
+<span class="sd">            terminated: Whether the episode has ended (need to call reset() if True)</span>
+<span class="sd">            truncated: Whether the episode was truncated (need to call reset() if True)</span>
+<span class="sd">            info: Extra information about the environment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ego_rew</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">acts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_actions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span><span class="p">(</span><span class="n">acts</span><span class="p">)</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;_partnerid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partnerids</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_players</span><span class="p">(</span><span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">)</span>
+
+            <span class="n">ego_rew</span> <span class="o">+=</span> <span class="n">rews</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_moved</span> \
+                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_rews</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">ego_moved</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
+                <span class="n">ego_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_old_ego_obs</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_extractor</span><span class="p">(</span><span class="n">ego_obs</span><span class="p">),</span> <span class="n">ego_rew</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">info</span>
+
+        <span class="n">ego_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_old_ego_obs</span> <span class="o">=</span> <span class="n">ego_obs</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_extractor</span><span class="p">(</span><span class="n">ego_obs</span><span class="p">),</span> <span class="n">ego_rew</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">info</span></div>
+
+
+<div class="viewcode-block" id="MultiAgentEnv.reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Observation</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset environment to an initial state and return the first observation</span>
+<span class="sd">        for the ego agent.</span>
+
+<span class="sd">        :returns: Ego-agent&#39;s first observation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">resample_partner</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">should_update</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_players</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_rews</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_players</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ego_moved</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">:</span>
+            <span class="n">acts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_actions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span><span class="p">(</span><span class="n">acts</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_players</span><span class="p">(</span><span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">resample_partner</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_reset</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">should_update</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_players</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">total_rews</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_players</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ego_moved</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">ego_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ego_ind</span><span class="p">)]</span>
+
+        <span class="k">assert</span> <span class="n">ego_obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_old_ego_obs</span> <span class="o">=</span> <span class="n">ego_obs</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_extractor</span><span class="p">(</span><span class="n">ego_obs</span><span class="p">),</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="MultiAgentEnv.n_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.n_step">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">n_step</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">actions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                           <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Observation</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span>
+                           <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                           <span class="nb">bool</span><span class="p">,</span>
+                           <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform the actions specified by the agents that will move. This</span>
+<span class="sd">        function returns a tuple of (next agents, observations, both rewards,</span>
+<span class="sd">        done, info).</span>
+
+<span class="sd">        This function is called by the `step` function.</span>
+
+<span class="sd">        :param actions: List of action provided agents that are acting on this</span>
+<span class="sd">        step.</span>
+
+<span class="sd">        :returns:</span>
+<span class="sd">            agents: Tuple representing the agents to call for the next actions</span>
+<span class="sd">            observations: Tuple representing the next observations (ego, alt)</span>
+<span class="sd">            rewards: Tuple representing the rewards of all agents</span>
+<span class="sd">            done: Whether the episode has ended</span>
+<span class="sd">            info: Extra information about the environment</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="MultiAgentEnv.n_reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.n_reset">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">n_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                               <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Observation</span><span class="p">],</span> <span class="o">...</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the environment and return which agents will move first along</span>
+<span class="sd">        with their initial observations.</span>
+
+<span class="sd">        This function is called by the `reset` function.</span>
+
+<span class="sd">        :returns:</span>
+<span class="sd">            agents: Tuple representing the agents that will move first</span>
+<span class="sd">            observations: Tuple representing the observations of both agents</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TurnBasedEnv">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.TurnBasedEnv.html#pantheonrl.common.multiagentenv.TurnBasedEnv">[docs]</a>
+<span class="k">class</span> <span class="nc">TurnBasedEnv</span><span class="p">(</span><span class="n">MultiAgentEnv</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for all 2-player turn-based games.</span>
+
+<span class="sd">    In turn-based games, players take turns receiving observations and making</span>
+<span class="sd">    actions.</span>
+
+<span class="sd">    :param probegostart: Probability that the ego agent gets the first turn</span>
+<span class="sd">    :param partners: List of policies to choose from for the partner agent</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">observation_spaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Space</span><span class="p">],</span>
+                 <span class="n">action_spaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Space</span><span class="p">],</span>
+                 <span class="n">probegostart</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+                 <span class="n">partners</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Agent</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">partners</span> <span class="o">=</span> <span class="p">[</span><span class="n">partners</span><span class="p">]</span> <span class="k">if</span> <span class="n">partners</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TurnBasedEnv</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">observation_spaces</span><span class="p">,</span> <span class="n">action_spaces</span><span class="p">,</span>
+            <span class="n">ego_ind</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_players</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">partners</span><span class="o">=</span><span class="n">partners</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">probegostart</span> <span class="o">=</span> <span class="n">probegostart</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ego_next</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="TurnBasedEnv.n_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.TurnBasedEnv.html#pantheonrl.common.multiagentenv.TurnBasedEnv.n_step">[docs]</a>
+    <span class="k">def</span> <span class="nf">n_step</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">actions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                           <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Observation</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span>
+                           <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                           <span class="nb">bool</span><span class="p">,</span>
+                           <span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">agents</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_next</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,)</span>
+        <span class="n">obs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_step</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_next</span> \
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt_step</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ego_next</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_next</span>
+
+        <span class="k">return</span> <span class="n">agents</span><span class="p">,</span> <span class="p">(</span><span class="n">Observation</span><span class="p">(</span><span class="n">obs</span><span class="p">),),</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span></div>
+
+
+<div class="viewcode-block" id="TurnBasedEnv.n_reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.TurnBasedEnv.html#pantheonrl.common.multiagentenv.TurnBasedEnv.n_reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">n_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                               <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="o">...</span><span class="p">]]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ego_next</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">probegostart</span><span class="p">)</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ego_next</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_next</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="n">Observation</span><span class="p">(</span><span class="n">obs</span><span class="p">),)</span></div>
+
+
+<div class="viewcode-block" id="TurnBasedEnv.ego_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.TurnBasedEnv.html#pantheonrl.common.multiagentenv.TurnBasedEnv.ego_step">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">ego_step</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform the ego-agent&#39;s action and return a tuple of (partner&#39;s</span>
+<span class="sd">        observation, both rewards, done, info).</span>
+
+<span class="sd">        This function is called by the `step` function along with alt-step.</span>
+
+<span class="sd">        :param action: An action provided by the ego-agent.</span>
+
+<span class="sd">        :returns:</span>
+<span class="sd">            partner observation: Partner&#39;s next observation</span>
+<span class="sd">            rewards: Tuple representing the rewards of both agents (ego, alt)</span>
+<span class="sd">            done: Whether the episode has ended</span>
+<span class="sd">            info: Extra information about the environment</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="TurnBasedEnv.alt_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.TurnBasedEnv.html#pantheonrl.common.multiagentenv.TurnBasedEnv.alt_step">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">alt_step</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform the partner&#39;s action and return a tuple of (ego&#39;s observation,</span>
+<span class="sd">        both rewards, done, info).</span>
+
+<span class="sd">        This function is called by the `step` function along with ego-step.</span>
+
+<span class="sd">        :param action: An action provided by the partner.</span>
+
+<span class="sd">        :returns:</span>
+<span class="sd">            ego observation: Ego-agent&#39;s next observation</span>
+<span class="sd">            rewards: Tuple representing the rewards of both agents (ego, alt)</span>
+<span class="sd">            done: Whether the episode has ended</span>
+<span class="sd">            info: Extra information about the environment</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="TurnBasedEnv.multi_reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.TurnBasedEnv.html#pantheonrl.common.multiagentenv.TurnBasedEnv.multi_reset">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">multi_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">egofirst</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the environment and give the observation of the starting agent</span>
+<span class="sd">        (based on the value of `egofirst`).</span>
+
+<span class="sd">        This function is called by the `reset` function.</span>
+
+<span class="sd">        :param egofirst: True if the ego has the first turn, False otherwise</span>
+<span class="sd">        :returns: The observation for the starting agent (ego if `egofirst` is</span>
+<span class="sd">            True, and the partner&#39;s observation otherwise)</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="SimultaneousEnv">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.SimultaneousEnv.html#pantheonrl.common.multiagentenv.SimultaneousEnv">[docs]</a>
+<span class="k">class</span> <span class="nc">SimultaneousEnv</span><span class="p">(</span><span class="n">MultiAgentEnv</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for all 2-player simultaneous games.</span>
+
+<span class="sd">    :param partners: List of policies to choose from for the partner agent</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">observation_spaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Space</span><span class="p">],</span>
+                 <span class="n">action_spaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Space</span><span class="p">],</span>
+                 <span class="n">partners</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Agent</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">partners</span> <span class="o">=</span> <span class="p">[</span><span class="n">partners</span><span class="p">]</span> <span class="k">if</span> <span class="n">partners</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SimultaneousEnv</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">observation_spaces</span><span class="p">,</span> <span class="n">action_spaces</span><span class="p">,</span>
+            <span class="n">ego_ind</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_players</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">partners</span><span class="o">=</span><span class="n">partners</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SimultaneousEnv.n_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.SimultaneousEnv.html#pantheonrl.common.multiagentenv.SimultaneousEnv.n_step">[docs]</a>
+    <span class="k">def</span> <span class="nf">n_step</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">actions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                           <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Observation</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span>
+                           <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                           <span class="nb">bool</span><span class="p">,</span>
+                           <span class="n">Dict</span><span class="p">]:</span>
+        <span class="p">(</span><span class="n">obs0</span><span class="p">,</span> <span class="n">obs1</span><span class="p">),</span> <span class="n">r</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_step</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">actions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">Observation</span><span class="p">(</span><span class="n">obs0</span><span class="p">),</span> <span class="n">Observation</span><span class="p">(</span><span class="n">obs1</span><span class="p">)),</span> <span class="n">r</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SimultaneousEnv.n_reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.SimultaneousEnv.html#pantheonrl.common.multiagentenv.SimultaneousEnv.n_reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">n_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                               <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Observation</span><span class="p">],</span> <span class="o">...</span><span class="p">]]:</span>
+        <span class="p">(</span><span class="n">obs0</span><span class="p">,</span> <span class="n">obs1</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_reset</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">Observation</span><span class="p">(</span><span class="n">obs0</span><span class="p">),</span> <span class="n">Observation</span><span class="p">(</span><span class="n">obs1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="SimultaneousEnv.multi_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.SimultaneousEnv.html#pantheonrl.common.multiagentenv.SimultaneousEnv.multi_step">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">multi_step</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">ego_action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                    <span class="n">alt_action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+                           <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform the ego-agent&#39;s and partner&#39;s actions. This function returns a</span>
+<span class="sd">        tuple of (observations, both rewards, done, info).</span>
+
+<span class="sd">        This function is called by the `step` function.</span>
+
+<span class="sd">        :param ego_action: An action provided by the ego-agent.</span>
+<span class="sd">        :param alt_action: An action provided by the partner.</span>
+
+<span class="sd">        :returns:</span>
+<span class="sd">            observations: Tuple representing the next observations (ego, alt)</span>
+<span class="sd">            rewards: Tuple representing the rewards of both agents (ego, alt)</span>
+<span class="sd">            done: Whether the episode has ended</span>
+<span class="sd">            info: Extra information about the environment</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="SimultaneousEnv.multi_reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.SimultaneousEnv.html#pantheonrl.common.multiagentenv.SimultaneousEnv.multi_reset">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">multi_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the environment and give the observation of both agents.</span>
+
+<span class="sd">        This function is called by the `reset` function.</span>
+
+<span class="sd">        :returns: The observations of both agents</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Stanford ILIAD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

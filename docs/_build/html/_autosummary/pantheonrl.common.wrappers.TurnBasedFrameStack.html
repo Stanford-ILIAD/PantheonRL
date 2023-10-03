@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pantheonrl.common.wrappers.TurnBasedFrameStack &mdash; PantheonRL 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pantheonrl.common.wrappers.TurnBasedRecorder" href="pantheonrl.common.wrappers.TurnBasedRecorder.html" />
+    <link rel="prev" title="pantheonrl.common.wrappers.SimultaneousRecorder" href="pantheonrl.common.wrappers.SimultaneousRecorder.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PantheonRL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/install.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pantheonrl.html">pantheonrl</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pantheonrl.algos.html">pantheonrl.algos</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pantheonrl.common.html">pantheonrl.common</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pantheonrl.common.agents.html">pantheonrl.common.agents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pantheonrl.common.multiagentenv.html">pantheonrl.common.multiagentenv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pantheonrl.common.observation.html">pantheonrl.common.observation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pantheonrl.common.trajsaver.html">pantheonrl.common.trajsaver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pantheonrl.common.util.html">pantheonrl.common.util</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="pantheonrl.common.wrappers.html">pantheonrl.common.wrappers</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.common.wrappers.frame_wrap.html">pantheonrl.common.wrappers.frame_wrap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.common.wrappers.recorder_wrap.html">pantheonrl.common.wrappers.recorder_wrap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.common.wrappers.HistoryQueue.html">pantheonrl.common.wrappers.HistoryQueue</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.common.wrappers.MultiRecorder.html">pantheonrl.common.wrappers.MultiRecorder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.common.wrappers.SimultaneousFrameStack.html">pantheonrl.common.wrappers.SimultaneousFrameStack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.common.wrappers.SimultaneousRecorder.html">pantheonrl.common.wrappers.SimultaneousRecorder</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pantheonrl.common.wrappers.TurnBasedFrameStack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.common.wrappers.TurnBasedRecorder.html">pantheonrl.common.wrappers.TurnBasedRecorder</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pantheonrl.envs.html">pantheonrl.envs</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PantheonRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pantheonrl.html">pantheonrl</a></li>
+          <li class="breadcrumb-item"><a href="pantheonrl.common.html">pantheonrl.common</a></li>
+          <li class="breadcrumb-item"><a href="pantheonrl.common.wrappers.html">pantheonrl.common.wrappers</a></li>
+      <li class="breadcrumb-item active">pantheonrl.common.wrappers.TurnBasedFrameStack</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pantheonrl-common-wrappers-turnbasedframestack">
+<h1>pantheonrl.common.wrappers.TurnBasedFrameStack<a class="headerlink" href="#pantheonrl-common-wrappers-turnbasedframestack" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TurnBasedFrameStack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numframes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaultobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">altenv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaultaltobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/wrappers.html#TurnBasedFrameStack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pantheonrl.common.multiagentenv.TurnBasedEnv.html#pantheonrl.common.multiagentenv.TurnBasedEnv" title="pantheonrl.common.multiagentenv.TurnBasedEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">TurnBasedEnv</span></code></a></p>
+<p>Wrapper that stacks the observations of a turn-based environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>env</strong> (<em>Env</em>) – The environment to wrap</p></li>
+<li><p><strong>numframes</strong> (<em>int</em>) – The number of frames to stack for each observation</p></li>
+<li><p><strong>defaultobs</strong> (<em>ndarray</em><em> | </em><em>None</em>) – The default observation that fills old segments of the
+frame stacks.</p></li>
+<li><p><strong>altenv</strong> (<em>Env</em><em> | </em><em>None</em>) – The optional dummy environment representing the spaces of
+the partner agent.</p></li>
+<li><p><strong>defaultaltobs</strong> (<em>ndarray</em><em> | </em><em>None</em>) – The default observation that fills old segments of
+the frame stacks for the partner agent.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.add_partner_agent" title="pantheonrl.common.wrappers.TurnBasedFrameStack.add_partner_agent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_partner_agent</span></code></a></p></td>
+<td><p>Add agent to the list of potential partner agents.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.alt_step" title="pantheonrl.common.wrappers.TurnBasedFrameStack.alt_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alt_step</span></code></a></p></td>
+<td><p>Perform the partner's action and return a tuple of (ego's observation, both rewards, done, info).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.close" title="pantheonrl.common.wrappers.TurnBasedFrameStack.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a></p></td>
+<td><p>After the user has finished using the environment, close contains the code necessary to &quot;clean up&quot; the environment.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">construct_single_agent_interface</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.ego_step" title="pantheonrl.common.wrappers.TurnBasedFrameStack.ego_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ego_step</span></code></a></p></td>
+<td><p>Perform the ego-agent's action and return a tuple of (partner's observation, both rewards, done, info).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.getDummyEnv" title="pantheonrl.common.wrappers.TurnBasedFrameStack.getDummyEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDummyEnv</span></code></a></p></td>
+<td><p>Returns a dummy environment with just an observation and action space that a partner agent can use to construct their policy network.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.get_wrapper_attr" title="pantheonrl.common.wrappers.TurnBasedFrameStack.get_wrapper_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_wrapper_attr</span></code></a></p></td>
+<td><p>Gets the attribute <cite>name</cite> from the environment.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.multi_reset" title="pantheonrl.common.wrappers.TurnBasedFrameStack.multi_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multi_reset</span></code></a></p></td>
+<td><p>Reset the environment and give the observation of the starting agent (based on the value of <cite>egofirst</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.n_reset" title="pantheonrl.common.wrappers.TurnBasedFrameStack.n_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_reset</span></code></a></p></td>
+<td><p>Reset the environment and return which agents will move first along with their initial observations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.n_step" title="pantheonrl.common.wrappers.TurnBasedFrameStack.n_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_step</span></code></a></p></td>
+<td><p>Perform the actions specified by the agents that will move.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.render" title="pantheonrl.common.wrappers.TurnBasedFrameStack.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a></p></td>
+<td><p>Compute the render frames as specified by <code class="xref py py-attr docutils literal notranslate"><span class="pre">render_mode</span></code> during the initialization of the environment.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.resample_random" title="pantheonrl.common.wrappers.TurnBasedFrameStack.resample_random"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_random</span></code></a></p></td>
+<td><p>Randomly resamples each partner policy</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.resample_round_robin" title="pantheonrl.common.wrappers.TurnBasedFrameStack.resample_round_robin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_round_robin</span></code></a></p></td>
+<td><p>Sets the partner policy to the next option on the list for round-robin sampling.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.reset" title="pantheonrl.common.wrappers.TurnBasedFrameStack.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a></p></td>
+<td><p>Reset environment to an initial state and return the first observation for the ego agent.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ego_extractor</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.set_partnerid" title="pantheonrl.common.wrappers.TurnBasedFrameStack.set_partnerid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_partnerid</span></code></a></p></td>
+<td><p>Set the current partner agent to use</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.set_resample_policy" title="pantheonrl.common.wrappers.TurnBasedFrameStack.set_resample_policy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_resample_policy</span></code></a></p></td>
+<td><p>Set the resample_partner method to round &quot;robin&quot; or &quot;random&quot;</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.step" title="pantheonrl.common.wrappers.TurnBasedFrameStack.step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">step</span></code></a></p></td>
+<td><p>Run one timestep from the perspective of the ego-agent.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">action_space</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">metadata</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.np_random" title="pantheonrl.common.wrappers.TurnBasedFrameStack.np_random"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np_random</span></code></a></p></td>
+<td><p>Returns the environment's internal <code class="xref py py-attr docutils literal notranslate"><span class="pre">_np_random</span></code> that if not set will initialise with a random seed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">observation_space</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_mode</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reward_range</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">spec</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.unwrapped" title="pantheonrl.common.wrappers.TurnBasedFrameStack.unwrapped"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unwrapped</span></code></a></p></td>
+<td><p>Returns the base non-wrapped environment.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.add_partner_agent">
+<span class="sig-name descname"><span class="pre">add_partner_agent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">player_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.add_partner_agent" title="Link to this definition"></a></dt>
+<dd><p>Add agent to the list of potential partner agents. If there are
+multiple agents that can be a specific player number, the environment
+randomly samples from them at the start of every episode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>agent</strong> (<a class="reference internal" href="pantheonrl.common.agents.Agent.html#pantheonrl.common.agents.Agent" title="pantheonrl.common.agents.Agent"><em>Agent</em></a>) – Agent to add</p></li>
+<li><p><strong>player_num</strong> (<em>int</em>) – the player number that this new agent can be</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.alt_step">
+<span class="sig-name descname"><span class="pre">alt_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/wrappers.html#TurnBasedFrameStack.alt_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.alt_step" title="Link to this definition"></a></dt>
+<dd><p>Perform the partner’s action and return a tuple of (ego’s observation,
+both rewards, done, info).</p>
+<p>This function is called by the <cite>step</cite> function along with ego-step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>action</strong> (<em>ndarray</em>) – An action provided by the partner.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>ego observation: Ego-agent’s next observation
+rewards: Tuple representing the rewards of both agents (ego, alt)
+done: Whether the episode has ended
+info: Extra information about the environment</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[<em>ndarray</em> | None, <em>Tuple</em>[float, float], bool, <em>Dict</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.close" title="Link to this definition"></a></dt>
+<dd><p>After the user has finished using the environment, close contains the code necessary to “clean up” the environment.</p>
+<p>This is critical for closing rendering windows, database or HTTP connections.
+Calling <code class="docutils literal notranslate"><span class="pre">close</span></code> on an already closed environment has no effect and won’t raise an error.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.ego_step">
+<span class="sig-name descname"><span class="pre">ego_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/wrappers.html#TurnBasedFrameStack.ego_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.ego_step" title="Link to this definition"></a></dt>
+<dd><p>Perform the ego-agent’s action and return a tuple of (partner’s
+observation, both rewards, done, info).</p>
+<p>This function is called by the <cite>step</cite> function along with alt-step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>action</strong> (<em>ndarray</em>) – An action provided by the ego-agent.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>partner observation: Partner’s next observation
+rewards: Tuple representing the rewards of both agents (ego, alt)
+done: Whether the episode has ended
+info: Extra information about the environment</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[<em>ndarray</em> | None, <em>Tuple</em>[float, float], bool, <em>Dict</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.getDummyEnv">
+<span class="sig-name descname"><span class="pre">getDummyEnv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">player_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.getDummyEnv" title="Link to this definition"></a></dt>
+<dd><p>Returns a dummy environment with just an observation and action
+space that a partner agent can use to construct their policy network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>player_num</strong> (<em>int</em>) – the partner number to query</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.get_wrapper_attr">
+<span class="sig-name descname"><span class="pre">get_wrapper_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.get_wrapper_attr" title="Link to this definition"></a></dt>
+<dd><p>Gets the attribute <cite>name</cite> from the environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Any</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.multi_reset">
+<span class="sig-name descname"><span class="pre">multi_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">egofirst</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/wrappers.html#TurnBasedFrameStack.multi_reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.multi_reset" title="Link to this definition"></a></dt>
+<dd><p>Reset the environment and give the observation of the starting agent
+(based on the value of <cite>egofirst</cite>).</p>
+<p>This function is called by the <cite>reset</cite> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>egofirst</strong> (<em>bool</em>) – True if the ego has the first turn, False otherwise</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The observation for the starting agent (ego if <cite>egofirst</cite> is
+True, and the partner’s observation otherwise)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.n_reset">
+<span class="sig-name descname"><span class="pre">n_reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.n_reset" title="Link to this definition"></a></dt>
+<dd><p>Reset the environment and return which agents will move first along
+with their initial observations.</p>
+<p>This function is called by the <cite>reset</cite> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>agents: Tuple representing the agents that will move first
+observations: Tuple representing the observations of both agents</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tuple</em>[<em>Tuple</em>[int, …], <em>Tuple</em>[<em>ndarray</em> | None, …]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.n_step">
+<span class="sig-name descname"><span class="pre">n_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.n_step" title="Link to this definition"></a></dt>
+<dd><p>Perform the actions specified by the agents that will move. This
+function returns a tuple of (next agents, observations, both rewards,
+done, info).</p>
+<p>This function is called by the <cite>step</cite> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>actions</strong> (<em>List</em><em>[</em><em>ndarray</em><em>]</em>) – List of action provided agents that are acting on this</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tuple</em>[<em>Tuple</em>[int, …], <em>Tuple</em>[<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a> | None, …], <em>Tuple</em>[float, …], bool, <em>Dict</em>]</p>
+</dd>
+</dl>
+<p>step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>agents: Tuple representing the agents to call for the next actions
+observations: Tuple representing the next observations (ego, alt)
+rewards: Tuple representing the rewards of all agents
+done: Whether the episode has ended
+info: Extra information about the environment</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>actions</strong> (<em>List</em><em>[</em><em>ndarray</em><em>]</em>) – </p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[<em>Tuple</em>[int, …], <em>Tuple</em>[<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a> | None, …], <em>Tuple</em>[float, …], bool, <em>Dict</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.np_random">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">np_random</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Generator</span></em><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.np_random" title="Link to this definition"></a></dt>
+<dd><p>Returns the environment’s internal <code class="xref py py-attr docutils literal notranslate"><span class="pre">_np_random</span></code> that if not set will initialise with a random seed.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Instances of <cite>np.random.Generator</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.render" title="Link to this definition"></a></dt>
+<dd><p>Compute the render frames as specified by <code class="xref py py-attr docutils literal notranslate"><span class="pre">render_mode</span></code> during the initialization of the environment.</p>
+<p>The environment’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">metadata</span></code> render modes (<cite>env.metadata[“render_modes”]</cite>) should contain the possible
+ways to implement the render modes. In addition, list versions for most render modes is achieved through
+<cite>gymnasium.make</cite> which automatically applies a wrapper to collect rendered frames.</p>
+<dl class="simple">
+<dt>Note:</dt><dd><p>As the <code class="xref py py-attr docutils literal notranslate"><span class="pre">render_mode</span></code> is known during <code class="docutils literal notranslate"><span class="pre">__init__</span></code>, the objects used to render the environment state
+should be initialised in <code class="docutils literal notranslate"><span class="pre">__init__</span></code>.</p>
+</dd>
+</dl>
+<p>By convention, if the <code class="xref py py-attr docutils literal notranslate"><span class="pre">render_mode</span></code> is:</p>
+<ul class="simple">
+<li><p>None (default): no render is computed.</p></li>
+<li><p>“human”: The environment is continuously rendered in the current display or terminal, usually for human consumption.
+This rendering should occur during <a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.step" title="pantheonrl.common.wrappers.TurnBasedFrameStack.step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">step()</span></code></a> and <a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.render" title="pantheonrl.common.wrappers.TurnBasedFrameStack.render"><code class="xref py py-meth docutils literal notranslate"><span class="pre">render()</span></code></a> doesn’t need to be called. Returns <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p>“rgb_array”: Return a single frame representing the current state of the environment.
+A frame is a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> with shape <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">3)</span></code> representing RGB values for an x-by-y pixel image.</p></li>
+<li><p>“ansi”: Return a strings (<code class="docutils literal notranslate"><span class="pre">str</span></code>) or <code class="docutils literal notranslate"><span class="pre">StringIO.StringIO</span></code> containing a terminal-style text representation
+for each time step. The text can include newlines and ANSI escape sequences (e.g. for colors).</p></li>
+<li><p>“rgb_array_list” and “ansi_list”: List based version of render modes are possible (except Human) through the
+wrapper, <code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.wrappers.RenderCollection</span></code> that is automatically applied during <code class="docutils literal notranslate"><span class="pre">gymnasium.make(...,</span> <span class="pre">render_mode=&quot;rgb_array_list&quot;)</span></code>.
+The frames collected are popped after <a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.render" title="pantheonrl.common.wrappers.TurnBasedFrameStack.render"><code class="xref py py-meth docutils literal notranslate"><span class="pre">render()</span></code></a> is called or <a class="reference internal" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.reset" title="pantheonrl.common.wrappers.TurnBasedFrameStack.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reset()</span></code></a>.</p></li>
+</ul>
+<dl class="simple">
+<dt>Note:</dt><dd><p>Make sure that your class’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">metadata</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;render_modes&quot;</span></code> key includes the list of supported modes.</p>
+</dd>
+</dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 0.25.0: </span>The render function was changed to no longer accept parameters, rather these parameters should be specified
+in the environment initialised, i.e., <code class="docutils literal notranslate"><span class="pre">gymnasium.make(&quot;CartPole-v1&quot;,</span> <span class="pre">render_mode=&quot;human&quot;)</span></code></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>RenderFrame</em> | list[<em>RenderFrame</em>] | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.resample_random">
+<span class="sig-name descname"><span class="pre">resample_random</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.resample_random" title="Link to this definition"></a></dt>
+<dd><p>Randomly resamples each partner policy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.resample_round_robin">
+<span class="sig-name descname"><span class="pre">resample_round_robin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.resample_round_robin" title="Link to this definition"></a></dt>
+<dd><p>Sets the partner policy to the next option on the list for round-robin
+sampling.</p>
+<p>Note: This function is only valid for 2-player environments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.reset" title="Link to this definition"></a></dt>
+<dd><p>Reset environment to an initial state and return the first observation
+for the ego agent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Ego-agent’s first observation</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>seed</strong> (<em>int</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>options</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a>, dict[str, <em>Any</em>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.set_partnerid">
+<span class="sig-name descname"><span class="pre">set_partnerid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">player_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.set_partnerid" title="Link to this definition"></a></dt>
+<dd><p>Set the current partner agent to use</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>agent_id</strong> (<em>int</em>) – agent_id to use as current partner</p></li>
+<li><p><strong>player_num</strong> (<em>int</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.set_resample_policy">
+<span class="sig-name descname"><span class="pre">set_resample_policy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resample_policy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.set_resample_policy" title="Link to this definition"></a></dt>
+<dd><p>Set the resample_partner method to round “robin” or “random”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>resample_policy</strong> (<em>str</em>) – The new resampling policy to use.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>Valid values are: “default”, “robin”, “random”</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.step" title="Link to this definition"></a></dt>
+<dd><p>Run one timestep from the perspective of the ego-agent. This involves
+calling the ego_step function and the alt_step function to get to the
+next observation of the ego agent.</p>
+<p>Accepts the ego-agent’s action and returns a tuple of (observation,
+reward, done, info) from the perspective of the ego agent.</p>
+<p>Note that when the environment is done, the final observation is the
+latest observation provided by the environment, which may be the same
+as the previous observation given to the agent, especially in turn-based
+settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>action</strong> (<em>ndarray</em>) – An action provided by the ego-agent.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>observation: Ego-agent’s next observation
+reward: Amount of reward returned after previous action
+terminated: Whether the episode has ended (need to call reset() if True)
+truncated: Whether the episode was truncated (need to call reset() if True)
+info: Extra information about the environment</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a> | <em>Any</em>, float, bool, bool, dict[str, <em>Any</em>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.TurnBasedFrameStack.unwrapped">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unwrapped</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Env</span><span class="p"><span class="pre">[</span></span><span class="pre">ObsType</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ActType</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pantheonrl.common.wrappers.TurnBasedFrameStack.unwrapped" title="Link to this definition"></a></dt>
+<dd><p>Returns the base non-wrapped environment.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Env: The base non-wrapped <code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.Env</span></code> instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pantheonrl.common.wrappers.SimultaneousRecorder.html" class="btn btn-neutral float-left" title="pantheonrl.common.wrappers.SimultaneousRecorder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pantheonrl.common.wrappers.TurnBasedRecorder.html" class="btn btn-neutral float-right" title="pantheonrl.common.wrappers.TurnBasedRecorder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Stanford ILIAD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

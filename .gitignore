@@ -11,3 +11,4 @@ trajs/
 models/
 .idea/
 .mypy_cache/
+docs/_build/doctrees

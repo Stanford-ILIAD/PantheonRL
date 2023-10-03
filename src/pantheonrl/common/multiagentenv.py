@@ -103,8 +103,7 @@ class MultiAgentEnv(gym.Env, ABC):
 
     :param ego_ind: The player that the ego represents
     :param n_players: The number of players in the game
-    :param resample_policy: The resampling policy to use
-    - (see set_resample_policy)
+    :param resample_policy: The resampling policy to use (see set_resample_policy)
     :param partners: Lists of agents to choose from for the partner players
     :param ego_extractor: Function to extract Observation into the type the
         ego expects

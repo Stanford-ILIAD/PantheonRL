@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pantheonrl.common.wrappers &mdash; PantheonRL 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PantheonRL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/install.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/pantheonrl.html">pantheonrl</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PantheonRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pantheonrl.common.wrappers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pantheonrl.common.wrappers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
+
+<span class="kn">from</span> <span class="nn">.multiagentenv</span> <span class="kn">import</span> <span class="n">TurnBasedEnv</span><span class="p">,</span> <span class="n">SimultaneousEnv</span><span class="p">,</span> <span class="n">MultiAgentEnv</span>
+<span class="kn">from</span> <span class="nn">.trajsaver</span> <span class="kn">import</span> <span class="p">(</span><span class="n">TurnBasedTransitions</span><span class="p">,</span> <span class="n">SimultaneousTransitions</span><span class="p">,</span>
+                        <span class="n">MultiTransitions</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="p">(</span><span class="n">calculate_space</span><span class="p">,</span> <span class="n">get_default_obs</span><span class="p">)</span>
+
+<span class="c1"># Flags for the TurnBasedRecorder wrapper</span>
+<span class="n">EGO_NOT_DONE</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">ALT_NOT_DONE</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">EGO_DONE</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">ALT_DONE</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="c1"># Flags for the SimultaneousRecorder wrapper</span>
+<span class="n">NOT_DONE</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">DONE</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<div class="viewcode-block" id="frame_wrap">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.frame_wrap.html#pantheonrl.common.wrappers.frame_wrap">[docs]</a>
+<span class="k">def</span> <span class="nf">frame_wrap</span><span class="p">(</span><span class="n">env</span><span class="p">:</span> <span class="n">MultiAgentEnv</span><span class="p">,</span> <span class="n">numframes</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">TurnBasedEnv</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TurnBasedFrameStack</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">numframes</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SimultaneousFrameStack</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">numframes</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="recorder_wrap">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.recorder_wrap.html#pantheonrl.common.wrappers.recorder_wrap">[docs]</a>
+<span class="k">def</span> <span class="nf">recorder_wrap</span><span class="p">(</span><span class="n">env</span><span class="p">:</span> <span class="n">MultiAgentEnv</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">TurnBasedEnv</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TurnBasedRecorder</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SimultaneousRecorder</span><span class="p">(</span><span class="n">env</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="HistoryQueue">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.HistoryQueue.html#pantheonrl.common.wrappers.HistoryQueue">[docs]</a>
+<span class="k">class</span> <span class="nc">HistoryQueue</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ring buffer representing the saved history for the FrameStack wrappers.</span>
+
+<span class="sd">    :param defaultelem: The default element for an empty buffer</span>
+<span class="sd">    :param size: The length of the queue</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">defaultelem</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultelem</span> <span class="o">=</span> <span class="n">defaultelem</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">defaultelem</span><span class="p">]</span> <span class="o">*</span> <span class="n">size</span>
+
+<div class="viewcode-block" id="HistoryQueue.add">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.HistoryQueue.html#pantheonrl.common.wrappers.HistoryQueue.add">[docs]</a>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">toadd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add the given value to the queue and return the new representation</span>
+
+<span class="sd">        :param toadd: The new value to add. This overrides the oldest value</span>
+<span class="sd">        :return: The new queue representation, where the first element is the</span>
+<span class="sd">            most recently added element and the last element is the oldest</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">toadd</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">val</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="n">ind</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">return</span> <span class="n">ans</span></div>
+
+
+<div class="viewcode-block" id="HistoryQueue.reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.HistoryQueue.html#pantheonrl.common.wrappers.HistoryQueue.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the queue. This fills the buffer with the defaultelement.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultelem</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MultiRecorder">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.MultiRecorder.html#pantheonrl.common.wrappers.MultiRecorder">[docs]</a>
+<span class="k">class</span> <span class="nc">MultiRecorder</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Base Class for all Recorder Wrappers&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MultiRecorder.get_transitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.MultiRecorder.html#pantheonrl.common.wrappers.MultiRecorder.get_transitions">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiTransitions</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Get the transitions that have been recorded &quot;&quot;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TurnBasedRecorder">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.TurnBasedRecorder.html#pantheonrl.common.wrappers.TurnBasedRecorder">[docs]</a>
+<span class="k">class</span> <span class="nc">TurnBasedRecorder</span><span class="p">(</span><span class="n">TurnBasedEnv</span><span class="p">,</span> <span class="n">MultiRecorder</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recorder for all turn-based environments</span>
+
+<span class="sd">    :param env: The environment to record</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TurnBasedRecorder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">probegostart</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">probegostart</span><span class="p">,</span> <span class="n">partners</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">partners</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">action_space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">observation_space</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">allobs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allacts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">incomplete</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="TurnBasedRecorder.ego_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.TurnBasedRecorder.html#pantheonrl.common.wrappers.TurnBasedRecorder.ego_step">[docs]</a>
+    <span class="k">def</span> <span class="nf">ego_step</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function calls the embedded environment&#39;s ego_step and records the</span>
+<span class="sd">        action and new observation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">altobs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">ego_step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allacts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">altobs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">EGO_NOT_DONE</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">EGO_DONE</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">incomplete</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">altobs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span></div>
+
+
+<div class="viewcode-block" id="TurnBasedRecorder.alt_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.TurnBasedRecorder.html#pantheonrl.common.wrappers.TurnBasedRecorder.alt_step">[docs]</a>
+    <span class="k">def</span> <span class="nf">alt_step</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function calls the embedded environment&#39;s alt_step and records the</span>
+<span class="sd">        action and new observation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">egoobs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">alt_step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allacts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">egoobs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ALT_NOT_DONE</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ALT_DONE</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">incomplete</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">egoobs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span></div>
+
+
+<div class="viewcode-block" id="TurnBasedRecorder.multi_reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.TurnBasedRecorder.html#pantheonrl.common.wrappers.TurnBasedRecorder.multi_reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">multi_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">egofirst</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function calls the embedded environment&#39;s multi_reset and records</span>
+<span class="sd">        the new observation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">newobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">multi_reset</span><span class="p">(</span><span class="n">egofirst</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">incomplete</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allobs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">newobs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newobs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">incomplete</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">newobs</span></div>
+
+
+<div class="viewcode-block" id="TurnBasedRecorder.get_transitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.TurnBasedRecorder.html#pantheonrl.common.wrappers.TurnBasedRecorder.get_transitions">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TurnBasedTransitions</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the recorded transitions &quot;&quot;&quot;</span>
+        <span class="n">obsarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allobs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">incomplete</span><span class="p">:</span>
+            <span class="n">obsarray</span> <span class="o">=</span> <span class="n">obsarray</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">TurnBasedTransitions</span><span class="p">(</span>
+                    <span class="n">obsarray</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allacts</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">)</span>
+                <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="SimultaneousRecorder">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.SimultaneousRecorder.html#pantheonrl.common.wrappers.SimultaneousRecorder">[docs]</a>
+<span class="k">class</span> <span class="nc">SimultaneousRecorder</span><span class="p">(</span><span class="n">SimultaneousEnv</span><span class="p">,</span> <span class="n">MultiRecorder</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recorder for all turn-based environments</span>
+
+<span class="sd">    :param env: The environment to record</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SimultaneousRecorder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">partners</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">partners</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">action_space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">observation_space</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">allegoobs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allegoacts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allaltobs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allaltacts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allflags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">incomplete</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="SimultaneousRecorder.multi_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.SimultaneousRecorder.html#pantheonrl.common.wrappers.SimultaneousRecorder.multi_step">[docs]</a>
+    <span class="k">def</span> <span class="nf">multi_step</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">ego_action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                    <span class="n">alt_action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+                           <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function calls the embedded environment&#39;s multi_step and records</span>
+<span class="sd">        the new actions and observations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">multi_step</span><span class="p">(</span><span class="n">ego_action</span><span class="p">,</span> <span class="n">alt_action</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allegoacts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ego_action</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allaltacts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alt_action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allegoobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allaltobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allflags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">NOT_DONE</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allflags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DONE</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">incomplete</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span></div>
+
+
+<div class="viewcode-block" id="SimultaneousRecorder.multi_reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.SimultaneousRecorder.html#pantheonrl.common.wrappers.SimultaneousRecorder.multi_reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">multi_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function calls the embedded environment&#39;s multi_reset and records</span>
+<span class="sd">        the new observations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">multi_reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allegoobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allaltobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">incomplete</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">obs</span></div>
+
+
+<div class="viewcode-block" id="SimultaneousRecorder.get_transitions">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.SimultaneousRecorder.html#pantheonrl.common.wrappers.SimultaneousRecorder.get_transitions">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimultaneousTransitions</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the recorded transitions &quot;&quot;&quot;</span>
+        <span class="n">egoobsarr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allegoobs</span><span class="p">)</span>
+        <span class="n">altobsarr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allaltobs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">incomplete</span><span class="p">:</span>
+            <span class="n">egoobsarr</span> <span class="o">=</span> <span class="n">egoobsarr</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">altobsarr</span> <span class="o">=</span> <span class="n">altobsarr</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">SimultaneousTransitions</span><span class="p">(</span>
+                    <span class="n">egoobsarr</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allegoacts</span><span class="p">),</span>
+                    <span class="n">altobsarr</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allaltacts</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allflags</span><span class="p">)</span>
+                <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TurnBasedFrameStack">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.TurnBasedFrameStack.html#pantheonrl.common.wrappers.TurnBasedFrameStack">[docs]</a>
+<span class="k">class</span> <span class="nc">TurnBasedFrameStack</span><span class="p">(</span><span class="n">TurnBasedEnv</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrapper that stacks the observations of a turn-based environment.</span>
+
+<span class="sd">    :param env: The environment to wrap</span>
+<span class="sd">    :param numframes: The number of frames to stack for each observation</span>
+<span class="sd">    :param defaultobs: The default observation that fills old segments of the</span>
+<span class="sd">        frame stacks.</span>
+<span class="sd">    :param altenv: The optional dummy environment representing the spaces of</span>
+<span class="sd">        the partner agent.</span>
+<span class="sd">    :param defaultaltobs: The default observation that fills old segments of</span>
+<span class="sd">        the frame stacks for the partner agent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">env</span><span class="p">:</span> <span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">,</span>
+                <span class="n">numframes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="n">defaultobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">altenv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">defaultaltobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TurnBasedFrameStack</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">probegostart</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">probegostart</span><span class="p">,</span> <span class="n">partners</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">partners</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numframes</span> <span class="o">=</span> <span class="n">numframes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">action_space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">calculate_space</span><span class="p">(</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span> <span class="n">numframes</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">defaultobs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">defobs</span> <span class="o">=</span> <span class="n">defaultobs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">defobs</span> <span class="o">=</span> <span class="n">get_default_obs</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">altenv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">altenv</span> <span class="o">=</span> <span class="n">env</span>
+
+        <span class="k">if</span> <span class="n">defaultaltobs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">defaltobs</span> <span class="o">=</span> <span class="n">defaultaltobs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">defaltobs</span> <span class="o">=</span> <span class="n">get_default_obs</span><span class="p">(</span><span class="n">altenv</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">egohistory</span> <span class="o">=</span> <span class="n">HistoryQueue</span><span class="p">(</span><span class="n">defobs</span><span class="p">,</span> <span class="n">numframes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">althistory</span> <span class="o">=</span> <span class="n">HistoryQueue</span><span class="p">(</span><span class="n">defaltobs</span><span class="p">,</span> <span class="n">numframes</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TurnBasedFrameStack.ego_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.TurnBasedFrameStack.html#pantheonrl.common.wrappers.TurnBasedFrameStack.ego_step">[docs]</a>
+    <span class="k">def</span> <span class="nf">ego_step</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">altobs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">ego_step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">althistory</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">altobs</span><span class="p">),</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span></div>
+
+
+<div class="viewcode-block" id="TurnBasedFrameStack.alt_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.TurnBasedFrameStack.html#pantheonrl.common.wrappers.TurnBasedFrameStack.alt_step">[docs]</a>
+    <span class="k">def</span> <span class="nf">alt_step</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">egoobs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">alt_step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">egohistory</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">egoobs</span><span class="p">),</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span></div>
+
+
+<div class="viewcode-block" id="TurnBasedFrameStack.multi_reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.TurnBasedFrameStack.html#pantheonrl.common.wrappers.TurnBasedFrameStack.multi_reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">multi_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">egofirst</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">newobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">multi_reset</span><span class="p">(</span><span class="n">egofirst</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">egohistory</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">althistory</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">egofirst</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">egohistory</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">newobs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">althistory</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">newobs</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="SimultaneousFrameStack">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.SimultaneousFrameStack.html#pantheonrl.common.wrappers.SimultaneousFrameStack">[docs]</a>
+<span class="k">class</span> <span class="nc">SimultaneousFrameStack</span><span class="p">(</span><span class="n">SimultaneousEnv</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrapper that stacks the observations of a simultaneous environment.</span>
+
+<span class="sd">    :param env: The environment to wrap</span>
+<span class="sd">    :param numframes: The number of frames to stack for each observation</span>
+<span class="sd">    :param defaultobs: The default observation that fills old segments of the</span>
+<span class="sd">        frame stacks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">env</span><span class="p">:</span> <span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">,</span>
+                <span class="n">numframes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="n">defaultobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SimultaneousFrameStack</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">partners</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">partners</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numframes</span> <span class="o">=</span> <span class="n">numframes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">action_space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">calculate_space</span><span class="p">(</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span> <span class="n">numframes</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultobs</span> <span class="o">=</span> <span class="n">get_default_obs</span><span class="p">(</span>
+            <span class="n">env</span><span class="p">)</span> <span class="k">if</span> <span class="n">defaultobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">defaultobs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">egohistory</span> <span class="o">=</span> <span class="n">HistoryQueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultobs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numframes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">althistory</span> <span class="o">=</span> <span class="n">HistoryQueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultobs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numframes</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SimultaneousFrameStack.multi_step">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.SimultaneousFrameStack.html#pantheonrl.common.wrappers.SimultaneousFrameStack.multi_step">[docs]</a>
+    <span class="k">def</span> <span class="nf">multi_step</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">ego_action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                    <span class="n">alt_action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+                           <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">obs</span><span class="p">,</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">multi_step</span><span class="p">(</span><span class="n">ego_action</span><span class="p">,</span> <span class="n">alt_action</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">egohistory</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">althistory</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span> <span class="n">rews</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span></div>
+
+
+<div class="viewcode-block" id="SimultaneousFrameStack.multi_reset">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.wrappers.SimultaneousFrameStack.html#pantheonrl.common.wrappers.SimultaneousFrameStack.multi_reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">multi_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">multi_reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">egohistory</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">althistory</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">egohistory</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">althistory</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Stanford ILIAD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

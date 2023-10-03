@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pantheonrl.algos.bc.BC &mdash; PantheonRL 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pantheonrl.algos.bc.BCShell" href="pantheonrl.algos.bc.BCShell.html" />
+    <link rel="prev" title="pantheonrl.algos.bc.reconstruct_policy" href="pantheonrl.algos.bc.reconstruct_policy.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PantheonRL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/install.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pantheonrl.html">pantheonrl</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pantheonrl.algos.html">pantheonrl.algos</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pantheonrl.algos.adap.html">pantheonrl.algos.adap</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="pantheonrl.algos.bc.html">pantheonrl.algos.bc</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.algos.bc.reconstruct_policy.html">pantheonrl.algos.bc.reconstruct_policy</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pantheonrl.algos.bc.BC</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.algos.bc.BCShell.html">pantheonrl.algos.bc.BCShell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.algos.bc.ConstantLRSchedule.html">pantheonrl.algos.bc.ConstantLRSchedule</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pantheonrl.algos.bc.EpochOrBatchIteratorWithProgress.html">pantheonrl.algos.bc.EpochOrBatchIteratorWithProgress</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pantheonrl.algos.modular.html">pantheonrl.algos.modular</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pantheonrl.common.html">pantheonrl.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pantheonrl.envs.html">pantheonrl.envs</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PantheonRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pantheonrl.html">pantheonrl</a></li>
+          <li class="breadcrumb-item"><a href="pantheonrl.algos.html">pantheonrl.algos</a></li>
+          <li class="breadcrumb-item"><a href="pantheonrl.algos.bc.html">pantheonrl.algos.bc</a></li>
+      <li class="breadcrumb-item active">pantheonrl.algos.bc.BC</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pantheonrl-algos-bc-bc">
+<h1>pantheonrl.algos.bc.BC<a class="headerlink" href="#pantheonrl-algos-bc-bc" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pantheonrl.algos.bc.BC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy_class=&lt;class</span> <span class="pre">'pantheonrl.common.util.FeedForward32Policy'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expert_data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_cls=&lt;class</span> <span class="pre">'torch.optim.adam.Adam'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent_weight=0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2_weight=0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device='auto'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/bc.html#BC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.bc.BC" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Behavioral cloning (BC).
+Recovers a policy via supervised learning on observation-action Tensor
+pairs, sampled from a Torch DataLoader or any Iterator that ducktypes
+<cite>torch.utils.data.DataLoader</cite>.
+Args:</p>
+<blockquote>
+<div><p>observation_space: the observation space of the environment.
+action_space: the action space of the environment.
+policy_class: used to instantiate imitation policy.
+policy_kwargs: keyword arguments passed to policy’s constructor.
+expert_data: If not None, then immediately call</p>
+<blockquote>
+<div><p><cite>self.set_expert_data_loader(expert_data)</cite> during
+initialization.</p>
+</div></blockquote>
+<p>optimizer_cls: optimiser to use for supervised training.
+optimizer_kwargs: keyword arguments, excluding learning rate and</p>
+<blockquote>
+<div><p>weight decay, for optimiser construction.</p>
+</div></blockquote>
+<p>ent_weight: scaling applied to the policy’s entropy regularization.
+l2_weight: scaling applied to the policy’s L2 regularization.
+device: name/identity of device to place policy on.</p>
+</div></blockquote>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.bc.BC.save_policy" title="pantheonrl.algos.bc.BC.save_policy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_policy</span></code></a></p></td>
+<td><p>Save policy to a path. Can be reloaded by <cite>.reconstruct_policy()</cite>. Args:     policy_path: path to save policy to.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.bc.BC.set_expert_data_loader" title="pantheonrl.algos.bc.BC.set_expert_data_loader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_expert_data_loader</span></code></a></p></td>
+<td><p>Set the expert data loader, which yields batches of obs-act pairs. Changing the expert data loader on-demand is useful for DAgger and other interactive algorithms. Args:      expert_data: Either a Torch <cite>DataLoader</cite>, any other iterator that         yields dictionaries containing &quot;obs&quot; and &quot;acts&quot; Tensors or         Numpy arrays, or a <cite>TransitionsMinimal</cite> instance. If this is a <cite>TransitionsMinimal</cite> instance, then it is         automatically converted into a shuffled <cite>DataLoader</cite> with batch         size <cite>BC.DEFAULT_BATCH_SIZE</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.bc.BC.train" title="pantheonrl.algos.bc.BC.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a></p></td>
+<td><p>Train with supervised learning for some number of epochs. Here an 'epoch' is just a complete pass through the expert data loader, as set by <cite>self.set_expert_data_loader()</cite>. Args:     n_epochs: Number of complete passes made through expert data before         ending training. Provide exactly one of <cite>n_epochs</cite> and         <cite>n_batches</cite>. n_batches: Number of batches loaded from dataset before ending         training. Provide exactly one of <cite>n_epochs</cite> and <cite>n_batches</cite>. on_epoch_end: Optional callback with no parameters to run at the         end of each epoch. on_batch_end: Optional callback with no parameters to run at the         end of each batch. log_interval: Log stats after every log_interval batches.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.bc.BC.DEFAULT_BATCH_SIZE" title="pantheonrl.algos.bc.BC.DEFAULT_BATCH_SIZE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_BATCH_SIZE</span></code></a></p></td>
+<td><p>Default batch size for DataLoader automatically constructed from Transitions.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>observation_space</strong> (<em>Space</em>) – </p></li>
+<li><p><strong>action_space</strong> (<em>Space</em>) – </p></li>
+<li><p><strong>policy_class</strong> (<em>Type</em><em>[</em><em>BasePolicy</em><em>]</em>) – </p></li>
+<li><p><strong>policy_kwargs</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>expert_data</strong> (<em>Iterable</em><em>[</em><em>Mapping</em><em>] </em><em>| </em><a class="reference internal" href="pantheonrl.common.trajsaver.TransitionsMinimal.html#pantheonrl.common.trajsaver.TransitionsMinimal" title="pantheonrl.common.trajsaver.TransitionsMinimal"><em>TransitionsMinimal</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>optimizer_cls</strong> (<em>Type</em><em>[</em><em>Optimizer</em><em>]</em>) – </p></li>
+<li><p><strong>optimizer_kwargs</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>ent_weight</strong> (<em>float</em>) – </p></li>
+<li><p><strong>l2_weight</strong> (<em>float</em>) – </p></li>
+<li><p><strong>device</strong> (<em>str</em><em> | </em><em>device</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pantheonrl.algos.bc.BC.DEFAULT_BATCH_SIZE">
+<span class="sig-name descname"><span class="pre">DEFAULT_BATCH_SIZE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pantheonrl.algos.bc.BC.DEFAULT_BATCH_SIZE" title="Link to this definition"></a></dt>
+<dd><p>Default batch size for DataLoader automatically constructed from
+Transitions. See <cite>set_expert_data_loader()</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.bc.BC.save_policy">
+<span class="sig-name descname"><span class="pre">save_policy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">policy_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/bc.html#BC.save_policy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.bc.BC.save_policy" title="Link to this definition"></a></dt>
+<dd><p>Save policy to a path. Can be reloaded by <cite>.reconstruct_policy()</cite>.
+Args:</p>
+<blockquote>
+<div><p>policy_path: path to save policy to.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>policy_path</strong> (<em>str</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.bc.BC.set_expert_data_loader">
+<span class="sig-name descname"><span class="pre">set_expert_data_loader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expert_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/bc.html#BC.set_expert_data_loader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.bc.BC.set_expert_data_loader" title="Link to this definition"></a></dt>
+<dd><p>Set the expert data loader, which yields batches of obs-act pairs.
+Changing the expert data loader on-demand is useful for DAgger and
+other interactive algorithms.
+Args:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>expert_data: Either a Torch <cite>DataLoader</cite>, any other iterator that</dt><dd><p>yields dictionaries containing “obs” and “acts” Tensors or
+Numpy arrays, or a <cite>TransitionsMinimal</cite> instance.
+If this is a <cite>TransitionsMinimal</cite> instance, then it is
+automatically converted into a shuffled <cite>DataLoader</cite> with batch
+size <cite>BC.DEFAULT_BATCH_SIZE</cite>.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>expert_data</strong> (<em>Iterable</em><em>[</em><em>Mapping</em><em>] </em><em>| </em><a class="reference internal" href="pantheonrl.common.trajsaver.TransitionsMinimal.html#pantheonrl.common.trajsaver.TransitionsMinimal" title="pantheonrl.common.trajsaver.TransitionsMinimal"><em>TransitionsMinimal</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.bc.BC.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_batches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_epoch_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_batch_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/bc.html#BC.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.bc.BC.train" title="Link to this definition"></a></dt>
+<dd><p>Train with supervised learning for some number of epochs.
+Here an ‘epoch’ is just a complete pass through the expert data loader,
+as set by <cite>self.set_expert_data_loader()</cite>.
+Args:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>n_epochs: Number of complete passes made through expert data before</dt><dd><p>ending training. Provide exactly one of <cite>n_epochs</cite> and
+<cite>n_batches</cite>.</p>
+</dd>
+<dt>n_batches: Number of batches loaded from dataset before ending</dt><dd><p>training. Provide exactly one of <cite>n_epochs</cite> and <cite>n_batches</cite>.</p>
+</dd>
+<dt>on_epoch_end: Optional callback with no parameters to run at the</dt><dd><p>end of each epoch.</p>
+</dd>
+<dt>on_batch_end: Optional callback with no parameters to run at the</dt><dd><p>end of each batch.</p>
+</dd>
+</dl>
+<p>log_interval: Log stats after every log_interval batches.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_epochs</strong> (<em>int</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>n_batches</strong> (<em>int</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>on_epoch_end</strong> (<em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>on_batch_end</strong> (<em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>log_interval</strong> (<em>int</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pantheonrl.algos.bc.reconstruct_policy.html" class="btn btn-neutral float-left" title="pantheonrl.algos.bc.reconstruct_policy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pantheonrl.algos.bc.BCShell.html" class="btn btn-neutral float-right" title="pantheonrl.algos.bc.BCShell" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Stanford ILIAD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
