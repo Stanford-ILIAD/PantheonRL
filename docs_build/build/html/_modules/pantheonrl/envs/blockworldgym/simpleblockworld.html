@@ -74,8 +74,13 @@
            <div itemprop="articleBody">
              
   <h1>Source code for pantheonrl.envs.blockworldgym.simpleblockworld</h1><div class="highlight"><pre>
-<span></span><span class="c1"># create a gym for a simplified version of blockworld</span>
-<span class="c1"># which i can use as a starting point to create the normal blockworld gym environment</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Simplified version of blockworld.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># create a gym for a simplified version of blockworld</span>
+<span class="c1"># which i can use as a starting point to create the normal</span>
+<span class="c1"># blockworld gym environment</span>
 
 <span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -84,7 +89,9 @@
 <span class="kn">from</span> <span class="nn">pantheonrl.common.multiagentenv</span> <span class="kn">import</span> <span class="n">TurnBasedEnv</span>
 
 <span class="n">GRIDLEN</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># block world in a 7 x 7 grid</span>
-<span class="n">NUM_BLOCKS</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># the number of blocks will be variable in the non-simplified version,</span>
+<span class="n">NUM_BLOCKS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="mi">5</span>  <span class="c1"># the number of blocks will be variable in the non-simplified version,</span>
+<span class="p">)</span>
 <span class="c1"># but allows for a constant sized action space here</span>
 <span class="n">NUM_COLORS</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">NO_COLOR</span> <span class="o">=</span> <span class="mi">0</span>
@@ -94,15 +101,20 @@
 <span class="n">NUM_TOKENS</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># number of tokens the planner has</span>
 
 <span class="n">PLANNER_ACTION_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">(</span>
-    <span class="n">NUM_TOKENS</span><span class="p">)</span>  <span class="c1"># tokens that represent words</span>
+    <span class="n">NUM_TOKENS</span>
+<span class="p">)</span>  <span class="c1"># tokens that represent words</span>
 <span class="n">CONSTRUCTOR_ACTION_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">MultiDiscrete</span><span class="p">(</span>
-    <span class="p">[</span><span class="n">NUM_BLOCKS</span><span class="p">,</span> <span class="n">NUM_COLORS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
-<span class="c1"># in the simplified version, the constructor&#39;s action space is just coloring each block</span>
+    <span class="p">[</span><span class="n">NUM_BLOCKS</span><span class="p">,</span> <span class="n">NUM_COLORS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="c1"># in the simplified version, the constructor&#39;s action space is</span>
+<span class="c1"># just coloring each block</span>
 
 <span class="c1"># for each block, store h/v, coordinate, and color</span>
-<span class="n">blocklistformat</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="n">GRIDLEN</span><span class="p">,</span> <span class="n">GRIDLEN</span><span class="p">,</span> <span class="n">NUM_COLORS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">NUM_BLOCKS</span>
+<span class="n">blocklistformat</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="n">GRIDLEN</span><span class="p">,</span> <span class="n">GRIDLEN</span><span class="p">,</span> <span class="n">NUM_COLORS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">NUM_BLOCKS</span>
 <span class="c1"># in the simplified version, constructor can see blocks</span>
-<span class="n">CONSTRUCTOR_OBS_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">MultiDiscrete</span><span class="p">([</span><span class="n">NUM_TOKENS</span><span class="p">]</span><span class="o">+</span><span class="n">blocklistformat</span><span class="p">)</span>
+<span class="n">CONSTRUCTOR_OBS_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">MultiDiscrete</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">NUM_TOKENS</span><span class="p">]</span> <span class="o">+</span> <span class="n">blocklistformat</span>
+<span class="p">)</span>
 <span class="c1"># constructor&#39;s obs space and true colorings</span>
 <span class="n">PLANNER_OBS_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">MultiDiscrete</span><span class="p">(</span><span class="n">blocklistformat</span> <span class="o">+</span> <span class="n">blocklistformat</span><span class="p">)</span>
 
@@ -110,8 +122,11 @@
 <div class="viewcode-block" id="generate_grid_world">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.simpleblockworld.generate_grid_world.html#pantheonrl.envs.blockworldgym.simpleblockworld.generate_grid_world">[docs]</a>
 <span class="k">def</span> <span class="nf">generate_grid_world</span><span class="p">(</span><span class="n">np_random</span><span class="p">):</span>
-    <span class="c1"># generates a random GRIDLEN x GRIDLEN world with NUM_BLOCKS blocks</span>
-    <span class="c1"># will be replaced in the true version with their generate gridworld function, which has gravity/var blocks/etc</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a random GRIDLEN x GRIDLEN world with NUM_BLOCKS blocks</span>
+<span class="sd">    Will be replaced in the true version with their generate gridworld</span>
+<span class="sd">    function, which has gravity/var blocks/etc</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">world</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">GRIDLEN</span><span class="p">,</span> <span class="n">GRIDLEN</span><span class="p">))</span>
     <span class="n">blocks_so_far</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">grid_world</span> <span class="o">=</span> <span class="p">[]</span>
@@ -121,16 +136,16 @@
         <span class="n">x</span> <span class="o">=</span> <span class="n">new_block</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">new_block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># horizontal</span>
-            <span class="k">if</span> <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># vertical</span>
-            <span class="k">if</span> <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">world</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">world</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">world</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">grid_world</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_block</span><span class="p">)</span>
         <span class="n">blocks_so_far</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">grid_world</span></div>
@@ -140,6 +155,9 @@
 <div class="viewcode-block" id="random_block">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.simpleblockworld.random_block.html#pantheonrl.envs.blockworldgym.simpleblockworld.random_block">[docs]</a>
 <span class="k">def</span> <span class="nf">random_block</span><span class="p">(</span><span class="n">np_random</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Places random block in the grid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">block</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">np_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># horizontal</span>
@@ -160,51 +178,61 @@
 <div class="viewcode-block" id="SimpleBlockEnv">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv.html#pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv">[docs]</a>
 <span class="k">class</span> <span class="nc">SimpleBlockEnv</span><span class="p">(</span><span class="n">TurnBasedEnv</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Simple blockworld environment. &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">PLANNER_OBS_SPACE</span><span class="p">,</span> <span class="n">CONSTRUCTOR_OBS_SPACE</span><span class="p">],</span> <span class="p">[</span><span class="n">PLANNER_ACTION_SPACE</span><span class="p">,</span> <span class="n">CONSTRUCTOR_ACTION_SPACE</span><span class="p">],</span> <span class="n">probegostart</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">PLANNER_OBS_SPACE</span><span class="p">,</span> <span class="n">CONSTRUCTOR_OBS_SPACE</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">PLANNER_ACTION_SPACE</span><span class="p">,</span> <span class="n">CONSTRUCTOR_ACTION_SPACE</span><span class="p">],</span>
+            <span class="n">probegostart</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_token</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="SimpleBlockEnv.multi_reset">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv.html#pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv.multi_reset">[docs]</a>
     <span class="k">def</span> <span class="nf">multi_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">egofirst</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span> <span class="o">=</span> <span class="n">generate_grid_world</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span> <span class="o">=</span> <span class="p">[[</span><span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">block</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
-                                <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">block</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span>
+        <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_token</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="n">egofirst</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obs</span><span class="p">(</span><span class="n">egofirst</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">get_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isego</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isego</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">isego</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">])</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">observations</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">elem</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">block</span><span class="p">]</span>
-            <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(([</span><span class="bp">self</span><span class="o">.</span><span class="n">last_token</span><span class="p">]</span><span class="o">+</span><span class="n">observations</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">output</span>
+        <span class="n">observations</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">elem</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">block</span>
+        <span class="p">]</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(([</span><span class="bp">self</span><span class="o">.</span><span class="n">last_token</span><span class="p">]</span> <span class="o">+</span> <span class="n">observations</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">output</span>
 
 <div class="viewcode-block" id="SimpleBlockEnv.ego_step">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv.html#pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv.ego_step">[docs]</a>
     <span class="k">def</span> <span class="nf">ego_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_token</span> <span class="o">=</span> <span class="n">action</span>
-        <span class="c1"># the planner gets to decide when they are done by taking action NUM_TOKENS - 1</span>
+        <span class="c1"># the planner decides when done by taking action NUM_TOKENS - 1</span>
         <span class="n">done</span> <span class="o">=</span> <span class="n">action</span> <span class="o">==</span> <span class="n">NUM_TOKENS</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">reward</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
-            <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reward</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="p">{}</span></div>
+            <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_reward</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obs</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="p">{}</span></div>
 
 
 <div class="viewcode-block" id="SimpleBlockEnv.alt_step">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv.html#pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv.alt_step">[docs]</a>
     <span class="k">def</span> <span class="nf">alt_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">[</span><span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="kc">True</span><span class="p">),</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{}</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obs</span><span class="p">(</span><span class="kc">True</span><span class="p">),</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{}</span></div>
 
 
-    <span class="k">def</span> <span class="nf">get_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># for simplified version, 100 * num blocks colored correctly / total blocks</span>
+    <span class="k">def</span> <span class="nf">_get_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># for simplified version, 100 * # colored correctly / total blocks</span>
         <span class="c1"># (in the actual one, use F1 score)</span>
         <span class="n">correct_blocks</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_BLOCKS</span><span class="p">):</span>
@@ -214,64 +242,26 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">reward</span><span class="p">,</span> <span class="n">reward</span><span class="p">]</span>  <span class="c1"># since they both get the same reward</span></div>
 
 
-    <span class="c1"># def render(self, mode=&quot;human&quot;):</span>
-    <span class="c1">#     screen_width = 700</span>
-    <span class="c1">#     scale = screen_width/GRIDLEN</span>
-    <span class="c1">#     if self.viewer is None:</span>
-    <span class="c1">#         from gym.envs.classic_control import rendering</span>
-    <span class="c1">#         self.viewer = rendering.Viewer(screen_width, screen_width)</span>
-    <span class="c1">#         self.block_renders = []</span>
-    <span class="c1">#         for blockdata in self.constructor_obs:</span>
-    <span class="c1">#             y, x = blockdata[1], blockdata[2]</span>
-    <span class="c1">#             if blockdata[0] == 0: # horizontal</span>
-    <span class="c1">#                 left, right, top, bottom = x*scale, (x+2)*scale, (GRIDLEN - y)*scale, (GRIDLEN - (y+1))*scale</span>
-    <span class="c1">#             else: # vertical</span>
-    <span class="c1">#                 left, right, top, bottom = x*scale, (x+1)*scale, (GRIDLEN - y)*scale, (GRIDLEN - (y+2))*scale</span>
-    <span class="c1">#             newblock = rendering.FilledPolygon([(left, bottom), (left, top), (right, top), (right, bottom)])</span>
-    <span class="c1">#             newblock.set_color(0.5, 0.5, 0.5)</span>
-    <span class="c1">#             self.viewer.add_geom(newblock)</span>
-    <span class="c1">#             self.block_renders.append(newblock)</span>
-    <span class="c1">#         for blockdata in self.gridworld:</span>
-    <span class="c1">#             y, x = blockdata[1], blockdata[2]</span>
-    <span class="c1">#             if blockdata[0] == 0:  # horizontal</span>
-    <span class="c1">#                 left, right, top, bottom = x * scale, (x + 2) * scale, (GRIDLEN - y) * scale, (</span>
-    <span class="c1">#                             GRIDLEN - (y + 1)) * scale</span>
-    <span class="c1">#             else:  # vertical</span>
-    <span class="c1">#                 left, right, top, bottom = x * scale, (x + 1) * scale, (GRIDLEN - y) * scale, (</span>
-    <span class="c1">#                             GRIDLEN - (y + 2)) * scale</span>
-    <span class="c1">#             newblock = rendering.PolyLine([(left, bottom), (left, top), (right, top), (right, bottom)], close=True)</span>
-    <span class="c1">#             newblock.set_linewidth(10)</span>
-    <span class="c1">#             if blockdata[3] == RED:</span>
-    <span class="c1">#                 newblock.set_color(0.98, 0.02, 0.02)</span>
-    <span class="c1">#             if blockdata[3] == BLUE:</span>
-    <span class="c1">#                 newblock.set_color(0.02, 0.02, 0.98)</span>
-    <span class="c1">#             self.viewer.add_geom(newblock)</span>
-    <span class="c1">#     for i in range(len(self.block_renders)):</span>
-    <span class="c1">#         if self.constructor_obs[i][3] == RED:</span>
-    <span class="c1">#             self.block_renders[i].set_color(0.98, 0.02, 0.02)</span>
-    <span class="c1">#         if self.constructor_obs[i][3] == BLUE:</span>
-    <span class="c1">#             self.block_renders[i].set_color(0.02, 0.02, 0.98)</span>
-    <span class="c1">#     return self.viewer.render(return_rgb_array=mode == &quot;rgb_array&quot;)</span>
-
 
 <div class="viewcode-block" id="SBWEasyPartner">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.simpleblockworld.SBWEasyPartner.html#pantheonrl.envs.blockworldgym.simpleblockworld.SBWEasyPartner">[docs]</a>
 <span class="k">class</span> <span class="nc">SBWEasyPartner</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Easy partner in the simple blockworld &quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="SBWEasyPartner.get_action">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.simpleblockworld.SBWEasyPartner.html#pantheonrl.envs.blockworldgym.simpleblockworld.SBWEasyPartner.get_action">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">recording</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">):</span>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">obs</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">token</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
-            <span class="n">token</span> <span class="o">=</span> <span class="n">token</span><span class="o">//</span><span class="mi">2</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">token</span> <span class="o">//</span> <span class="mi">2</span>
         <span class="c1"># tokens 1 - 5 mean color the block at that index red</span>
         <span class="k">if</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">token</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">token</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">RED</span><span class="p">]</span>
         <span class="c1"># tokens 6 - 10 mean color the block at that index blue</span>
         <span class="k">if</span> <span class="mi">6</span> <span class="o">&lt;=</span> <span class="n">token</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">token</span> <span class="o">-</span> <span class="mi">8</span><span class="p">,</span> <span class="n">BLUE</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">obs</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span></div>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">obs</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span></div>
 
 
 <div class="viewcode-block" id="SBWEasyPartner.update">
@@ -285,47 +275,51 @@
 <div class="viewcode-block" id="SBWDefaultAgent">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.simpleblockworld.SBWDefaultAgent.html#pantheonrl.envs.blockworldgym.simpleblockworld.SBWDefaultAgent">[docs]</a>
 <span class="k">class</span> <span class="nc">SBWDefaultAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Default partner in the simple blockworld &quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="SBWDefaultAgent.get_action">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.simpleblockworld.SBWDefaultAgent.html#pantheonrl.envs.blockworldgym.simpleblockworld.SBWDefaultAgent.get_action">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">recording</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">):</span>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">obs</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">token</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># do nothing</span>
             <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">obs</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">blocks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="p">(</span><span class="n">NUM_BLOCKS</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-            <span class="n">grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gridfromobs</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span>
-            <span class="c1"># tokens 1 - 7 mean find the first uncolored one in that row and color it red</span>
-            <span class="k">if</span> <span class="n">token</span> <span class="o">&lt;=</span> <span class="mi">7</span><span class="p">:</span>
-                <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findfirstuncolored</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">token</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">blocks</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">RED</span><span class="p">]</span>
-            <span class="c1"># tokens 8 - 14 mean find the first uncolored one in that row and color it blue</span>
-            <span class="k">if</span> <span class="n">token</span> <span class="o">&lt;=</span> <span class="mi">14</span><span class="p">:</span>
-                <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findfirstuncolored</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">token</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="n">blocks</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">BLUE</span><span class="p">]</span>
-            <span class="c1"># otherwise do nothing</span>
-            <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">obs</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span></div>
+
+        <span class="n">blocks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="p">(</span><span class="n">NUM_BLOCKS</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gridfromobs</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span>
+        <span class="c1"># tokens 1 - 7 mean find the first uncolored one in that row</span>
+        <span class="c1"># and color it red</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="o">&lt;=</span> <span class="mi">7</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findfirstuncolored</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">token</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">blocks</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">RED</span><span class="p">]</span>
+        <span class="c1"># tokens 8 - 14 mean find the first uncolored one in that row</span>
+        <span class="c1"># and color it blue</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="o">&lt;=</span> <span class="mi">14</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findfirstuncolored</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">token</span> <span class="o">-</span> <span class="mi">8</span><span class="p">,</span> <span class="n">blocks</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">BLUE</span><span class="p">]</span>
+        <span class="c1"># otherwise do nothing</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">obs</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span></div>
 
 
-    <span class="k">def</span> <span class="nf">findfirstuncolored</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_findfirstuncolored</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">space</span> <span class="ow">in</span> <span class="n">grid</span><span class="p">[</span><span class="n">row</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">space</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">blocks</span><span class="p">[</span><span class="n">space</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">space</span>
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 
-    <span class="k">def</span> <span class="nf">gridfromobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_gridfromobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
         <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">GRIDLEN</span><span class="p">,</span> <span class="n">GRIDLEN</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">blocks</span><span class="p">)):</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">block</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">blocks</span><span class="p">):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
             <span class="n">grid</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
-            <span class="k">if</span> <span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># horizontal</span>
-                <span class="n">grid</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">if</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># horizontal</span>
+                <span class="n">grid</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">grid</span><span class="p">[</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">grid</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
         <span class="k">return</span> <span class="n">grid</span>
 
 <div class="viewcode-block" id="SBWDefaultAgent.update">

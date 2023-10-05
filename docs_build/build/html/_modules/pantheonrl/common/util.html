@@ -93,14 +93,14 @@
 <div class="viewcode-block" id="SpaceException">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.util.SpaceException.html#pantheonrl.common.util.SpaceException">[docs]</a>
 <span class="k">class</span> <span class="nc">SpaceException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Raise when an illegal Space is used &quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raise when an illegal Space is used&quot;&quot;&quot;</span></div>
 
 
 
 <div class="viewcode-block" id="get_space_size">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.util.get_space_size.html#pantheonrl.common.util.get_space_size">[docs]</a>
 <span class="k">def</span> <span class="nf">get_space_size</span><span class="p">(</span><span class="n">space</span><span class="p">:</span> <span class="n">Space</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return the length of a space &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the length of a space&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">Box</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">space</span><span class="o">.</span><span class="n">low</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">Discrete</span><span class="p">):</span>
@@ -116,7 +116,7 @@
 <div class="viewcode-block" id="calculate_space">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.util.calculate_space.html#pantheonrl.common.util.calculate_space">[docs]</a>
 <span class="k">def</span> <span class="nf">calculate_space</span><span class="p">(</span><span class="n">space</span><span class="p">:</span> <span class="n">Space</span><span class="p">,</span> <span class="n">numframes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Space</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return the new space if the observation is framestacked &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the new space if the observation is framestacked&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">Box</span><span class="p">):</span>
         <span class="n">low</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="n">numframes</span><span class="p">)</span>
         <span class="n">high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">space</span><span class="o">.</span><span class="n">high</span><span class="p">,</span> <span class="n">numframes</span><span class="p">)</span>
@@ -134,7 +134,7 @@
 <div class="viewcode-block" id="get_default_obs">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.util.get_default_obs.html#pantheonrl.common.util.get_default_obs">[docs]</a>
 <span class="k">def</span> <span class="nf">get_default_obs</span><span class="p">(</span><span class="n">env</span><span class="p">:</span> <span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return the default observation for a given environment &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the default observation for a given environment&quot;&quot;&quot;</span>
     <span class="n">space</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">observation_space</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">Box</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">space</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span> <span class="o">*</span> <span class="mi">0</span>
@@ -151,8 +151,7 @@
 <div class="viewcode-block" id="action_from_policy">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.util.action_from_policy.html#pantheonrl.common.util.action_from_policy">[docs]</a>
 <span class="k">def</span> <span class="nf">action_from_policy</span><span class="p">(</span>
-    <span class="n">obs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">policy</span><span class="p">:</span> <span class="n">policies</span><span class="o">.</span><span class="n">ActorCriticPolicy</span>
+    <span class="n">obs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">policy</span><span class="p">:</span> <span class="n">policies</span><span class="o">.</span><span class="n">ActorCriticPolicy</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the action, values, and log_probs given an observation and policy</span>
@@ -178,7 +177,7 @@
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.util.clip_actions.html#pantheonrl.common.util.clip_actions">[docs]</a>
 <span class="k">def</span> <span class="nf">clip_actions</span><span class="p">(</span>
     <span class="n">actions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">policy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">policies</span><span class="o">.</span><span class="n">ActorCriticPolicy</span><span class="p">,</span> <span class="n">BaseAlgorithm</span><span class="p">]</span>
+    <span class="n">policy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">policies</span><span class="o">.</span><span class="n">ActorCriticPolicy</span><span class="p">,</span> <span class="n">BaseAlgorithm</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the actions clipped by the action space of the policy</span>
@@ -189,8 +188,9 @@
 <span class="sd">    :returns: The actions clipped by the policy</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">):</span>
-        <span class="n">actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">policy</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span>
-                          <span class="n">policy</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">high</span><span class="p">)</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+            <span class="n">actions</span><span class="p">,</span> <span class="n">policy</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="n">policy</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">high</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="n">actions</span></div>
 
 
@@ -204,8 +204,11 @@
 <span class="sd">    :param model: The model, which might use sde</span>
 <span class="sd">    :param n_steps: The number of timesteps the model has been active</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">use_sde</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> \
-            <span class="n">n_steps</span> <span class="o">%</span> <span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">use_sde</span>
+        <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="ow">and</span> <span class="n">n_steps</span> <span class="o">%</span> <span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="p">):</span>
         <span class="n">model</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">reset_noise</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span></div>
 
 

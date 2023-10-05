@@ -1,4 +1,4 @@
-﻿pantheonrl.common.trajsaver.MultiTransitions
+pantheonrl.common.trajsaver.MultiTransitions
 ============================================
 
 .. currentmodule:: pantheonrl.common.trajsaver

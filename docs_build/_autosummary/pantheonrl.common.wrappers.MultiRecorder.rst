@@ -1,4 +1,4 @@
-﻿pantheonrl.common.wrappers.MultiRecorder
+pantheonrl.common.wrappers.MultiRecorder
 ========================================
 
 .. currentmodule:: pantheonrl.common.wrappers

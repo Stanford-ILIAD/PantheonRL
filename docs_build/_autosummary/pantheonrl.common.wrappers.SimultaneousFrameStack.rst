@@ -1,4 +1,4 @@
-﻿pantheonrl.common.wrappers.SimultaneousFrameStack
+pantheonrl.common.wrappers.SimultaneousFrameStack
 =================================================
 
 .. currentmodule:: pantheonrl.common.wrappers

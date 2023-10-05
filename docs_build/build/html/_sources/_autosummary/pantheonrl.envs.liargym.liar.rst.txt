@@ -13,14 +13,6 @@ pantheonrl.envs.liargym.liar
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-      :toctree:
-      :nosignatures:
-   
-      randRoll
-   
    
 
    

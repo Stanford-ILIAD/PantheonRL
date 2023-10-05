@@ -15,11 +15,11 @@ from stable_baselines3.common.utils import obs_as_tensor
 
 
 class SpaceException(Exception):
-    """ Raise when an illegal Space is used """
+    """Raise when an illegal Space is used"""
 
 
 def get_space_size(space: Space) -> int:
-    """ Return the length of a space """
+    """Return the length of a space"""
     if isinstance(space, Box):
         return len(space.low)
     if isinstance(space, Discrete):
@@ -32,7 +32,7 @@ def get_space_size(space: Space) -> int:
 
 
 def calculate_space(space: Space, numframes: int) -> Space:
-    """ Return the new space if the observation is framestacked """
+    """Return the new space if the observation is framestacked"""
     if isinstance(space, Box):
         low = np.tile(space.low, numframes)
         high = np.tile(space.high, numframes)
@@ -47,7 +47,7 @@ def calculate_space(space: Space, numframes: int) -> Space:
 
 
 def get_default_obs(env: gym.Env):
-    """ Return the default observation for a given environment """
+    """Return the default observation for a given environment"""
     space = env.observation_space
     if isinstance(space, Box):
         return space.sample() * 0
@@ -61,8 +61,7 @@ def get_default_obs(env: gym.Env):
 
 
 def action_from_policy(
-    obs: np.ndarray,
-    policy: policies.ActorCriticPolicy
+    obs: np.ndarray, policy: policies.ActorCriticPolicy
 ) -> Tuple[np.ndarray, th.Tensor, th.Tensor]:
     """
     Return the action, values, and log_probs given an observation and policy
@@ -85,7 +84,7 @@ def action_from_policy(
 
 def clip_actions(
     actions: np.ndarray,
-    policy: Union[policies.ActorCriticPolicy, BaseAlgorithm]
+    policy: Union[policies.ActorCriticPolicy, BaseAlgorithm],
 ) -> np.ndarray:
     """
     Return the actions clipped by the action space of the policy
@@ -96,8 +95,9 @@ def clip_actions(
     :returns: The actions clipped by the policy
     """
     if isinstance(policy.action_space, gym.spaces.Box):
-        actions = np.clip(actions, policy.action_space.low,
-                          policy.action_space.high)
+        actions = np.clip(
+            actions, policy.action_space.low, policy.action_space.high
+        )
     return actions
 
 
@@ -108,8 +108,11 @@ def resample_noise(model: BaseAlgorithm, n_steps: int) -> None:
     :param model: The model, which might use sde
     :param n_steps: The number of timesteps the model has been active
     """
-    if model.use_sde and model.sde_sample_freq > 0 and \
-            n_steps % model.sde_sample_freq == 0:
+    if (
+        model.use_sde
+        and model.sde_sample_freq > 0
+        and n_steps % model.sde_sample_freq == 0
+    ):
         model.policy.reset_noise(model.env.num_envs)
 
 

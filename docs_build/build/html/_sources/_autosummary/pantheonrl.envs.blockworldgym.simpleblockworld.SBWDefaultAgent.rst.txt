@@ -16,9 +16,7 @@ pantheonrl.envs.blockworldgym.simpleblockworld.SBWDefaultAgent
    .. autosummary::
       :nosignatures:
    
-      ~SBWDefaultAgent.findfirstuncolored
       ~SBWDefaultAgent.get_action
-      ~SBWDefaultAgent.gridfromobs
       ~SBWDefaultAgent.update
    
    

@@ -74,16 +74,17 @@
            <div itemprop="articleBody">
              
   <h1>Source code for pantheonrl.envs.blockworldgym.gridutils</h1><div class="highlight"><pre>
-<span></span><span class="c1"># functions to deal with generating a grid world and gravity</span>
+<span></span><span class="sd">&quot;&quot;&quot; Functions to deal with generating a grid world and gravity. &quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="n">HORIZONTAL</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">VERTICAL</span> <span class="o">=</span> <span class="mi">1</span>
 
+
 <div class="viewcode-block" id="generate_random_world">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.gridutils.generate_random_world.html#pantheonrl.envs.blockworldgym.gridutils.generate_random_world">[docs]</a>
 <span class="k">def</span> <span class="nf">generate_random_world</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">num_blocks</span><span class="p">,</span> <span class="n">num_colors</span><span class="p">,</span> <span class="n">np_random</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates a random world&quot;&quot;&quot;</span>
     <span class="n">gridworld</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">width</span><span class="p">,</span> <span class="n">width</span><span class="p">))</span>
     <span class="n">blocks_placed</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="n">blocks_placed</span> <span class="o">&lt;</span> <span class="n">num_blocks</span><span class="p">:</span>
@@ -92,62 +93,72 @@
     <span class="k">return</span> <span class="n">gridworld</span></div>
 
 
+
 <div class="viewcode-block" id="drop_random">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.gridutils.drop_random.html#pantheonrl.envs.blockworldgym.gridutils.drop_random">[docs]</a>
 <span class="k">def</span> <span class="nf">drop_random</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">gridworld</span><span class="p">,</span> <span class="n">num_colors</span><span class="p">,</span> <span class="n">np_random</span><span class="p">):</span>
-    <span class="n">orientation</span> <span class="o">=</span> <span class="n">np_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> 
-    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="n">HORIZONTAL</span><span class="p">:</span> 
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># can&#39;t drop at the last coordinate if horizontal</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Drops a block randomly&quot;&quot;&quot;</span>
+    <span class="n">orientation</span> <span class="o">=</span> <span class="n">np_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="n">HORIZONTAL</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="n">width</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="p">)</span>  <span class="c1"># can&#39;t drop at the last coordinate if horizontal</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">np_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">gravity</span><span class="p">(</span><span class="n">gridworld</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="c1"># error</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">color</span> <span class="o">=</span> <span class="n">np_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_colors</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">place</span><span class="p">(</span><span class="n">gridworld</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">orientation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># error</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="n">np_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_colors</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">place</span><span class="p">(</span><span class="n">gridworld</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">orientation</span><span class="p">)</span>
     <span class="k">return</span> <span class="mi">0</span></div>
+
 
 
 <div class="viewcode-block" id="place">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.gridutils.place.html#pantheonrl.envs.blockworldgym.gridutils.place">[docs]</a>
 <span class="k">def</span> <span class="nf">place</span><span class="p">(</span><span class="n">gridworld</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">orientation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Places block into the grid&quot;&quot;&quot;</span>
     <span class="n">gridworld</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
     <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="n">HORIZONTAL</span><span class="p">:</span>
         <span class="n">gridworld</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
     <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="n">VERTICAL</span><span class="p">:</span>
         <span class="n">gridworld</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span></div>
 
-    
+
+
 <div class="viewcode-block" id="gravity">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.gridutils.gravity.html#pantheonrl.envs.blockworldgym.gridutils.gravity">[docs]</a>
 <span class="k">def</span> <span class="nf">gravity</span><span class="p">(</span><span class="n">gridworld</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Runs a timestep of gravity simulation&quot;&quot;&quot;</span>
     <span class="c1"># check if placeable</span>
     <span class="k">if</span> <span class="n">gridworld</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">orientation</span> <span class="o">==</span> <span class="n">HORIZONTAL</span> <span class="ow">and</span> <span class="n">gridworld</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">orientation</span> <span class="o">==</span> <span class="n">VERTICAL</span> <span class="ow">and</span> <span class="n">gridworld</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">orientation</span> <span class="o">==</span> <span class="n">HORIZONTAL</span> <span class="ow">and</span> <span class="n">gridworld</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">orientation</span> <span class="o">==</span> <span class="n">VERTICAL</span> <span class="ow">and</span> <span class="n">gridworld</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
+    <span class="p">):</span>
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
     <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gridworld</span><span class="p">)):</span>
-        <span class="c1"># this is the final position if it hits something (there&#39;s something or a floor right below it)</span>
+        <span class="c1"># this is the final position if it hits something</span>
+        <span class="c1"># (there&#39;s something or a floor right below it)</span>
         <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="n">HORIZONTAL</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">gridworld</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">y</span>
-            <span class="k">if</span> <span class="n">gridworld</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">gridworld</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">y</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">gridworld</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="ow">or</span> <span class="n">gridworld</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
+                <span class="ow">or</span> <span class="n">gridworld</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="p">):</span>
                 <span class="k">return</span> <span class="n">y</span>
         <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="n">VERTICAL</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">gridworld</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">gridworld</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">gridworld</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="mi">2</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">y</span>
-            <span class="k">if</span> <span class="n">gridworld</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="mi">2</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">y</span>
-    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="c1"># shouldn&#39;t be able to reach here</span></div>
+    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># shouldn&#39;t be able to reach here</span></div>
+
 
 
 <div class="viewcode-block" id="matches">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.gridutils.matches.html#pantheonrl.envs.blockworldgym.gridutils.matches">[docs]</a>
 <span class="k">def</span> <span class="nf">matches</span><span class="p">(</span><span class="n">grid1</span><span class="p">,</span> <span class="n">grid2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if two grids match&quot;&quot;&quot;</span>
     <span class="c1"># number of nonzero elements in the same place</span>
-    <span class="c1"># we can divide the two, and if two nonzero elements are in the same place the quotient is 1</span>
-    <span class="c1"># then count nonzeroes in the array quotient==1</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">grid1</span> <span class="o">==</span> <span class="n">grid2</span><span class="p">)</span></div>
 
 </pre></div>

@@ -1,4 +1,4 @@
-﻿pantheonrl.common.multiagentenv.SimultaneousEnv
+pantheonrl.common.multiagentenv.SimultaneousEnv
 ===============================================
 
 .. currentmodule:: pantheonrl.common.multiagentenv

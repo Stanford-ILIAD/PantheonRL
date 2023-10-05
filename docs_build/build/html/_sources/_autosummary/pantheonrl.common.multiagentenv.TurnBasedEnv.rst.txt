@@ -1,4 +1,4 @@
-﻿pantheonrl.common.multiagentenv.TurnBasedEnv
+pantheonrl.common.multiagentenv.TurnBasedEnv
 ============================================
 
 .. currentmodule:: pantheonrl.common.multiagentenv

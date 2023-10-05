@@ -74,37 +74,50 @@
            <div itemprop="articleBody">
              
   <h1>Source code for pantheonrl.envs.blockworldgym.blockworld</h1><div class="highlight"><pre>
-<span></span><span class="c1"># the more complex version of blockworld, where the constructor doesn&#39;t see the blocks beforehand</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The more complex version of blockworld, where the constructor doesn&#39;t see the blocks beforehand</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">pantheonrl.common.agents</span> <span class="kn">import</span> <span class="n">Agent</span>
 <span class="kn">from</span> <span class="nn">pantheonrl.common.multiagentenv</span> <span class="kn">import</span> <span class="n">TurnBasedEnv</span>
-<span class="kn">from</span> <span class="nn">pantheonrl.envs.blockworldgym.gridutils</span> <span class="kn">import</span> <span class="n">HORIZONTAL</span><span class="p">,</span> <span class="n">VERTICAL</span><span class="p">,</span> <span class="n">generate_random_world</span><span class="p">,</span> <span class="n">gravity</span><span class="p">,</span> <span class="n">place</span><span class="p">,</span> <span class="n">matches</span>
+<span class="kn">from</span> <span class="nn">pantheonrl.envs.blockworldgym.gridutils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">HORIZONTAL</span><span class="p">,</span>
+    <span class="n">VERTICAL</span><span class="p">,</span>
+    <span class="n">generate_random_world</span><span class="p">,</span>
+    <span class="n">gravity</span><span class="p">,</span>
+    <span class="n">place</span><span class="p">,</span>
+    <span class="n">matches</span><span class="p">,</span>
+<span class="p">)</span>
 
-<span class="kn">import</span> <span class="nn">pantheonrl.envs.blockworldgym.rendering</span> <span class="k">as</span> <span class="nn">rendering</span>
+<span class="kn">from</span> <span class="nn">pantheonrl.envs.blockworldgym</span> <span class="kn">import</span> <span class="n">rendering</span>
 
 <span class="c1"># import pantheonrl.envs.blockworldgym.rendering as rendering</span>
 
 <span class="n">GRIDLEN</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># block world in a 7 x 7 grid</span>
-<span class="n">NUM_BLOCKS</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># the number of blocks will be variable in the non-simplified version,</span>
+<span class="n">NUM_BLOCKS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="mi">5</span>  <span class="c1"># the number of blocks will be variable in the non-simplified version,</span>
+<span class="p">)</span>
 <span class="c1"># but allows for a constant sized action space here</span>
 
-<span class="c1">#TODO: make sure color and action space/resulting grid are consistent</span>
+<span class="c1"># make sure color and action space/resulting grid are consistent</span>
 <span class="n">NUM_COLORS</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">BLUE</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">RED</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># useful for if we add graphics later</span>
 
 <span class="n">NUM_TOKENS</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># number of tokens the planner has</span>
 
-<span class="n">PLANNER_ACTION_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">(</span><span class="n">NUM_TOKENS</span><span class="p">)</span>  <span class="c1"># tokens that represent words</span>
+<span class="n">PLANNER_ACTION_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">(</span>
+    <span class="n">NUM_TOKENS</span>
+<span class="p">)</span>  <span class="c1"># tokens that represent words</span>
 <span class="c1"># it can drop any block from the top, set h/v and color</span>
 <span class="n">CONSTRUCTOR_ACTION_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">MultiDiscrete</span><span class="p">([</span><span class="n">GRIDLEN</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">NUM_COLORS</span><span class="p">])</span>
 <span class="c1"># plus an extra option to do nothing</span>
 
-<span class="n">gridformat</span> <span class="o">=</span> <span class="p">[</span><span class="n">NUM_COLORS</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">GRIDLEN</span><span class="o">*</span><span class="n">GRIDLEN</span>
+<span class="n">gridformat</span> <span class="o">=</span> <span class="p">[</span><span class="n">NUM_COLORS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">GRIDLEN</span> <span class="o">*</span> <span class="n">GRIDLEN</span>
 <span class="c1"># can see what the planner said and the &quot;real world&quot; grid</span>
-<span class="n">CONSTRUCTOR_OBS_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">MultiDiscrete</span><span class="p">([</span><span class="n">NUM_TOKENS</span><span class="p">]</span><span class="o">+</span><span class="n">gridformat</span><span class="p">)</span>
+<span class="n">CONSTRUCTOR_OBS_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">MultiDiscrete</span><span class="p">([</span><span class="n">NUM_TOKENS</span><span class="p">]</span> <span class="o">+</span> <span class="n">gridformat</span><span class="p">)</span>
 <span class="c1"># can see the planned grid and the &quot;real world&quot; grid</span>
 <span class="n">PLANNER_OBS_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">MultiDiscrete</span><span class="p">(</span><span class="n">gridformat</span> <span class="o">+</span> <span class="n">gridformat</span><span class="p">)</span>
 
@@ -112,50 +125,64 @@
 <div class="viewcode-block" id="BlockEnv">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.blockworld.BlockEnv.html#pantheonrl.envs.blockworldgym.blockworld.BlockEnv">[docs]</a>
 <span class="k">class</span> <span class="nc">BlockEnv</span><span class="p">(</span><span class="n">TurnBasedEnv</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Full blockworld environment. &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">PLANNER_OBS_SPACE</span><span class="p">,</span> <span class="n">CONSTRUCTOR_OBS_SPACE</span><span class="p">],</span> <span class="p">[</span><span class="n">PLANNER_ACTION_SPACE</span><span class="p">,</span> <span class="n">CONSTRUCTOR_ACTION_SPACE</span><span class="p">],</span> <span class="n">probegostart</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">PLANNER_OBS_SPACE</span><span class="p">,</span> <span class="n">CONSTRUCTOR_OBS_SPACE</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">PLANNER_ACTION_SPACE</span><span class="p">,</span> <span class="n">CONSTRUCTOR_ACTION_SPACE</span><span class="p">],</span>
+            <span class="n">probegostart</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># using same structure as SimpleBlockEnv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_token</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="BlockEnv.multi_reset">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.blockworld.BlockEnv.html#pantheonrl.envs.blockworldgym.blockworld.BlockEnv.multi_reset">[docs]</a>
     <span class="k">def</span> <span class="nf">multi_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">egofirst</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span> <span class="o">=</span> <span class="n">generate_random_world</span><span class="p">(</span><span class="n">GRIDLEN</span><span class="p">,</span> <span class="n">NUM_BLOCKS</span><span class="p">,</span> <span class="n">NUM_COLORS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span> <span class="o">=</span> <span class="n">generate_random_world</span><span class="p">(</span>
+            <span class="n">GRIDLEN</span><span class="p">,</span> <span class="n">NUM_BLOCKS</span><span class="p">,</span> <span class="n">NUM_COLORS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">np_random</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">GRIDLEN</span><span class="p">,</span> <span class="n">GRIDLEN</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_token</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="n">egofirst</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obs</span><span class="p">(</span><span class="n">egofirst</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">get_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isego</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isego</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">isego</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">observations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(([</span><span class="bp">self</span><span class="o">.</span><span class="n">last_token</span><span class="p">]</span> <span class="o">+</span> <span class="n">observations</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span>
+            <span class="p">)</span>
+        <span class="n">observations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(([</span><span class="bp">self</span><span class="o">.</span><span class="n">last_token</span><span class="p">]</span> <span class="o">+</span> <span class="n">observations</span><span class="p">))</span>
 
 <div class="viewcode-block" id="BlockEnv.ego_step">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.blockworld.BlockEnv.html#pantheonrl.envs.blockworldgym.blockworld.BlockEnv.ego_step">[docs]</a>
     <span class="k">def</span> <span class="nf">ego_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_token</span> <span class="o">=</span> <span class="n">action</span>
-        <span class="n">done</span> <span class="o">=</span> <span class="n">action</span> <span class="o">==</span> <span class="n">NUM_TOKENS</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="n">action</span> <span class="o">==</span> <span class="n">NUM_TOKENS</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">reward</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
-            <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reward</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span> <span class="p">[</span><span class="n">reward</span><span class="p">,</span> <span class="n">reward</span><span class="p">],</span> <span class="n">done</span><span class="p">,</span> <span class="p">{}</span></div>
+            <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_reward</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obs</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span> <span class="p">[</span><span class="n">reward</span><span class="p">,</span> <span class="n">reward</span><span class="p">],</span> <span class="n">done</span><span class="p">,</span> <span class="p">{}</span></div>
 
 
 <div class="viewcode-block" id="BlockEnv.alt_step">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.blockworld.BlockEnv.html#pantheonrl.envs.blockworldgym.blockworld.BlockEnv.alt_step">[docs]</a>
     <span class="k">def</span> <span class="nf">alt_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
-        <span class="n">x</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">action</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">action</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span>
-        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">orientation</span> <span class="o">==</span> <span class="n">HORIZONTAL</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">==</span> <span class="n">GRIDLEN</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">action</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">action</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">orientation</span> <span class="o">==</span> <span class="n">HORIZONTAL</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">==</span> <span class="n">GRIDLEN</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">gravity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">y</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="n">place</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">orientation</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="kc">True</span><span class="p">),</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{}</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obs</span><span class="p">(</span><span class="kc">True</span><span class="p">),</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{}</span></div>
 
 
-    <span class="k">def</span> <span class="nf">get_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># we use F1 score which is 2 * precision * recall / (precision + recall)</span>
         <span class="c1"># also = 2 * truepos / (selected + relevant)</span>
         <span class="n">truepos</span> <span class="o">=</span> <span class="n">matches</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span><span class="p">)</span>
@@ -167,35 +194,54 @@
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.blockworld.BlockEnv.html#pantheonrl.envs.blockworldgym.blockworld.BlockEnv.render">[docs]</a>
     <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">):</span>
         <span class="n">screen_width</span> <span class="o">=</span> <span class="mi">700</span>
-        <span class="n">scale</span> <span class="o">=</span> <span class="n">screen_width</span><span class="o">/</span><span class="n">GRIDLEN</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">screen_width</span> <span class="o">/</span> <span class="n">GRIDLEN</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span> <span class="o">=</span> <span class="n">rendering</span><span class="o">.</span><span class="n">Viewer</span><span class="p">(</span><span class="n">screen_width</span><span class="p">,</span> <span class="n">screen_width</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span><span class="p">)):</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
-                    <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="n">j</span> <span class="o">*</span> \
-                        <span class="n">scale</span><span class="p">,</span> <span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">scale</span><span class="p">,</span> <span class="p">(</span><span class="n">GRIDLEN</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> \
-                        <span class="n">scale</span><span class="p">,</span> <span class="p">(</span><span class="n">GRIDLEN</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">scale</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">grid_block</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+                    <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">j</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">GRIDLEN</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">GRIDLEN</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span>
+                    <span class="p">)</span>
                     <span class="n">newblock</span> <span class="o">=</span> <span class="n">rendering</span><span class="o">.</span><span class="n">PolyLine</span><span class="p">(</span>
-                        <span class="p">[(</span><span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">top</span><span class="p">),</span> <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">top</span><span class="p">),</span> <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">)],</span> <span class="n">close</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="p">[</span>
+                            <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">top</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">top</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">),</span>
+                        <span class="p">],</span>
+                        <span class="n">close</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
                     <span class="n">newblock</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_geom</span><span class="p">(</span><span class="n">newblock</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">RED</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">grid_block</span> <span class="o">==</span> <span class="n">RED</span><span class="p">:</span>
                         <span class="n">newblock</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">gridworld</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">BLUE</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="n">grid_block</span> <span class="o">==</span> <span class="n">BLUE</span><span class="p">:</span>
                         <span class="n">newblock</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">)):</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">cons_block</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="n">j</span> <span class="o">*</span> \
-                        <span class="n">scale</span><span class="p">,</span> <span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">scale</span><span class="p">,</span> <span class="p">(</span><span class="n">GRIDLEN</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> \
-                        <span class="n">scale</span><span class="p">,</span> <span class="p">(</span><span class="n">GRIDLEN</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">scale</span>
+                    <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">j</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">GRIDLEN</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">GRIDLEN</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span>
+                    <span class="p">)</span>
                     <span class="n">newblock</span> <span class="o">=</span> <span class="n">rendering</span><span class="o">.</span><span class="n">FilledPolygon</span><span class="p">(</span>
-                        <span class="p">[(</span><span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">),</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">top</span><span class="p">),</span> <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">top</span><span class="p">),</span> <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">)])</span>
+                        <span class="p">[</span>
+                            <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">top</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">top</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">),</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
                     <span class="n">newblock</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_geom</span><span class="p">(</span><span class="n">newblock</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">RED</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">cons_block</span> <span class="o">==</span> <span class="n">RED</span><span class="p">:</span>
                         <span class="n">newblock</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">constructor_obs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">BLUE</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="n">cons_block</span> <span class="o">==</span> <span class="n">BLUE</span><span class="p">:</span>
                         <span class="n">newblock</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">return_rgb_array</span><span class="o">=</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;rgb_array&quot;</span><span class="p">)</span></div>
 </div>
@@ -205,12 +251,14 @@
 <div class="viewcode-block" id="DefaultConstructorAgent">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.blockworld.DefaultConstructorAgent.html#pantheonrl.envs.blockworldgym.blockworld.DefaultConstructorAgent">[docs]</a>
 <span class="k">class</span> <span class="nc">DefaultConstructorAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The default Constructor partner agent. &quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="DefaultConstructorAgent.get_action">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.blockworld.DefaultConstructorAgent.html#pantheonrl.envs.blockworldgym.blockworld.DefaultConstructorAgent.get_action">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">recording</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">):</span>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">obs</span>
         <span class="n">token</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">token</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">token</span> <span class="o">==</span> <span class="mi">29</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">29</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">GRIDLEN</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">VERTICAL</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">token</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="n">color</span> <span class="o">=</span> <span class="n">token</span> <span class="o">%</span> <span class="mi">2</span>

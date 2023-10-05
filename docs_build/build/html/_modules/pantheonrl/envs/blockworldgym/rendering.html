@@ -80,12 +80,16 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">gymnasium</span> <span class="kn">import</span> <span class="n">error</span>
+
+
 <span class="k">if</span> <span class="s2">&quot;Apple&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
     <span class="k">if</span> <span class="s2">&quot;DYLD_FALLBACK_LIBRARY_PATH&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
         <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;DYLD_FALLBACK_LIBRARY_PATH&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;:/usr/lib&quot;</span>
         <span class="c1"># (JDS 2016/04/15): avoid bug on Anaconda 2.3.0 / Yosemite</span>
-
-<span class="kn">from</span> <span class="nn">gymnasium</span> <span class="kn">import</span> <span class="n">error</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">pyglet</span>
@@ -94,25 +98,17 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cannot import pyglet.</span>
 <span class="sd">    HINT: you can install pyglet directly via &#39;pip install pyglet&#39;.</span>
-<span class="sd">    But if you really just want to install all Gym dependencies and not have to think about it,</span>
-<span class="sd">    &#39;pip install -e .[all]&#39; or &#39;pip install gym[all]&#39; will do it.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="p">)</span>
+    <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">pyglet.gl</span> <span class="k">as</span> <span class="nn">gl</span>
+    <span class="kn">from</span> <span class="nn">pyglet</span> <span class="kn">import</span> <span class="n">gl</span>
 <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Error occurred while running `from pyglet.gl import *`</span>
-<span class="sd">    HINT: make sure you have OpenGL installed. On Ubuntu, you can run &#39;apt-get install python-opengl&#39;.</span>
-<span class="sd">    If you&#39;re running on a server, you may need a virtual frame buffer; something like this should work:</span>
-<span class="sd">    &#39;xvfb-run -s \&quot;-screen 0 1400x900x24\&quot; python &lt;your_script.py&gt;&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="p">)</span>
-
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
 
 <span class="n">RAD2DEG</span> <span class="o">=</span> <span class="mf">57.29577951308232</span>
 
@@ -129,14 +125,13 @@
         <span class="k">return</span> <span class="n">pyglet</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">get_display</span><span class="p">()</span>
         <span class="c1"># returns already available pyglet_display,</span>
         <span class="c1"># if there is no pyglet display available then it creates one</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">pyglet</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">Display</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span>
-            <span class="s2">&quot;Invalid display specification: </span><span class="si">{}</span><span class="s2">. (Must be a string like :0 or None.)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">spec</span>
-            <span class="p">)</span>
-        <span class="p">)</span></div>
+
+    <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Invalid display specification: </span><span class="si">{</span><span class="n">spec</span><span class="si">}</span><span class="s2">. </span><span class="se">\</span>
+<span class="s2">        (Must be a string like :0 or None.)&quot;</span>
+    <span class="p">)</span></div>
 
 
 
@@ -156,14 +151,16 @@
         <span class="n">display</span><span class="o">=</span><span class="n">display</span><span class="p">,</span>
         <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
         <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="Viewer">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer">[docs]</a>
-<span class="k">class</span> <span class="nc">Viewer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Viewer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Viewer class from early gym versions&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">display</span> <span class="o">=</span> <span class="n">get_display</span><span class="p">(</span><span class="n">display</span><span class="p">)</span>
 
@@ -179,30 +176,53 @@
         <span class="n">gl</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_BLEND</span><span class="p">)</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glBlendFunc</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_SRC_ALPHA</span><span class="p">,</span> <span class="n">gl</span><span class="o">.</span><span class="n">GL_ONE_MINUS_SRC_ALPHA</span><span class="p">)</span>
 
+<div class="viewcode-block" id="Viewer.close">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer.close">[docs]</a>
     <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Closes the viewer window.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">meta_path</span><span class="p">:</span>
-            <span class="c1"># ^^^ check sys.meta_path to avoid &#39;ImportError: sys.meta_path is None, Python is likely shutting down&#39;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span> <span class="o">=</span> <span class="kc">False</span></div>
 
+
+<div class="viewcode-block" id="Viewer.window_closed_by_user">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer.window_closed_by_user">[docs]</a>
     <span class="k">def</span> <span class="nf">window_closed_by_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called when window is closed by user.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span> <span class="o">=</span> <span class="kc">False</span></div>
 
+
+<div class="viewcode-block" id="Viewer.set_bounds">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer.set_bounds">[docs]</a>
     <span class="k">def</span> <span class="nf">set_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">top</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the bounds of the window&quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="n">right</span> <span class="o">&gt;</span> <span class="n">left</span> <span class="ow">and</span> <span class="n">top</span> <span class="o">&gt;</span> <span class="n">bottom</span>
         <span class="n">scalex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="p">(</span><span class="n">right</span> <span class="o">-</span> <span class="n">left</span><span class="p">)</span>
         <span class="n">scaley</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="p">(</span><span class="n">top</span> <span class="o">-</span> <span class="n">bottom</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">Transform</span><span class="p">(</span>
-            <span class="n">translation</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">left</span> <span class="o">*</span> <span class="n">scalex</span><span class="p">,</span> <span class="o">-</span><span class="n">bottom</span> <span class="o">*</span> <span class="n">scaley</span><span class="p">),</span> <span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="n">scalex</span><span class="p">,</span> <span class="n">scaley</span><span class="p">)</span>
-        <span class="p">)</span>
+            <span class="n">translation</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">left</span> <span class="o">*</span> <span class="n">scalex</span><span class="p">,</span> <span class="o">-</span><span class="n">bottom</span> <span class="o">*</span> <span class="n">scaley</span><span class="p">),</span>
+            <span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="n">scalex</span><span class="p">,</span> <span class="n">scaley</span><span class="p">),</span>
+        <span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Viewer.add_geom">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer.add_geom">[docs]</a>
     <span class="k">def</span> <span class="nf">add_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds the geometry to the scene&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Viewer.add_onetime">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer.add_onetime">[docs]</a>
     <span class="k">def</span> <span class="nf">add_onetime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">onetime_geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds the geometry for one-time viewing&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onetime_geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Viewer.render">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer.render">[docs]</a>
     <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">return_rgb_array</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Renders the scene&quot;&quot;&quot;</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glClearColor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">switch_to</span><span class="p">()</span>
@@ -228,42 +248,65 @@
             <span class="n">arr</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">onetime_geoms</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">return</span> <span class="n">arr</span> <span class="k">if</span> <span class="n">return_rgb_array</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span>
+        <span class="k">return</span> <span class="n">arr</span> <span class="k">if</span> <span class="n">return_rgb_array</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span></div>
+
 
     <span class="c1"># Convenience</span>
+<div class="viewcode-block" id="Viewer.draw_circle">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer.draw_circle">[docs]</a>
     <span class="k">def</span> <span class="nf">draw_circle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">filled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw circle&quot;&quot;&quot;</span>
         <span class="n">geom</span> <span class="o">=</span> <span class="n">make_circle</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">res</span><span class="p">,</span> <span class="n">filled</span><span class="o">=</span><span class="n">filled</span><span class="p">)</span>
         <span class="n">_add_attrs</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_onetime</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">geom</span>
+        <span class="k">return</span> <span class="n">geom</span></div>
 
+
+<div class="viewcode-block" id="Viewer.draw_polygon">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer.draw_polygon">[docs]</a>
     <span class="k">def</span> <span class="nf">draw_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">filled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw polygon&quot;&quot;&quot;</span>
         <span class="n">geom</span> <span class="o">=</span> <span class="n">make_polygon</span><span class="p">(</span><span class="n">v</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">filled</span><span class="o">=</span><span class="n">filled</span><span class="p">)</span>
         <span class="n">_add_attrs</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_onetime</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">geom</span>
+        <span class="k">return</span> <span class="n">geom</span></div>
 
+
+<div class="viewcode-block" id="Viewer.draw_polyline">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer.draw_polyline">[docs]</a>
     <span class="k">def</span> <span class="nf">draw_polyline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw polyline&quot;&quot;&quot;</span>
         <span class="n">geom</span> <span class="o">=</span> <span class="n">make_polyline</span><span class="p">(</span><span class="n">v</span><span class="o">=</span><span class="n">v</span><span class="p">)</span>
         <span class="n">_add_attrs</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_onetime</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">geom</span>
+        <span class="k">return</span> <span class="n">geom</span></div>
 
+
+<div class="viewcode-block" id="Viewer.draw_line">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer.draw_line">[docs]</a>
     <span class="k">def</span> <span class="nf">draw_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw line&quot;&quot;&quot;</span>
         <span class="n">geom</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
         <span class="n">_add_attrs</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_onetime</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">geom</span>
+        <span class="k">return</span> <span class="n">geom</span></div>
 
+
+<div class="viewcode-block" id="Viewer.get_array">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Viewer.html#pantheonrl.envs.blockworldgym.rendering.Viewer.get_array">[docs]</a>
     <span class="k">def</span> <span class="nf">get_array</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the window as an rgb array&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span>
         <span class="n">image_data</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">pyglet</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">get_buffer_manager</span><span class="p">()</span><span class="o">.</span><span class="n">get_color_buffer</span><span class="p">()</span><span class="o">.</span><span class="n">get_image_data</span><span class="p">()</span>
+            <span class="n">pyglet</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">get_buffer_manager</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">get_color_buffer</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">get_image_data</span><span class="p">()</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span>
         <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">image_data</span><span class="o">.</span><span class="n">get_data</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">arr</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">arr</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">arr</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span></div>
+
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
@@ -279,127 +322,201 @@
 
 <div class="viewcode-block" id="Geom">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Geom.html#pantheonrl.envs.blockworldgym.rendering.Geom">[docs]</a>
-<span class="k">class</span> <span class="nc">Geom</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Geom</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base Geometry class&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_color</span> <span class="o">=</span> <span class="n">Color</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_color</span><span class="p">]</span>
 
+<div class="viewcode-block" id="Geom.render">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Geom.html#pantheonrl.envs.blockworldgym.rendering.Geom.render">[docs]</a>
     <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render the geometry&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="p">):</span>
             <span class="n">attr</span><span class="o">.</span><span class="n">enable</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">render1</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
-            <span class="n">attr</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span>
+            <span class="n">attr</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span></div>
 
+
+<div class="viewcode-block" id="Geom.render1">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Geom.html#pantheonrl.envs.blockworldgym.rendering.Geom.render1">[docs]</a>
     <span class="k">def</span> <span class="nf">render1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render the geometry, implemented by subclass&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
+
+<div class="viewcode-block" id="Geom.add_attr">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Geom.html#pantheonrl.envs.blockworldgym.rendering.Geom.add_attr">[docs]</a>
     <span class="k">def</span> <span class="nf">add_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an attribute&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Geom.set_color">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Geom.html#pantheonrl.envs.blockworldgym.rendering.Geom.set_color">[docs]</a>
     <span class="k">def</span> <span class="nf">set_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the color&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_color</span><span class="o">.</span><span class="n">vec4</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="Attr">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Attr.html#pantheonrl.envs.blockworldgym.rendering.Attr">[docs]</a>
-<span class="k">class</span> <span class="nc">Attr</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+<span class="k">class</span> <span class="nc">Attr</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base attribute class&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Attr.enable">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Attr.html#pantheonrl.envs.blockworldgym.rendering.Attr.enable">[docs]</a>
+    <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Enable the attribute&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="Attr.disable">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Attr.html#pantheonrl.envs.blockworldgym.rendering.Attr.disable">[docs]</a>
     <span class="k">def</span> <span class="nf">disable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Disable the attribute&quot;&quot;&quot;</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="Transform">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Transform.html#pantheonrl.envs.blockworldgym.rendering.Transform">[docs]</a>
 <span class="k">class</span> <span class="nc">Transform</span><span class="p">(</span><span class="n">Attr</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class defining an opengl transform&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">translation</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">rotation</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_translation</span><span class="p">(</span><span class="o">*</span><span class="n">translation</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="n">rotation</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_scale</span><span class="p">(</span><span class="o">*</span><span class="n">scale</span><span class="p">)</span>
 
+<div class="viewcode-block" id="Transform.enable">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Transform.html#pantheonrl.envs.blockworldgym.rendering.Transform.enable">[docs]</a>
     <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glPushMatrix</span><span class="p">()</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glTranslatef</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">translation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">translation</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span>
         <span class="p">)</span>  <span class="c1"># translate to GL loc ppint</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glRotatef</span><span class="p">(</span><span class="n">RAD2DEG</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">gl</span><span class="o">.</span><span class="n">glScalef</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glScalef</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Transform.disable">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Transform.html#pantheonrl.envs.blockworldgym.rendering.Transform.disable">[docs]</a>
     <span class="k">def</span> <span class="nf">disable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">gl</span><span class="o">.</span><span class="n">glPopMatrix</span><span class="p">()</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glPopMatrix</span><span class="p">()</span></div>
 
+
+<div class="viewcode-block" id="Transform.set_translation">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Transform.html#pantheonrl.envs.blockworldgym.rendering.Transform.set_translation">[docs]</a>
     <span class="k">def</span> <span class="nf">set_translation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newx</span><span class="p">,</span> <span class="n">newy</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">translation</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">newx</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">newy</span><span class="p">))</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the translation&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translation</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">newx</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">newy</span><span class="p">))</span></div>
 
+
+<div class="viewcode-block" id="Transform.set_rotation">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Transform.html#pantheonrl.envs.blockworldgym.rendering.Transform.set_rotation">[docs]</a>
     <span class="k">def</span> <span class="nf">set_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the rotation&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Transform.set_scale">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Transform.html#pantheonrl.envs.blockworldgym.rendering.Transform.set_scale">[docs]</a>
     <span class="k">def</span> <span class="nf">set_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newx</span><span class="p">,</span> <span class="n">newy</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the scale&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">newx</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">newy</span><span class="p">))</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="Color">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Color.html#pantheonrl.envs.blockworldgym.rendering.Color">[docs]</a>
 <span class="k">class</span> <span class="nc">Color</span><span class="p">(</span><span class="n">Attr</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Color attribute&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vec4</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vec4</span> <span class="o">=</span> <span class="n">vec4</span>
 
+<div class="viewcode-block" id="Color.enable">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Color.html#pantheonrl.envs.blockworldgym.rendering.Color.enable">[docs]</a>
     <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glColor4f</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">)</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="LineStyle">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.LineStyle.html#pantheonrl.envs.blockworldgym.rendering.LineStyle">[docs]</a>
 <span class="k">class</span> <span class="nc">LineStyle</span><span class="p">(</span><span class="n">Attr</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Line style attribute&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="n">style</span>
 
+<div class="viewcode-block" id="LineStyle.enable">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.LineStyle.html#pantheonrl.envs.blockworldgym.rendering.LineStyle.enable">[docs]</a>
     <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_LINE_STIPPLE</span><span class="p">)</span>
-        <span class="n">gl</span><span class="o">.</span><span class="n">glLineStipple</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glLineStipple</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="LineStyle.disable">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.LineStyle.html#pantheonrl.envs.blockworldgym.rendering.LineStyle.disable">[docs]</a>
     <span class="k">def</span> <span class="nf">disable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glDisable</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_LINE_STIPPLE</span><span class="p">)</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="LineWidth">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.LineWidth.html#pantheonrl.envs.blockworldgym.rendering.LineWidth">[docs]</a>
 <span class="k">class</span> <span class="nc">LineWidth</span><span class="p">(</span><span class="n">Attr</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Line width attribute&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stroke</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stroke</span> <span class="o">=</span> <span class="n">stroke</span>
 
+<div class="viewcode-block" id="LineWidth.enable">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.LineWidth.html#pantheonrl.envs.blockworldgym.rendering.LineWidth.enable">[docs]</a>
     <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glLineWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stroke</span><span class="p">)</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="Point">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Point.html#pantheonrl.envs.blockworldgym.rendering.Point">[docs]</a>
 <span class="k">class</span> <span class="nc">Point</span><span class="p">(</span><span class="n">Geom</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Point geometry&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">Geom</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
+<div class="viewcode-block" id="Point.render1">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Point.html#pantheonrl.envs.blockworldgym.rendering.Point.render1">[docs]</a>
     <span class="k">def</span> <span class="nf">render1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glBegin</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_POINTS</span><span class="p">)</span>  <span class="c1"># draw point</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glVertex3f</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glEnd</span><span class="p">()</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="FilledPolygon">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.FilledPolygon.html#pantheonrl.envs.blockworldgym.rendering.FilledPolygon">[docs]</a>
 <span class="k">class</span> <span class="nc">FilledPolygon</span><span class="p">(</span><span class="n">Geom</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filled Polygon geometry&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="n">Geom</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">v</span>
 
+<div class="viewcode-block" id="FilledPolygon.render1">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.FilledPolygon.html#pantheonrl.envs.blockworldgym.rendering.FilledPolygon.render1">[docs]</a>
     <span class="k">def</span> <span class="nf">render1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
             <span class="n">gl</span><span class="o">.</span><span class="n">glBegin</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_QUADS</span><span class="p">)</span>
@@ -410,36 +527,38 @@
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">:</span>
             <span class="n">gl</span><span class="o">.</span><span class="n">glVertex3f</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># draw each vertex</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glEnd</span><span class="p">()</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="make_circle">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.make_circle.html#pantheonrl.envs.blockworldgym.rendering.make_circle">[docs]</a>
 <span class="k">def</span> <span class="nf">make_circle</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">filled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience method for constructing a circle&quot;&quot;&quot;</span>
     <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
         <span class="n">ang</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">i</span> <span class="o">/</span> <span class="n">res</span>
         <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span> <span class="o">*</span> <span class="n">radius</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span> <span class="o">*</span> <span class="n">radius</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">filled</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">FilledPolygon</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">PolyLine</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">PolyLine</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="make_polygon">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.make_polygon.html#pantheonrl.envs.blockworldgym.rendering.make_polygon">[docs]</a>
 <span class="k">def</span> <span class="nf">make_polygon</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">filled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience method for constructing a polygon&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">filled</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">FilledPolygon</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">PolyLine</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">PolyLine</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="make_polyline">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.make_polyline.html#pantheonrl.envs.blockworldgym.rendering.make_polyline">[docs]</a>
 <span class="k">def</span> <span class="nf">make_polyline</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience method for constructing a polyline&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">PolyLine</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
 
 
@@ -447,6 +566,7 @@
 <div class="viewcode-block" id="make_capsule">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.make_capsule.html#pantheonrl.envs.blockworldgym.rendering.make_capsule">[docs]</a>
 <span class="k">def</span> <span class="nf">make_capsule</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience method for constructing a capsule&quot;&quot;&quot;</span>
     <span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span>
     <span class="n">box</span> <span class="o">=</span> <span class="n">make_polygon</span><span class="p">([(</span><span class="n">l</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">b</span><span class="p">)])</span>
     <span class="n">circ0</span> <span class="o">=</span> <span class="n">make_circle</span><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
@@ -460,21 +580,28 @@
 <div class="viewcode-block" id="Compound">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Compound.html#pantheonrl.envs.blockworldgym.rendering.Compound">[docs]</a>
 <span class="k">class</span> <span class="nc">Compound</span><span class="p">(</span><span class="n">Geom</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compound Geometry object&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gs</span><span class="p">):</span>
         <span class="n">Geom</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gs</span> <span class="o">=</span> <span class="n">gs</span>
         <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gs</span><span class="p">:</span>
             <span class="n">g</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">attrs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">Color</span><span class="p">)]</span>
 
+<div class="viewcode-block" id="Compound.render1">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Compound.html#pantheonrl.envs.blockworldgym.rendering.Compound.render1">[docs]</a>
     <span class="k">def</span> <span class="nf">render1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gs</span><span class="p">:</span>
             <span class="n">g</span><span class="o">.</span><span class="n">render</span><span class="p">()</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="PolyLine">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.PolyLine.html#pantheonrl.envs.blockworldgym.rendering.PolyLine">[docs]</a>
 <span class="k">class</span> <span class="nc">PolyLine</span><span class="p">(</span><span class="n">Geom</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Polyline Geometry object&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">close</span><span class="p">):</span>
         <span class="n">Geom</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">v</span>
@@ -482,20 +609,29 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">linewidth</span> <span class="o">=</span> <span class="n">LineWidth</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_attr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linewidth</span><span class="p">)</span>
 
+<div class="viewcode-block" id="PolyLine.render1">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.PolyLine.html#pantheonrl.envs.blockworldgym.rendering.PolyLine.render1">[docs]</a>
     <span class="k">def</span> <span class="nf">render1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glBegin</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_LINE_LOOP</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">close</span> <span class="k">else</span> <span class="n">gl</span><span class="o">.</span><span class="n">GL_LINE_STRIP</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">:</span>
             <span class="n">gl</span><span class="o">.</span><span class="n">glVertex3f</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># draw each vertex</span>
-        <span class="n">gl</span><span class="o">.</span><span class="n">glEnd</span><span class="p">()</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glEnd</span><span class="p">()</span></div>
 
+
+<div class="viewcode-block" id="PolyLine.set_linewidth">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.PolyLine.html#pantheonrl.envs.blockworldgym.rendering.PolyLine.set_linewidth">[docs]</a>
     <span class="k">def</span> <span class="nf">set_linewidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the line width&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">linewidth</span><span class="o">.</span><span class="n">stroke</span> <span class="o">=</span> <span class="n">x</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="Line">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Line.html#pantheonrl.envs.blockworldgym.rendering.Line">[docs]</a>
 <span class="k">class</span> <span class="nc">Line</span><span class="p">(</span><span class="n">Geom</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Line Geometry object&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)):</span>
         <span class="n">Geom</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">start</span>
@@ -503,17 +639,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">linewidth</span> <span class="o">=</span> <span class="n">LineWidth</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_attr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linewidth</span><span class="p">)</span>
 
+<div class="viewcode-block" id="Line.render1">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Line.html#pantheonrl.envs.blockworldgym.rendering.Line.render1">[docs]</a>
     <span class="k">def</span> <span class="nf">render1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glBegin</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_LINES</span><span class="p">)</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glVertex2f</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glVertex2f</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
         <span class="n">gl</span><span class="o">.</span><span class="n">glEnd</span><span class="p">()</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="Image">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Image.html#pantheonrl.envs.blockworldgym.rendering.Image">[docs]</a>
 <span class="k">class</span> <span class="nc">Image</span><span class="p">(</span><span class="n">Geom</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Image Geometry object&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
         <span class="n">Geom</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
@@ -523,10 +664,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">img</span> <span class="o">=</span> <span class="n">img</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flip</span> <span class="o">=</span> <span class="kc">False</span>
 
+<div class="viewcode-block" id="Image.render1">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.Image.html#pantheonrl.envs.blockworldgym.rendering.Image.render1">[docs]</a>
     <span class="k">def</span> <span class="nf">render1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">img</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span>
-            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span>
+            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+            <span class="n">height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
         <span class="p">)</span></div>
+</div>
 
 
 
@@ -535,14 +682,21 @@
 
 <div class="viewcode-block" id="SimpleImageViewer">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.SimpleImageViewer.html#pantheonrl.envs.blockworldgym.rendering.SimpleImageViewer">[docs]</a>
-<span class="k">class</span> <span class="nc">SimpleImageViewer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SimpleImageViewer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple Image viewer class&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxwidth</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">display</span> <span class="o">=</span> <span class="n">get_display</span><span class="p">(</span><span class="n">display</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxwidth</span> <span class="o">=</span> <span class="n">maxwidth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="kc">None</span>
 
+<div class="viewcode-block" id="SimpleImageViewer.imshow">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.SimpleImageViewer.html#pantheonrl.envs.blockworldgym.rendering.SimpleImageViewer.imshow">[docs]</a>
     <span class="k">def</span> <span class="nf">imshow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Show the image given an rgb array&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">_channels</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span>
             <span class="k">if</span> <span class="n">width</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxwidth</span><span class="p">:</span>
@@ -569,11 +723,19 @@
             <span class="k">def</span> <span class="nf">on_close</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;You passed in an image with the wrong number shape&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+        <span class="p">),</span> <span class="s2">&quot;You passed in an image with the wrong number shape&quot;</span>
         <span class="n">image</span> <span class="o">=</span> <span class="n">pyglet</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">ImageData</span><span class="p">(</span>
-            <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;RGB&quot;</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span> <span class="n">pitch</span><span class="o">=</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="mi">3</span>
+            <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;RGB&quot;</span><span class="p">,</span>
+            <span class="n">arr</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span>
+            <span class="n">pitch</span><span class="o">=</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">gl</span><span class="o">.</span><span class="n">glTexParameteri</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_TEXTURE_2D</span><span class="p">,</span> <span class="n">gl</span><span class="o">.</span><span class="n">GL_TEXTURE_MAG_FILTER</span><span class="p">,</span> <span class="n">gl</span><span class="o">.</span><span class="n">GL_NEAREST</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glTexParameteri</span><span class="p">(</span>
+            <span class="n">gl</span><span class="o">.</span><span class="n">GL_TEXTURE_2D</span><span class="p">,</span> <span class="n">gl</span><span class="o">.</span><span class="n">GL_TEXTURE_MAG_FILTER</span><span class="p">,</span> <span class="n">gl</span><span class="o">.</span><span class="n">GL_NEAREST</span>
+        <span class="p">)</span>
         <span class="n">texture</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_texture</span><span class="p">()</span>
         <span class="n">texture</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
         <span class="n">texture</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span>
@@ -581,13 +743,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">switch_to</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">dispatch_events</span><span class="p">()</span>
         <span class="n">texture</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># draw</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span></div>
 
+
+<div class="viewcode-block" id="SimpleImageViewer.close">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.blockworldgym.rendering.SimpleImageViewer.html#pantheonrl.envs.blockworldgym.rendering.SimpleImageViewer.close">[docs]</a>
     <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close the viewer&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">meta_path</span><span class="p">:</span>
-            <span class="c1"># ^^^ check sys.meta_path to avoid &#39;ImportError: sys.meta_path is None, Python is likely shutting down&#39;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span> <span class="o">=</span> <span class="kc">False</span></div>
+
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>

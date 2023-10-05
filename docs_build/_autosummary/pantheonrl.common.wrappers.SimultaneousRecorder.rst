@@ -1,4 +1,4 @@
-﻿pantheonrl.common.wrappers.SimultaneousRecorder
+pantheonrl.common.wrappers.SimultaneousRecorder
 ===============================================
 
 .. currentmodule:: pantheonrl.common.wrappers

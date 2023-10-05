@@ -1,4 +1,4 @@
-﻿pantheonrl.envs.blockworldgym.blockworld.BlockEnv
+pantheonrl.envs.blockworldgym.blockworld.BlockEnv
 =================================================
 
 .. currentmodule:: pantheonrl.envs.blockworldgym.blockworld
@@ -23,8 +23,6 @@
       ~BlockEnv.ego_step
       ~BlockEnv.get_dummy_env
       ~BlockEnv.get_ego_ind
-      ~BlockEnv.get_obs
-      ~BlockEnv.get_reward
       ~BlockEnv.get_wrapper_attr
       ~BlockEnv.multi_reset
       ~BlockEnv.n_reset

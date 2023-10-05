@@ -1,4 +1,4 @@
-﻿pantheonrl.envs.liargym.liar.LiarEnv
+pantheonrl.envs.liargym.liar.LiarEnv
 ====================================
 
 .. currentmodule:: pantheonrl.envs.liargym.liar
@@ -21,20 +21,16 @@
       ~LiarEnv.close
       ~LiarEnv.construct_single_agent_interface
       ~LiarEnv.ego_step
-      ~LiarEnv.eval_bluff
-      ~LiarEnv.getObs
       ~LiarEnv.get_dummy_env
       ~LiarEnv.get_ego_ind
       ~LiarEnv.get_wrapper_attr
       ~LiarEnv.multi_reset
       ~LiarEnv.n_reset
       ~LiarEnv.n_step
-      ~LiarEnv.player_step
       ~LiarEnv.render
       ~LiarEnv.resample_random
       ~LiarEnv.resample_round_robin
       ~LiarEnv.reset
-      ~LiarEnv.sanitize_action
       ~LiarEnv.set_ego_extractor
       ~LiarEnv.set_ego_ind
       ~LiarEnv.set_partnerid

@@ -74,13 +74,16 @@
            <div itemprop="articleBody">
              
   <h1>Source code for pantheonrl.envs.rpsgym.rps</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Definition of the Rock-paper-scissors environment.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">pantheonrl.common.agents</span> <span class="kn">import</span> <span class="n">Agent</span>
 <span class="kn">from</span> <span class="nn">pantheonrl.common.multiagentenv</span> <span class="kn">import</span> <span class="n">SimultaneousEnv</span>
 
-<span class="n">ACTION_NAMES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ROCK&#39;</span><span class="p">,</span> <span class="s1">&#39;PAPER&#39;</span><span class="p">,</span> <span class="s1">&#39;SCISSORS&#39;</span><span class="p">]</span>
+<span class="n">ACTION_NAMES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ROCK&quot;</span><span class="p">,</span> <span class="s2">&quot;PAPER&quot;</span><span class="p">,</span> <span class="s2">&quot;SCISSORS&quot;</span><span class="p">]</span>
 <span class="n">ACTION_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">OBS_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
@@ -90,11 +93,15 @@
 <div class="viewcode-block" id="RPSWeightedAgent">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.rpsgym.rps.RPSWeightedAgent.html#pantheonrl.envs.rpsgym.rps.RPSWeightedAgent">[docs]</a>
 <span class="k">class</span> <span class="nc">RPSWeightedAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Random RPS agent based on weights of each action.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">np_random</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="p">):</span>
         <span class="n">weight</span> <span class="o">=</span> <span class="n">r</span> <span class="o">+</span> <span class="n">p</span> <span class="o">+</span> <span class="n">s</span>
         <span class="k">if</span> <span class="n">weight</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">c0</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="mi">3</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">c1</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">/</span><span class="mi">3</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">c0</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mi">3</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">c1</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="mi">3</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">c0</span> <span class="o">=</span> <span class="n">r</span> <span class="o">/</span> <span class="n">weight</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">c1</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span> <span class="o">+</span> <span class="n">p</span><span class="p">)</span> <span class="o">/</span> <span class="n">weight</span>
@@ -102,7 +109,7 @@
 
 <div class="viewcode-block" id="RPSWeightedAgent.get_action">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.rpsgym.rps.RPSWeightedAgent.html#pantheonrl.envs.rpsgym.rps.RPSWeightedAgent.get_action">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">):</span>
         <span class="n">roll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span>
         <span class="k">return</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">roll</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">c0</span> <span class="k">else</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">roll</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">c1</span> <span class="k">else</span> <span class="mi">2</span></div>
 
@@ -118,9 +125,14 @@
 <div class="viewcode-block" id="RPSEnv">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.rpsgym.rps.RPSEnv.html#pantheonrl.envs.rpsgym.rps.RPSEnv">[docs]</a>
 <span class="k">class</span> <span class="nc">RPSEnv</span><span class="p">(</span><span class="n">SimultaneousEnv</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Definition of the RPS environment.</span>
+
+<span class="sd">    The observation is always 0, and the valid actions are 0, 1, and 2.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">RPSEnv</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">OBS_SPACE</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">ACTION_SPACE</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">OBS_SPACE</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">ACTION_SPACE</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="RPSEnv.multi_step">

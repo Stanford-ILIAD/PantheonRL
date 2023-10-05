@@ -1,4 +1,4 @@
-﻿pantheonrl.common.wrappers.TurnBasedFrameStack
+pantheonrl.common.wrappers.TurnBasedFrameStack
 ==============================================
 
 .. currentmodule:: pantheonrl.common.wrappers

@@ -74,7 +74,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for pantheonrl.envs.liargym.liar</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Definition of the Liar&#39;s dice environment.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">pantheonrl.common.agents</span> <span class="kn">import</span> <span class="n">Agent</span>
@@ -95,29 +99,27 @@
 <span class="n">OBS_SPACE</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">MultiDiscrete</span><span class="p">([</span><span class="n">M</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">N</span> <span class="o">+</span> <span class="p">[</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">M</span><span class="p">]</span> <span class="o">*</span> <span class="n">MAX_MOVES</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="randRoll">
-<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.liargym.liar.randRoll.html#pantheonrl.envs.liargym.liar.randRoll">[docs]</a>
-<span class="k">def</span> <span class="nf">randRoll</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">_rand_roll</span><span class="p">():</span>
     <span class="n">dice</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
         <span class="n">dice</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">dice</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)]</span></div>
-
+    <span class="k">return</span> <span class="p">[</span><span class="n">dice</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)]</span>
 
 
 <div class="viewcode-block" id="LiarDefaultAgent">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.liargym.liar.LiarDefaultAgent.html#pantheonrl.envs.liargym.liar.LiarDefaultAgent">[docs]</a>
 <span class="k">class</span> <span class="nc">LiarDefaultAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The default liar&#39;s dice agent&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="LiarDefaultAgent.get_action">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.liargym.liar.LiarDefaultAgent.html#pantheonrl.envs.liargym.liar.LiarDefaultAgent.get_action">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">):</span>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">obs</span>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">hand</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span>
         <span class="n">maxval</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span>
         <span class="n">count</span> <span class="o">=</span> <span class="n">hand</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">maxval</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">obs</span><span class="p">[</span><span class="n">N</span><span class="p">]</span> <span class="o">!=</span> <span class="n">N</span> <span class="ow">and</span> <span class="n">obs</span><span class="p">[</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">maxval</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">obs</span><span class="p">[</span><span class="n">N</span><span class="p">]</span> <span class="o">!=</span> <span class="n">N</span> <span class="ow">and</span> <span class="n">obs</span><span class="p">[</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">maxval</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">BLUFF</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">count</span><span class="p">,</span> <span class="n">maxval</span><span class="p">])</span></div>
 
@@ -133,20 +135,32 @@
 <div class="viewcode-block" id="LiarEnv">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.liargym.liar.LiarEnv.html#pantheonrl.envs.liargym.liar.LiarEnv">[docs]</a>
 <span class="k">class</span> <span class="nc">LiarEnv</span><span class="p">(</span><span class="n">TurnBasedEnv</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Definition of the Liar&#39;s dice environment.</span>
+
+<span class="sd">    The observation is the current hand. The valid actions are to bluff or to</span>
+<span class="sd">    state a belief in the total number of dice of a certain number.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">probegostart</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">LiarEnv</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">OBS_SPACE</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">ACTION_SPACE</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">probegostart</span><span class="o">=</span><span class="n">probegostart</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">OBS_SPACE</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">ACTION_SPACE</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">probegostart</span><span class="o">=</span><span class="n">probegostart</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">egohand</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">althand</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">getObs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isego</span><span class="p">):</span>
-        <span class="n">prevmove</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">+</span> <span class="n">DEFAULT</span> <span class="o">*</span> \
-            <span class="p">(</span><span class="n">MAX_MOVES</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_get_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isego</span><span class="p">):</span>
+        <span class="n">prevmove</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">+</span> <span class="n">DEFAULT</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">MAX_MOVES</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">egohand</span> <span class="k">if</span> <span class="n">isego</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">althand</span><span class="p">)</span> <span class="o">+</span> <span class="n">prevmove</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">sanitize_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_sanitize_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                                       <span class="ow">or</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">N</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">action</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">N</span>
+        <span class="p">):</span>
             <span class="k">return</span> <span class="n">BLUFF</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">action</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">N</span><span class="p">:</span>
@@ -154,7 +168,7 @@
 
         <span class="k">return</span> <span class="n">action</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">eval_bluff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_eval_bluff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
@@ -162,40 +176,34 @@
         <span class="n">trueans</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">egohand</span><span class="p">[</span><span class="n">side</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">althand</span><span class="p">[</span><span class="n">side</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">trueans</span>
 
-    <span class="k">def</span> <span class="nf">player_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">isego</span><span class="p">):</span>
-        <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sanitize_action</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_player_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">isego</span><span class="p">):</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sanitize_action</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="n">BLUFF</span><span class="p">:</span>
-            <span class="n">didwin</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_bluff</span><span class="p">()</span> <span class="o">==</span> <span class="n">isego</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getObs</span><span class="p">(</span><span class="ow">not</span> <span class="n">isego</span><span class="p">),</span> <span class="n">WIN</span> <span class="k">if</span> <span class="n">didwin</span> <span class="k">else</span> <span class="n">LOSE</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="p">{}</span>
+            <span class="n">didwin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_bluff</span><span class="p">()</span> <span class="o">==</span> <span class="n">isego</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obs</span><span class="p">(</span><span class="ow">not</span> <span class="n">isego</span><span class="p">),</span> <span class="n">WIN</span> <span class="k">if</span> <span class="n">didwin</span> <span class="k">else</span> <span class="n">LOSE</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">action</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getObs</span><span class="p">(</span><span class="ow">not</span> <span class="n">isego</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obs</span><span class="p">(</span><span class="ow">not</span> <span class="n">isego</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{}</span>
 
 <div class="viewcode-block" id="LiarEnv.ego_step">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.liargym.liar.LiarEnv.html#pantheonrl.envs.liargym.liar.LiarEnv.ego_step">[docs]</a>
     <span class="k">def</span> <span class="nf">ego_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return partner&#39;s obs, both rewards, is done, and info</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">player_step</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_player_step</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="LiarEnv.alt_step">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.liargym.liar.LiarEnv.html#pantheonrl.envs.liargym.liar.LiarEnv.alt_step">[docs]</a>
     <span class="k">def</span> <span class="nf">alt_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return ego&#39;s obs, both rewards, is done, and info</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">player_step</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_player_step</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="LiarEnv.multi_reset">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.envs.liargym.liar.LiarEnv.html#pantheonrl.envs.liargym.liar.LiarEnv.multi_reset">[docs]</a>
     <span class="k">def</span> <span class="nf">multi_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">egofirst</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">egohand</span> <span class="o">=</span> <span class="n">randRoll</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">althand</span> <span class="o">=</span> <span class="n">randRoll</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">egohand</span> <span class="o">=</span> <span class="n">_rand_roll</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">althand</span> <span class="o">=</span> <span class="n">_rand_roll</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getObs</span><span class="p">(</span><span class="n">egofirst</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obs</span><span class="p">(</span><span class="n">egofirst</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

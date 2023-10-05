@@ -99,6 +99,9 @@
 <dt class="sig sig-object py" id="pantheonrl.envs.liargym.liar.LiarEnv">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LiarEnv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">probegostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/envs/liargym/liar.html#LiarEnv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.envs.liargym.liar.LiarEnv" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pantheonrl.common.multiagentenv.TurnBasedEnv.html#pantheonrl.common.multiagentenv.TurnBasedEnv" title="pantheonrl.common.multiagentenv.TurnBasedEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">TurnBasedEnv</span></code></a></p>
+<p>Definition of the Liar’s dice environment.</p>
+<p>The observation is the current hand. The valid actions are to bluff or to
+state a belief in the total number of dice of a certain number.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -106,7 +109,7 @@
 <td><p>Add agent to the list of potential partner agents.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.alt_step" title="pantheonrl.envs.liargym.liar.LiarEnv.alt_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alt_step</span></code></a></p></td>
-<td><p>Return ego's obs, both rewards, is done, and info</p></td>
+<td><p>Perform the partner's action and return a tuple of (ego's observation, both rewards, done, info).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.close" title="pantheonrl.envs.liargym.liar.LiarEnv.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a></p></td>
 <td><p>After the user has finished using the environment, close contains the code necessary to &quot;clean up&quot; the environment.</p></td>
@@ -115,13 +118,7 @@
 <td><p>Construct a gym interface to be used by a single-agent RL algorithm.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.ego_step" title="pantheonrl.envs.liargym.liar.LiarEnv.ego_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ego_step</span></code></a></p></td>
-<td><p>Return partner's obs, both rewards, is done, and info</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval_bluff</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getObs</span></code></p></td>
-<td><p></p></td>
+<td><p>Perform the ego-agent's action and return a tuple of (partner's observation, both rewards, done, info).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.get_dummy_env" title="pantheonrl.envs.liargym.liar.LiarEnv.get_dummy_env"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dummy_env</span></code></a></p></td>
 <td><p>Returns a dummy environment with just an observation and action space that a partner agent can use to construct their policy network.</p></td>
@@ -141,23 +138,17 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.n_step" title="pantheonrl.envs.liargym.liar.LiarEnv.n_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_step</span></code></a></p></td>
 <td><p>Perform the actions specified by the agents that will move.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">player_step</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.render" title="pantheonrl.envs.liargym.liar.LiarEnv.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.render" title="pantheonrl.envs.liargym.liar.LiarEnv.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a></p></td>
 <td><p>Compute the render frames as specified by <code class="xref py py-attr docutils literal notranslate"><span class="pre">render_mode</span></code> during the initialization of the environment.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.resample_random" title="pantheonrl.envs.liargym.liar.LiarEnv.resample_random"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_random</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.resample_random" title="pantheonrl.envs.liargym.liar.LiarEnv.resample_random"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_random</span></code></a></p></td>
 <td><p>Randomly resamples each partner policy</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.resample_round_robin" title="pantheonrl.envs.liargym.liar.LiarEnv.resample_round_robin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_round_robin</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.resample_round_robin" title="pantheonrl.envs.liargym.liar.LiarEnv.resample_round_robin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_round_robin</span></code></a></p></td>
 <td><p>Sets the partner policy to the next option on the list for round-robin sampling.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.reset" title="pantheonrl.envs.liargym.liar.LiarEnv.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.reset" title="pantheonrl.envs.liargym.liar.LiarEnv.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a></p></td>
 <td><p>Reset environment to an initial state and return the first observation for the ego agent.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sanitize_action</span></code></p></td>
-<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.envs.liargym.liar.LiarEnv.set_ego_extractor" title="pantheonrl.envs.liargym.liar.LiarEnv.set_ego_extractor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ego_extractor</span></code></a></p></td>
 <td><p>Sets the function to extract Observation for the ego agent.</p></td>
@@ -233,7 +224,21 @@ randomly samples from them at the start of every episode.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.envs.liargym.liar.LiarEnv.alt_step">
 <span class="sig-name descname"><span class="pre">alt_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/envs/liargym/liar.html#LiarEnv.alt_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.envs.liargym.liar.LiarEnv.alt_step" title="Link to this definition"></a></dt>
-<dd><p>Return ego’s obs, both rewards, is done, and info</p>
+<dd><p>Perform the partner’s action and return a tuple of (ego’s observation,
+both rewards, done, info).</p>
+<p>This function is called by the <cite>step</cite> function along with ego-step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>action</strong> – An action provided by the partner.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>ego observation: Ego-agent’s next observation</p>
+<p>rewards: Tuple representing the rewards of both agents (ego, alt)</p>
+<p>done: Whether the episode has ended</p>
+<p>info: Extra information about the environment</p>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -264,7 +269,20 @@ file in examples to see how to appropriately use this function.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.envs.liargym.liar.LiarEnv.ego_step">
 <span class="sig-name descname"><span class="pre">ego_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/envs/liargym/liar.html#LiarEnv.ego_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.envs.liargym.liar.LiarEnv.ego_step" title="Link to this definition"></a></dt>
-<dd><p>Return partner’s obs, both rewards, is done, and info</p>
+<dd><p>Perform the ego-agent’s action and return a tuple of (partner’s
+observation, both rewards, done, info).</p>
+<p>This function is called by the <cite>step</cite> function along with alt-step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>action</strong> – An action provided by the ego-agent.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>partner observation: Partner’s next observation
+rewards: Tuple representing the rewards of both agents (ego, alt)
+done: Whether the episode has ended
+info: Extra information about the environment</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

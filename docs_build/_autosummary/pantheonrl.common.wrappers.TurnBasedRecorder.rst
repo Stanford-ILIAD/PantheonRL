@@ -1,4 +1,4 @@
-﻿pantheonrl.common.wrappers.TurnBasedRecorder
+pantheonrl.common.wrappers.TurnBasedRecorder
 ============================================
 
 .. currentmodule:: pantheonrl.common.wrappers

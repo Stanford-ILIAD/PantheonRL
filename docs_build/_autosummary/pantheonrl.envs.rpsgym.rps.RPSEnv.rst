@@ -1,4 +1,4 @@
-﻿pantheonrl.envs.rpsgym.rps.RPSEnv
+pantheonrl.envs.rpsgym.rps.RPSEnv
 =================================
 
 .. currentmodule:: pantheonrl.envs.rpsgym.rps

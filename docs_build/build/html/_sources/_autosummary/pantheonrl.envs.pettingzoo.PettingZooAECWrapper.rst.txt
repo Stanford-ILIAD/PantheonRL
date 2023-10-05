@@ -1,4 +1,4 @@
-﻿pantheonrl.envs.pettingzoo.PettingZooAECWrapper
+pantheonrl.envs.pettingzoo.PettingZooAECWrapper
 ===============================================
 
 .. currentmodule:: pantheonrl.envs.pettingzoo
