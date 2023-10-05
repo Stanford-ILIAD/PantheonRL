@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -119,11 +120,11 @@ each field has been sliced.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_transition</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.trajsaver.TransitionsMinimal.read_transition" title="pantheonrl.common.trajsaver.TransitionsMinimal.read_transition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_transition</span></code></a></p></td>
+<td><p>Construct TransitionsMinimal from file</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_transition</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.trajsaver.TransitionsMinimal.write_transition" title="pantheonrl.common.trajsaver.TransitionsMinimal.write_transition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_transition</span></code></a></p></td>
+<td><p>Write transition to a given file.</p></td>
 </tr>
 </tbody>
 </table>
@@ -159,6 +160,18 @@ each field has been sliced.</p>
 The i’th observation <cite>obs[i]</cite> in this array is the observation seen
 by the agent when choosing action <cite>acts[i]</cite>. <cite>obs[i]</cite> is not required to
 be from the timestep preceding <cite>obs[i+1]</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.trajsaver.TransitionsMinimal.read_transition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_space</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/trajsaver.html#TransitionsMinimal.read_transition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.trajsaver.TransitionsMinimal.read_transition" title="Link to this definition"></a></dt>
+<dd><p>Construct TransitionsMinimal from file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.trajsaver.TransitionsMinimal.write_transition">
+<span class="sig-name descname"><span class="pre">write_transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/trajsaver.html#TransitionsMinimal.write_transition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.trajsaver.TransitionsMinimal.write_transition" title="Link to this definition"></a></dt>
+<dd><p>Write transition to a given file.</p>
 </dd></dl>
 
 </dd></dl>

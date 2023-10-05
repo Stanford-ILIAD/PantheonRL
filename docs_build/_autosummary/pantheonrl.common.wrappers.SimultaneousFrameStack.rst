@@ -1,4 +1,4 @@
-pantheonrl.common.wrappers.SimultaneousFrameStack
+﻿pantheonrl.common.wrappers.SimultaneousFrameStack
 =================================================
 
 .. currentmodule:: pantheonrl.common.wrappers
@@ -19,7 +19,8 @@ pantheonrl.common.wrappers.SimultaneousFrameStack
       ~SimultaneousFrameStack.add_partner_agent
       ~SimultaneousFrameStack.close
       ~SimultaneousFrameStack.construct_single_agent_interface
-      ~SimultaneousFrameStack.getDummyEnv
+      ~SimultaneousFrameStack.get_dummy_env
+      ~SimultaneousFrameStack.get_ego_ind
       ~SimultaneousFrameStack.get_wrapper_attr
       ~SimultaneousFrameStack.multi_reset
       ~SimultaneousFrameStack.multi_step
@@ -30,6 +31,7 @@ pantheonrl.common.wrappers.SimultaneousFrameStack
       ~SimultaneousFrameStack.resample_round_robin
       ~SimultaneousFrameStack.reset
       ~SimultaneousFrameStack.set_ego_extractor
+      ~SimultaneousFrameStack.set_ego_ind
       ~SimultaneousFrameStack.set_partnerid
       ~SimultaneousFrameStack.set_resample_policy
       ~SimultaneousFrameStack.step

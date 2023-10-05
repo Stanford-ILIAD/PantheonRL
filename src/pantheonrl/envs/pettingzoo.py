@@ -37,23 +37,6 @@ class PettingZooAECWrapper(MultiAgentEnv):
                            Tuple[float, ...],
                            bool,
                            Dict]:
-        """
-        Perform the actions specified by the agents that will move. This
-        function returns a tuple of (next agents, observations, both rewards,
-        done, info).
-
-        This function is called by the `step` function.
-
-        :param actions: List of action provided agents that are acting on this
-        step.
-
-        :returns:
-            agents: Tuple representing the agents to call for the next actions
-            observations: Tuple representing the next observations (ego, alt)
-            rewards: Tuple representing the rewards of all agents
-            done: Whether the episode has ended
-            info: Extra information about the environment
-        """
         agent = self.base_env.agent_selection
         act = actions[0]
         if self._action_mask is not None and not self._action_mask[act]:
@@ -85,16 +68,6 @@ class PettingZooAECWrapper(MultiAgentEnv):
 
     def n_reset(self) -> Tuple[Tuple[int, ...],
                                Tuple[Optional[Observation], ...]]:
-        """
-        Reset the environment and return which agents will move first along
-        with their initial observations.
-
-        This function is called by the `reset` function.
-
-        :returns:
-            agents: Tuple representing the agents that will move first
-            observations: Tuple representing the observations of both agents
-        """
         self.base_env.reset()
         agent = self.base_env.agent_selection
         agent_idx = self.base_env.possible_agents.index(agent)

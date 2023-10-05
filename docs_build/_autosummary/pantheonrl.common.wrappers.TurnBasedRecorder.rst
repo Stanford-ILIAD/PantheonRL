@@ -1,4 +1,4 @@
-pantheonrl.common.wrappers.TurnBasedRecorder
+﻿pantheonrl.common.wrappers.TurnBasedRecorder
 ============================================
 
 .. currentmodule:: pantheonrl.common.wrappers
@@ -21,7 +21,8 @@ pantheonrl.common.wrappers.TurnBasedRecorder
       ~TurnBasedRecorder.close
       ~TurnBasedRecorder.construct_single_agent_interface
       ~TurnBasedRecorder.ego_step
-      ~TurnBasedRecorder.getDummyEnv
+      ~TurnBasedRecorder.get_dummy_env
+      ~TurnBasedRecorder.get_ego_ind
       ~TurnBasedRecorder.get_transitions
       ~TurnBasedRecorder.get_wrapper_attr
       ~TurnBasedRecorder.multi_reset
@@ -32,9 +33,11 @@ pantheonrl.common.wrappers.TurnBasedRecorder
       ~TurnBasedRecorder.resample_round_robin
       ~TurnBasedRecorder.reset
       ~TurnBasedRecorder.set_ego_extractor
+      ~TurnBasedRecorder.set_ego_ind
       ~TurnBasedRecorder.set_partnerid
       ~TurnBasedRecorder.set_resample_policy
       ~TurnBasedRecorder.step
+      ~TurnBasedRecorder.write_transition
    
    
 

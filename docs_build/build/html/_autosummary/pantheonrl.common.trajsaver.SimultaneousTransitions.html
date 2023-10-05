@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -102,8 +103,9 @@
 <h1>pantheonrl.common.trajsaver.SimultaneousTransitions<a class="headerlink" href="#pantheonrl-common-trajsaver-simultaneoustransitions" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pantheonrl.common.trajsaver.SimultaneousTransitions">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimultaneousTransitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">egoobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egoacts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">altobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">altacts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/trajsaver.html#SimultaneousTransitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.trajsaver.SimultaneousTransitions" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimultaneousTransitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">egoobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egoacts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">altobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">altacts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/trajsaver.html#SimultaneousTransitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.trajsaver.SimultaneousTransitions" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pantheonrl.common.trajsaver.MultiTransitions.html#pantheonrl.common.trajsaver.MultiTransitions" title="pantheonrl.common.trajsaver.MultiTransitions"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiTransitions</span></code></a></p>
+<p>Class that stores transitions from SimultaneousEnv</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -113,11 +115,11 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.trajsaver.SimultaneousTransitions.get_ego_transitions" title="pantheonrl.common.trajsaver.SimultaneousTransitions.get_ego_transitions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ego_transitions</span></code></a></p></td>
 <td><p>Returns the ego's transitions</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_transition</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.trajsaver.SimultaneousTransitions.read_transition" title="pantheonrl.common.trajsaver.SimultaneousTransitions.read_transition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_transition</span></code></a></p></td>
+<td><p>Construct SimultaneousTransitions from file</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_transition</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.trajsaver.SimultaneousTransitions.write_transition" title="pantheonrl.common.trajsaver.SimultaneousTransitions.write_transition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_transition</span></code></a></p></td>
+<td><p>Write transition to a given file.</p></td>
 </tr>
 </tbody>
 </table>
@@ -172,6 +174,18 @@
 <dd class="field-odd"><p><a class="reference internal" href="pantheonrl.common.trajsaver.TransitionsMinimal.html#pantheonrl.common.trajsaver.TransitionsMinimal" title="pantheonrl.common.trajsaver.TransitionsMinimal"><em>TransitionsMinimal</em></a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.trajsaver.SimultaneousTransitions.read_transition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_space</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/trajsaver.html#SimultaneousTransitions.read_transition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.trajsaver.SimultaneousTransitions.read_transition" title="Link to this definition"></a></dt>
+<dd><p>Construct SimultaneousTransitions from file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.trajsaver.SimultaneousTransitions.write_transition">
+<span class="sig-name descname"><span class="pre">write_transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/trajsaver.html#SimultaneousTransitions.write_transition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.trajsaver.SimultaneousTransitions.write_transition" title="Link to this definition"></a></dt>
+<dd><p>Write transition to a given file.</p>
 </dd></dl>
 
 </dd></dl>

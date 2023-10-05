@@ -1,4 +1,4 @@
-pantheonrl.envs.rpsgym.rps.RPSEnv
+﻿pantheonrl.envs.rpsgym.rps.RPSEnv
 =================================
 
 .. currentmodule:: pantheonrl.envs.rpsgym.rps
@@ -19,7 +19,8 @@ pantheonrl.envs.rpsgym.rps.RPSEnv
       ~RPSEnv.add_partner_agent
       ~RPSEnv.close
       ~RPSEnv.construct_single_agent_interface
-      ~RPSEnv.getDummyEnv
+      ~RPSEnv.get_dummy_env
+      ~RPSEnv.get_ego_ind
       ~RPSEnv.get_wrapper_attr
       ~RPSEnv.multi_reset
       ~RPSEnv.multi_step
@@ -30,6 +31,7 @@ pantheonrl.envs.rpsgym.rps.RPSEnv
       ~RPSEnv.resample_round_robin
       ~RPSEnv.reset
       ~RPSEnv.set_ego_extractor
+      ~RPSEnv.set_ego_ind
       ~RPSEnv.set_partnerid
       ~RPSEnv.set_resample_policy
       ~RPSEnv.step

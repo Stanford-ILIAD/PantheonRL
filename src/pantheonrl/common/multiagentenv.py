@@ -1,5 +1,24 @@
+"""
+This module defines the standard Env classes for PantheonRL.
+
+It defines the following Environments:
+
+- The abstract base MultiAgentEnv class
+- The abstract SimultaneousEnv
+- The abstract TurnBasedEnv
+
+It defines a convenience DummyEnv for interacting with SARL
+algorithms.
+
+It also defines the PlayerException and KillEnvException.
+"""
+import warnings
+
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Dict, Optional, Callable, Any, Union
+
+import threading
+from threading import Condition
 
 import gymnasium as gym
 import numpy as np
@@ -7,23 +26,42 @@ import numpy as np
 from .agents import Agent, DummyAgent
 from .observation import Observation, extract_obs
 
-import threading
-from threading import Condition
-
 
 class PlayerException(Exception):
-    """ Raise when players in the environment are incorrectly set """
+    """Raise when players in the environment are incorrectly set"""
+
 
 class KillEnvException(Exception):
-    """ Raise when the DummyEnv is killed """
+    """Raise when the DummyEnv is killed"""
 
 
 class DummyEnv(gym.Env):
     """
-    Environment representing a partner agent's observation and action space.
+    Environment representing an interface for single-agent RL algorithms that
+    assume access to a gym environment.
+
+    In its basic use, it just defines the observation and action spaces.
+    However, it may also be used directly to run a single-agent RL algorithm.
+
+    .. warning:: Use caution when trying to directly train a policy on this
+      environment. You must create a separate thread and manage potential
+      deadlocks. If you are using the SB3 algorithms, we strongly advise
+      using our OnPolicyAgent and OffPolicyAgent classes instead to avoid
+      deadlocks.
+
+    :param base_env: The base MultiAgentEnv
+    :param agent_ind: The player number in the larger environment
+    :param extractor: Function to call to process the Observation into a
+      usable value. By default, transforms the Observation into a numpy
+      array of the partial observation.
     """
 
-    def __init__(self, base_env, agent_ind, extractor=extract_obs):
+    def __init__(
+        self,
+        base_env: gym.Env,
+        agent_ind: int,
+        extractor: Callable[[Observation], Any] = extract_obs,
+    ):
         super().__init__()
         self.base_env = base_env
         self.agent_ind = agent_ind
@@ -43,8 +81,32 @@ class DummyEnv(gym.Env):
         self.dead = False
 
     def step(
-            self, action: np.ndarray
+        self, action: np.ndarray
     ) -> tuple[Union[Observation, Any], float, bool, bool, dict[str, Any]]:
+        """
+        Run one timestep from the perspective of the agent.
+
+        Accepts the agent's action and returns a tuple of (observation,
+        reward, done, info) from the perspective of the ego agent.
+
+        Note that when the environment is done, the final observation is the
+        latest observation provided by the environment, which may be the same
+        as the previous observation given to the agent, especially in
+        turn-based settings.
+
+        :param action: An action provided by the ego-agent.
+
+        :returns:
+          observation: Ego-agent's next observation
+
+          reward: Amount of reward returned after previous action
+
+          terminated: Whether the episode has ended (call reset() if True)
+
+          truncated: Whether the episode was truncated (call reset() if True)
+
+          info: Extra information about the environment
+        """
         assert threading.current_thread() is not threading.main_thread()
         # print("Dummy Env: got new action in step function", self.steps)
         with self.associated_agent.action_cv:
@@ -59,20 +121,26 @@ class DummyEnv(gym.Env):
                 self.obs_cv.wait()
                 if self.dead:
                     raise KillEnvException("Killing dummy environment")
-            to_return = self.extractor(self._obs), self._rew, self._done, False, {}
+            to_return = (
+                self.extractor(self._obs),
+                self._rew,
+                self._done,
+                False,
+                {},
+            )
             if not self._done:
                 self._obs = None
             # else:
-                # print("DUMMY ENV THINKS DONE")
+            # print("DUMMY ENV THINKS DONE")
             # print("Dummy Env: got observation")
         self.steps += 1
         return to_return
 
     def reset(
-            self,
-            *,
-            seed: int | None = None,
-            options: dict[str, Any] | None = None
+        self,
+        *,
+        seed: Optional[int] = None,
+        options: Optional[dict[str, Any]] = None,
     ) -> tuple[Observation, dict[str, Any]]:
         assert self._done
         assert threading.current_thread() is not threading.main_thread()
@@ -93,30 +161,40 @@ class DummyEnv(gym.Env):
         with self.associated_agent.action_cv:
             self.associated_agent.action_cv.notify()
 
-        import warnings
-        warnings.warn('Partner agent\'s dummy environment is dead. Remember to set the the learning time for the partner to be much larger than the program lifetime')
+        warnings.warn(
+            "Partner agent's dummy environment is dead. Remember to set the \
+            learning time for the partner to be much larger than the program \
+            lifetime"
+        )
+
+    def render(self):
+        pass
 
 
 class MultiAgentEnv(gym.Env, ABC):
     """
     Base class for all Multi-agent environments.
 
-    :param ego_ind: The player that the ego represents
+    :param observation_spaces: The observation space for each player
+    :param action_spaces: The action space for each player
+    :param ego_ind: The player number that the ego represents
     :param n_players: The number of players in the game
-    :param resample_policy: The resampling policy to use (see set_resample_policy)
+    :param resample_policy: The resampling policy (see set_resample_policy)
     :param partners: Lists of agents to choose from for the partner players
     :param ego_extractor: Function to extract Observation into the type the
-        ego expects
+        ego agent expects
     """
 
-    def __init__(self,
-                 observation_spaces: List[gym.spaces.Space],
-                 action_spaces: List[gym.spaces.Space],
-                 ego_ind: int = 0,
-                 n_players: int = 2,
-                 resample_policy: str = "default",
-                 partners: Optional[List[List[Agent]]] = None,
-                 ego_extractor: Callable[[Observation], Any] = extract_obs):
+    def __init__(
+        self,
+        observation_spaces: List[gym.spaces.Space],
+        action_spaces: List[gym.spaces.Space],
+        ego_ind: int = 0,
+        n_players: int = 2,
+        resample_policy: str = "default",
+        partners: Optional[List[List[Agent]]] = None,
+        ego_extractor: Callable[[Observation], Any] = extract_obs,
+    ):
         super().__init__()
         self.observation_spaces = observation_spaces
         self.action_spaces = action_spaces
@@ -127,12 +205,14 @@ class MultiAgentEnv(gym.Env, ABC):
             if len(partners) != n_players - 1:
                 raise PlayerException(
                     "The number of partners needs to equal the number \
-                    of non-ego players")
+                    of non-ego players"
+                )
 
             for plist in partners:
                 if not isinstance(plist, list) or not plist:
                     raise PlayerException(
-                        "Sublist for each partner must be nonempty list")
+                        "Sublist for each partner must be nonempty list"
+                    )
 
         self.partners = partners or [[]] * (n_players - 1)
         self.partnerids = [0] * (n_players - 1)
@@ -148,43 +228,88 @@ class MultiAgentEnv(gym.Env, ABC):
         self.set_resample_policy(resample_policy)
         self.ego_extractor = ego_extractor
 
-    def getDummyEnv(self, player_num: int):
+    def get_ego_ind(self):
+        """Returns the current player number for the ego agent"""
+        return self.ego_ind
+
+    def set_ego_ind(self, new_ind: int, silence_partner_warning: bool = False):
+        """
+        Sets the current player number for the ego agent
+
+        ..warning:: Modifying the ego_ind after partners have been added will
+          change the player number of those partners as well
+
+        :param new_ind: the new index of the ego player
+        :param silence_partner_warning: Whether to suppress the partner warning
+        """
+        if not silence_partner_warning:
+            for plist in self.partners:
+                if len(plist) > 0:
+                    warnings.warn(
+                        "Modifying the ego_ind after partners have been added \
+                        will change the player number of those partners as \
+                        well"
+                    )
+                break
+        self.ego_ind = new_ind
+
+    def get_dummy_env(self, player_num: int):
         """
         Returns a dummy environment with just an observation and action
         space that a partner agent can use to construct their policy network.
 
         :param player_num: the partner number to query
+        :returns: Dummy environment for this player number
         """
         return DummyEnv(self, player_num)
 
     def construct_single_agent_interface(self, player_num: int):
-        dummyEnv = self.getDummyEnv(player_num)
-        dummyAgent = DummyAgent(dummyEnv)
+        """
+        Construct a gym interface to be used by a single-agent RL algorithm.
+
+        Note that when training a policy using this interface, it must be
+        spawned in a separate Thread. Please refer to the custom_sarl.py
+        file in examples to see how to appropriately use this function.
+
+        :param player_num: the player number to build the interface around
+        :returns: environment to use for the new player
+        """
+        dummy_env = self.get_dummy_env(player_num)
+        dummy_agent = DummyAgent(dummy_env)
 
         partner_num = self._get_partner_num(player_num)
         if len(self.partners[partner_num]) != 0:
-            raise PlayerException("Cannot construct multiple single agent \
-            interfaces for the same player_num")
+            raise PlayerException(
+                "Cannot construct multiple single agent \
+                interfaces for the same player_num"
+            )
 
-        self.add_partner_agent(dummyAgent, player_num)
-        return dummyEnv
+        self.add_partner_agent(dummy_agent, player_num)
+        return dummy_env
 
     @property
     def observation_space(self) -> gym.spaces.Space:
+        """The observation space of the ego agent"""
         return self.observation_spaces[self.ego_ind]
 
     @property
     def action_space(self) -> gym.spaces.Space:
+        """The action space of the ego agent"""
         return self.action_spaces[self.ego_ind]
 
     def set_ego_extractor(self, ego_extractor: Callable[[Observation], Any]):
+        """
+        Sets the function to extract Observation for the ego agent.
+
+        :param ego_extractor: Function to extract Observation into the type the
+          ego agent expects
+        """
         self.ego_extractor = ego_extractor
 
     def _get_partner_num(self, player_num: int) -> int:
         if player_num == self.ego_ind:
-            raise PlayerException(
-                "Ego agent is not set by the environment")
-        elif player_num > self.ego_ind:
+            raise PlayerException("Ego agent is not set by the environment")
+        if player_num > self.ego_ind:
             return player_num - 1
         return player_num
 
@@ -204,15 +329,17 @@ class MultiAgentEnv(gym.Env, ABC):
         Set the current partner agent to use
 
         :param agent_id: agent_id to use as current partner
+        :param player_num: The player number
         """
         partner_num = self._get_partner_num(player_num)
-        assert(agent_id >= 0 and agent_id < len(self.partners[partner_num]))
+        assert 0 <= agent_id < len(self.partners[partner_num])
         self.partnerids[partner_num] = agent_id
 
     def resample_random(self) -> None:
-        """ Randomly resamples each partner policy """
-        self.partnerids = [self.np_random.integers(0, len(plist))
-                           for plist in self.partners]
+        """Randomly resamples each partner policy"""
+        self.partnerids = [
+            self.np_random.integers(0, len(plist)) for plist in self.partners
+        ]
 
     def resample_round_robin(self) -> None:
         """
@@ -228,14 +355,15 @@ class MultiAgentEnv(gym.Env, ABC):
         Set the resample_partner method to round "robin" or "random"
 
         :param resample_policy: The new resampling policy to use.
-        - Valid values are: "default", "robin", "random"
+          Valid values are: "default", "robin", "random"
         """
         if resample_policy == "default":
             resample_policy = "robin" if self.n_players == 2 else "random"
 
         if resample_policy == "robin" and self.n_players != 2:
             raise PlayerException(
-                "Cannot do round robin resampling for >2 players")
+                "Cannot do round robin resampling for >2 players"
+            )
 
         if resample_policy == "robin":
             self.resample_partner = self.resample_round_robin
@@ -243,7 +371,8 @@ class MultiAgentEnv(gym.Env, ABC):
             self.resample_partner = self.resample_random
         else:
             raise PlayerException(
-                f"Invalid resampling policy: {resample_policy}")
+                f"Invalid resampling policy: {resample_policy}"
+            )
 
     def _get_actions(self, players, obs, ego_act=None):
         actions = []
@@ -269,7 +398,7 @@ class MultiAgentEnv(gym.Env, ABC):
             self.total_rews[i] += rews[i]
 
     def step(
-            self, action: np.ndarray
+        self, action: np.ndarray
     ) -> tuple[Union[Observation, Any], float, bool, bool, dict[str, Any]]:
         """
         Run one timestep from the perspective of the ego-agent. This involves
@@ -281,29 +410,36 @@ class MultiAgentEnv(gym.Env, ABC):
 
         Note that when the environment is done, the final observation is the
         latest observation provided by the environment, which may be the same
-        as the previous observation given to the agent, especially in turn-based
-        settings.
+        as the previous observation given to the agent, especially in
+        turn-based settings.
 
         :param action: An action provided by the ego-agent.
 
         :returns:
-            observation: Ego-agent's next observation
-            reward: Amount of reward returned after previous action
-            terminated: Whether the episode has ended (need to call reset() if True)
-            truncated: Whether the episode was truncated (need to call reset() if True)
-            info: Extra information about the environment
+          observation: Ego-agent's next observation
+
+          reward: Amount of reward returned after previous action
+
+          terminated: Whether the episode has ended (call reset() if True)
+
+          truncated: Whether the episode was truncated (call reset() if True)
+
+          info: Extra information about the environment
         """
         ego_rew = 0.0
 
         while True:
             acts = self._get_actions(self._players, self._obs, action)
             self._players, self._obs, rews, done, info = self.n_step(acts)
-            info['_partnerid'] = self.partnerids
+            info["_partnerid"] = self.partnerids
 
             self._update_players(rews, done)
 
-            ego_rew += rews[self.ego_ind] if self.ego_moved \
+            ego_rew += (
+                rews[self.ego_ind]
+                if self.ego_moved
                 else self.total_rews[self.ego_ind]
+            )
 
             self.ego_moved = True
 
@@ -319,10 +455,10 @@ class MultiAgentEnv(gym.Env, ABC):
         return self.ego_extractor(ego_obs), ego_rew, done, False, info
 
     def reset(
-            self,
-            *,
-            seed: int | None = None,
-            options: dict[str, Any] | None = None
+        self,
+        *,
+        seed: Optional[int] = None,
+        options: Optional[dict[str, Any]] = None,
     ) -> tuple[Observation, dict[str, Any]]:
         """
         Reset environment to an initial state and return the first observation
@@ -358,13 +494,15 @@ class MultiAgentEnv(gym.Env, ABC):
 
     @abstractmethod
     def n_step(
-                    self,
-                    actions: List[np.ndarray],
-                ) -> Tuple[Tuple[int, ...],
-                           Tuple[Optional[Observation], ...],
-                           Tuple[float, ...],
-                           bool,
-                           Dict]:
+        self,
+        actions: List[np.ndarray],
+    ) -> Tuple[
+        Tuple[int, ...],
+        Tuple[Optional[Observation], ...],
+        Tuple[float, ...],
+        bool,
+        Dict,
+    ]:
         """
         Perform the actions specified by the agents that will move. This
         function returns a tuple of (next agents, observations, both rewards,
@@ -373,19 +511,25 @@ class MultiAgentEnv(gym.Env, ABC):
         This function is called by the `step` function.
 
         :param actions: List of action provided agents that are acting on this
-        step.
+            step.
 
         :returns:
+
             agents: Tuple representing the agents to call for the next actions
+
             observations: Tuple representing the next observations (ego, alt)
+
             rewards: Tuple representing the rewards of all agents
+
             done: Whether the episode has ended
+
             info: Extra information about the environment
         """
 
     @abstractmethod
-    def n_reset(self) -> Tuple[Tuple[int, ...],
-                               Tuple[Optional[Observation], ...]]:
+    def n_reset(
+        self,
+    ) -> Tuple[Tuple[int, ...], Tuple[Optional[Observation], ...]]:
         """
         Reset the environment and return which agents will move first along
         with their initial observations.
@@ -393,7 +537,9 @@ class MultiAgentEnv(gym.Env, ABC):
         This function is called by the `reset` function.
 
         :returns:
+
             agents: Tuple representing the agents that will move first
+
             observations: Tuple representing the observations of both agents
         """
 
@@ -405,49 +551,62 @@ class TurnBasedEnv(MultiAgentEnv, ABC):
     In turn-based games, players take turns receiving observations and making
     actions.
 
+    :param observation_spaces: The observation space for each player
+    :param action_spaces: The action space for each player
     :param probegostart: Probability that the ego agent gets the first turn
     :param partners: List of policies to choose from for the partner agent
     """
 
-    def __init__(self,
-                 observation_spaces: List[gym.spaces.Space],
-                 action_spaces: List[gym.spaces.Space],
-                 probegostart: float = 0.5,
-                 partners: Optional[List[Agent]] = None):
+    def __init__(
+        self,
+        observation_spaces: List[gym.spaces.Space],
+        action_spaces: List[gym.spaces.Space],
+        probegostart: float = 0.5,
+        partners: Optional[List[Agent]] = None,
+    ):
         partners = [partners] if partners else None
-        super(TurnBasedEnv, self).__init__(
-            observation_spaces, action_spaces,
-            ego_ind=0, n_players=2, partners=partners)
+        super().__init__(
+            observation_spaces,
+            action_spaces,
+            ego_ind=0,
+            n_players=2,
+            partners=partners,
+        )
         self.probegostart = probegostart
         self.ego_next = True
 
     def n_step(
-                    self,
-                    actions: List[np.ndarray],
-                ) -> Tuple[Tuple[int, ...],
-                           Tuple[Optional[Observation], ...],
-                           Tuple[float, ...],
-                           bool,
-                           Dict]:
+        self,
+        actions: List[np.ndarray],
+    ) -> Tuple[
+        Tuple[int, ...],
+        Tuple[Optional[Observation], ...],
+        Tuple[float, ...],
+        bool,
+        Dict,
+    ]:
         agents = (1 if self.ego_next else 0,)
-        obs, rews, done, info = self.ego_step(actions[0]) if self.ego_next \
+        obs, rews, done, info = (
+            self.ego_step(actions[0])
+            if self.ego_next
             else self.alt_step(actions[0])
+        )
 
         self.ego_next = not self.ego_next
 
         return agents, (Observation(obs),), rews, done, info
 
-    def n_reset(self) -> Tuple[Tuple[int, ...],
-                               Tuple[Optional[np.ndarray], ...]]:
-        self.ego_next = (self.np_random.random() < self.probegostart)
+    def n_reset(
+        self,
+    ) -> Tuple[Tuple[int, ...], Tuple[Optional[np.ndarray], ...]]:
+        self.ego_next = self.np_random.random() < self.probegostart
         obs = self.multi_reset(self.ego_next)
         return (0 if self.ego_next else 1,), (Observation(obs),)
 
     @abstractmethod
     def ego_step(
-                self,
-                action: np.ndarray
-            ) -> Tuple[Optional[np.ndarray], Tuple[float, float], bool, Dict]:
+        self, action: np.ndarray
+    ) -> Tuple[Optional[np.ndarray], Tuple[float, float], bool, Dict]:
         """
         Perform the ego-agent's action and return a tuple of (partner's
         observation, both rewards, done, info).
@@ -465,9 +624,8 @@ class TurnBasedEnv(MultiAgentEnv, ABC):
 
     @abstractmethod
     def alt_step(
-                self,
-                action: np.ndarray
-            ) -> Tuple[Optional[np.ndarray], Tuple[float, float], bool, Dict]:
+        self, action: np.ndarray
+    ) -> Tuple[Optional[np.ndarray], Tuple[float, float], bool, Dict]:
         """
         Perform the partner's action and return a tuple of (ego's observation,
         both rewards, done, info).
@@ -477,9 +635,13 @@ class TurnBasedEnv(MultiAgentEnv, ABC):
         :param action: An action provided by the partner.
 
         :returns:
+
             ego observation: Ego-agent's next observation
+
             rewards: Tuple representing the rewards of both agents (ego, alt)
+
             done: Whether the episode has ended
+
             info: Extra information about the environment
         """
 
@@ -501,41 +663,54 @@ class SimultaneousEnv(MultiAgentEnv, ABC):
     """
     Base class for all 2-player simultaneous games.
 
+    :param observation_spaces: The observation space for each player
+    :param action_spaces: The action space for each player
     :param partners: List of policies to choose from for the partner agent
     """
 
-    def __init__(self,
-                 observation_spaces: List[gym.spaces.Space],
-                 action_spaces: List[gym.spaces.Space],
-                 partners: Optional[List[Agent]] = None):
+    def __init__(
+        self,
+        observation_spaces: List[gym.spaces.Space],
+        action_spaces: List[gym.spaces.Space],
+        partners: Optional[List[Agent]] = None,
+    ):
         partners = [partners] if partners else None
-        super(SimultaneousEnv, self).__init__(
-            observation_spaces, action_spaces,
-            ego_ind=0, n_players=2, partners=partners)
+        super().__init__(
+            observation_spaces,
+            action_spaces,
+            ego_ind=0,
+            n_players=2,
+            partners=partners,
+        )
 
     def n_step(
-                    self,
-                    actions: List[np.ndarray],
-                ) -> Tuple[Tuple[int, ...],
-                           Tuple[Optional[Observation], ...],
-                           Tuple[float, ...],
-                           bool,
-                           Dict]:
+        self,
+        actions: List[np.ndarray],
+    ) -> Tuple[
+        Tuple[int, ...],
+        Tuple[Optional[Observation], ...],
+        Tuple[float, ...],
+        bool,
+        Dict,
+    ]:
         (obs0, obs1), r, d, i = self.multi_step(actions[0], actions[1])
         return ((0, 1), (Observation(obs0), Observation(obs1)), r, d, i)
 
-    def n_reset(self) -> Tuple[Tuple[int, ...],
-                               Tuple[Optional[Observation], ...]]:
+    def n_reset(
+        self,
+    ) -> Tuple[Tuple[int, ...], Tuple[Optional[Observation], ...]]:
         (obs0, obs1) = self.multi_reset()
         return (0, 1), (Observation(obs0), Observation(obs1))
 
     @abstractmethod
     def multi_step(
-                    self,
-                    ego_action: np.ndarray,
-                    alt_action: np.ndarray
-                ) -> Tuple[Tuple[Optional[np.ndarray], Optional[np.ndarray]],
-                           Tuple[float, float], bool, Dict]:
+        self, ego_action: np.ndarray, alt_action: np.ndarray
+    ) -> Tuple[
+        Tuple[Optional[np.ndarray], Optional[np.ndarray]],
+        Tuple[float, float],
+        bool,
+        Dict,
+    ]:
         """
         Perform the ego-agent's and partner's actions. This function returns a
         tuple of (observations, both rewards, done, info).
@@ -547,8 +722,11 @@ class SimultaneousEnv(MultiAgentEnv, ABC):
 
         :returns:
             observations: Tuple representing the next observations (ego, alt)
+
             rewards: Tuple representing the rewards of both agents (ego, alt)
+
             done: Whether the episode has ended
+
             info: Extra information about the environment
         """
 

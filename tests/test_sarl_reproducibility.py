@@ -23,12 +23,11 @@ class FakeAgent(Agent):
         self.action_space = copy.deepcopy(self.env.action_space)
         self.action_space.seed(0)
 
-    def get_action(self, obs, record: bool = True):
+    def get_action(self, obs):
         """
         Return an action given an observation.
 
         :param obs: The observation to use
-        :param record: Whether to record the obs, action (unused)
         :returns: The action to take
         """
         return self.action_space.sample()
@@ -72,7 +71,7 @@ class ReplayAgent(Agent):
         self.rb = rb
         self.steps = 0
 
-    def get_action(self, obs, record:bool = True):
+    def get_action(self, obs):
         if not np.array_equal(obs.obs, self.rb.observations[self.steps]):
             raise Exception(f"Observations mismatch at {self.steps} {obs.obs} {self.rb.observations[self.steps]}")
         self.steps += 1
@@ -116,7 +115,7 @@ def run_standard(ALGO, timesteps, option, n_steps):
 
     env = make_env(option)
     ego = ALGO('MlpPolicy', env, n_steps=n_steps, verbose=0)
-    partner = FakeAgent(env.unwrapped.getDummyEnv(1))
+    partner = FakeAgent(env.unwrapped.get_dummy_env(1))
     env.unwrapped.ego_ind = 0
     env.unwrapped.add_partner_agent(partner)
 
@@ -176,7 +175,7 @@ def run_standard_dqn(ALGO, timesteps, option, n_steps):
     env = make_env(option)
     env.unwrapped.ego_ind = 0
     ego = ALGO('MlpPolicy', env, train_freq=n_steps, verbose=0, learning_starts=32, batch_size=32, seed=0)
-    partner = FakeAgent(env.unwrapped.getDummyEnv(1))
+    partner = FakeAgent(env.unwrapped.get_dummy_env(1))
     env.unwrapped.add_partner_agent(partner)
 
     print('ego start', sum([param.data.mean() for param in ego.policy.parameters()]))
@@ -278,7 +277,7 @@ def test_sarl(ALGO, epochs, option, n_steps):
 #     stable_baselines3.common.utils.set_random_seed(0)
 
 #     env = make_env()
-#     partner = FakeAgent(env.unwrapped.getDummyEnv(1))
+#     partner = FakeAgent(env.unwrapped.get_dummy_env(1))
 #     env.unwrapped.ego_ind = 0
 #     agents, observations = env.unwrapped.n_reset()
 #     t = 0

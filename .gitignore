@@ -12,3 +12,4 @@ models/
 .idea/
 .mypy_cache/
 docs_build/build/doctrees
+*.DS_Store

@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -99,11 +100,21 @@
              
   <section id="module-pantheonrl.common.multiagentenv">
 <span id="pantheonrl-common-multiagentenv"></span><h1>pantheonrl.common.multiagentenv<a class="headerlink" href="#module-pantheonrl.common.multiagentenv" title="Link to this heading"></a></h1>
+<p>This module defines the standard Env classes for PantheonRL.</p>
+<p>It defines the following Environments:</p>
+<ul class="simple">
+<li><p>The abstract base MultiAgentEnv class</p></li>
+<li><p>The abstract SimultaneousEnv</p></li>
+<li><p>The abstract TurnBasedEnv</p></li>
+</ul>
+<p>It defines a convenience DummyEnv for interacting with SARL
+algorithms.</p>
+<p>It also defines the PlayerException and KillEnvException.</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="pantheonrl.common.multiagentenv.DummyEnv.html#pantheonrl.common.multiagentenv.DummyEnv" title="pantheonrl.common.multiagentenv.DummyEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DummyEnv</span></code></a></p></td>
-<td><p>Environment representing a partner agent's observation and action space.</p></td>
+<td><p>Environment representing an interface for single-agent RL algorithms that assume access to a gym environment.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv" title="pantheonrl.common.multiagentenv.MultiAgentEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiAgentEnv</span></code></a></p></td>
 <td><p>Base class for all Multi-agent environments.</p></td>

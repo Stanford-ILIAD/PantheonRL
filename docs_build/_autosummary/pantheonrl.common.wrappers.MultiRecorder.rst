@@ -1,4 +1,4 @@
-pantheonrl.common.wrappers.MultiRecorder
+﻿pantheonrl.common.wrappers.MultiRecorder
 ========================================
 
 .. currentmodule:: pantheonrl.common.wrappers
@@ -17,6 +17,7 @@ pantheonrl.common.wrappers.MultiRecorder
       :nosignatures:
    
       ~MultiRecorder.get_transitions
+      ~MultiRecorder.write_transition
    
    
 

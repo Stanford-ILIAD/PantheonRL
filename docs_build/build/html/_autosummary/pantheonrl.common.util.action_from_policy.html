@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -106,18 +107,18 @@
 <dt class="sig sig-object py" id="pantheonrl.common.util.action_from_policy">
 <span class="sig-name descname"><span class="pre">action_from_policy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/util.html#action_from_policy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.util.action_from_policy" title="Link to this definition"></a></dt>
 <dd><p>Return the action, values, and log_probs given an observation and policy</p>
-<p>: param obs: Numpy array representing the observation
-: param policy: The actor-critic policy</p>
-<p>: returns: The action, values, and log_probs from the policy</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>obs</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>policy</strong> (<em>ActorCriticPolicy</em>) – </p></li>
+<li><p><strong>obs</strong> (<em>ndarray</em>) – Numpy array representing the observation</p></li>
+<li><p><strong>policy</strong> (<em>ActorCriticPolicy</em>) – The actor-critic policy</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Tuple</em>[<em>ndarray</em>, <em>Tensor</em>, <em>Tensor</em>]</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The action, values, and log_probs from the policy</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[<em>ndarray</em>, <em>Tensor</em>, <em>Tensor</em>]</p>
 </dd>
 </dl>
 </dd></dl>

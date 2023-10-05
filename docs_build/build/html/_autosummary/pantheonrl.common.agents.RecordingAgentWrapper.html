@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -128,16 +129,13 @@ wrappers.py) to record the transitions in an environment.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.common.agents.RecordingAgentWrapper.get_action">
-<span class="sig-name descname"><span class="pre">get_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/agents.html#RecordingAgentWrapper.get_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.agents.RecordingAgentWrapper.get_action" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/agents.html#RecordingAgentWrapper.get_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.agents.RecordingAgentWrapper.get_action" title="Link to this definition"></a></dt>
 <dd><p>Return an action given an observation.</p>
 <p>The output is the same as calling <cite>get_action</cite> on the realagent, but
 this wrapper also stores the observation-action pair to a buffer</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>obs</strong> (<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a>) – The observation to use</p></li>
-<li><p><strong>record</strong> (<em>bool</em>) – Whether to record the obs, action (True when training)</p></li>
-</ul>
+<dd class="field-odd"><p><strong>obs</strong> (<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a>) – The observation to use</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The action to take</p>

@@ -30,6 +30,7 @@
           
           <a href="../../../../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../../../../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -99,7 +100,7 @@
     <span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">pyglet.gl</span> <span class="kn">import</span> <span class="o">*</span>
+    <span class="kn">import</span> <span class="nn">pyglet.gl</span> <span class="k">as</span> <span class="nn">gl</span>
 <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -175,8 +176,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">onetime_geoms</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">Transform</span><span class="p">()</span>
 
-        <span class="n">glEnable</span><span class="p">(</span><span class="n">GL_BLEND</span><span class="p">)</span>
-        <span class="n">glBlendFunc</span><span class="p">(</span><span class="n">GL_SRC_ALPHA</span><span class="p">,</span> <span class="n">GL_ONE_MINUS_SRC_ALPHA</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_BLEND</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glBlendFunc</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_SRC_ALPHA</span><span class="p">,</span> <span class="n">gl</span><span class="o">.</span><span class="n">GL_ONE_MINUS_SRC_ALPHA</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isopen</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">meta_path</span><span class="p">:</span>
@@ -202,7 +203,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">onetime_geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">return_rgb_array</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="n">glClearColor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glClearColor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">switch_to</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">dispatch_events</span><span class="p">()</span>
@@ -321,15 +322,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set_scale</span><span class="p">(</span><span class="o">*</span><span class="n">scale</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">glPushMatrix</span><span class="p">()</span>
-        <span class="n">glTranslatef</span><span class="p">(</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glPushMatrix</span><span class="p">()</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glTranslatef</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">translation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">translation</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span>
         <span class="p">)</span>  <span class="c1"># translate to GL loc ppint</span>
-        <span class="n">glRotatef</span><span class="p">(</span><span class="n">RAD2DEG</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">glScalef</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glRotatef</span><span class="p">(</span><span class="n">RAD2DEG</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glScalef</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">disable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">glPopMatrix</span><span class="p">()</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glPopMatrix</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">set_translation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newx</span><span class="p">,</span> <span class="n">newy</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">translation</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">newx</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">newy</span><span class="p">))</span>
@@ -349,7 +350,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vec4</span> <span class="o">=</span> <span class="n">vec4</span>
 
     <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">glColor4f</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">)</span></div>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glColor4f</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">)</span></div>
 
 
 
@@ -360,11 +361,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="n">style</span>
 
     <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">glEnable</span><span class="p">(</span><span class="n">GL_LINE_STIPPLE</span><span class="p">)</span>
-        <span class="n">glLineStipple</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_LINE_STIPPLE</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glLineStipple</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">disable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">glDisable</span><span class="p">(</span><span class="n">GL_LINE_STIPPLE</span><span class="p">)</span></div>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glDisable</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_LINE_STIPPLE</span><span class="p">)</span></div>
 
 
 
@@ -375,7 +376,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">stroke</span> <span class="o">=</span> <span class="n">stroke</span>
 
     <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">glLineWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stroke</span><span class="p">)</span></div>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glLineWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stroke</span><span class="p">)</span></div>
 
 
 
@@ -386,9 +387,9 @@
         <span class="n">Geom</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">render1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">glBegin</span><span class="p">(</span><span class="n">GL_POINTS</span><span class="p">)</span>  <span class="c1"># draw point</span>
-        <span class="n">glVertex3f</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-        <span class="n">glEnd</span><span class="p">()</span></div>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glBegin</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_POINTS</span><span class="p">)</span>  <span class="c1"># draw point</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glVertex3f</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glEnd</span><span class="p">()</span></div>
 
 
 
@@ -401,14 +402,14 @@
 
     <span class="k">def</span> <span class="nf">render1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="n">glBegin</span><span class="p">(</span><span class="n">GL_QUADS</span><span class="p">)</span>
+            <span class="n">gl</span><span class="o">.</span><span class="n">glBegin</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_QUADS</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="n">glBegin</span><span class="p">(</span><span class="n">GL_POLYGON</span><span class="p">)</span>
+            <span class="n">gl</span><span class="o">.</span><span class="n">glBegin</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_POLYGON</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">glBegin</span><span class="p">(</span><span class="n">GL_TRIANGLES</span><span class="p">)</span>
+            <span class="n">gl</span><span class="o">.</span><span class="n">glBegin</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_TRIANGLES</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">:</span>
-            <span class="n">glVertex3f</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># draw each vertex</span>
-        <span class="n">glEnd</span><span class="p">()</span></div>
+            <span class="n">gl</span><span class="o">.</span><span class="n">glVertex3f</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># draw each vertex</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glEnd</span><span class="p">()</span></div>
 
 
 
@@ -482,10 +483,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_attr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linewidth</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">render1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">glBegin</span><span class="p">(</span><span class="n">GL_LINE_LOOP</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">close</span> <span class="k">else</span> <span class="n">GL_LINE_STRIP</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glBegin</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_LINE_LOOP</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">close</span> <span class="k">else</span> <span class="n">gl</span><span class="o">.</span><span class="n">GL_LINE_STRIP</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">:</span>
-            <span class="n">glVertex3f</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># draw each vertex</span>
-        <span class="n">glEnd</span><span class="p">()</span>
+            <span class="n">gl</span><span class="o">.</span><span class="n">glVertex3f</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># draw each vertex</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glEnd</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">set_linewidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">linewidth</span><span class="o">.</span><span class="n">stroke</span> <span class="o">=</span> <span class="n">x</span></div>
@@ -503,10 +504,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_attr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linewidth</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">render1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">glBegin</span><span class="p">(</span><span class="n">GL_LINES</span><span class="p">)</span>
-        <span class="n">glVertex2f</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
-        <span class="n">glVertex2f</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
-        <span class="n">glEnd</span><span class="p">()</span></div>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glBegin</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">GL_LINES</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glVertex2f</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glVertex2f</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+        <span class="n">gl</span><span class="o">.</span><span class="n">glEnd</span><span class="p">()</span></div>
 
 
 

@@ -30,6 +30,7 @@
           
           <a href="../../../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../../../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -73,35 +74,48 @@
            <div itemprop="articleBody">
              
   <h1>Source code for pantheonrl.common.agents</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module defines the standard Agent classes for PantheonRL.</span>
+
+<span class="sd">It defines the following Agents:</span>
+
+<span class="sd">- The abstract base Agent class</span>
+<span class="sd">- The DummyAgent for wrapping SARL algorithms (not user-facing)</span>
+<span class="sd">- The SB3-specific OnPolicyAgent and OffPolicyAgent</span>
+<span class="sd">- The StaticPolicyAgent for pure inference of trained policies</span>
+
+<span class="sd">It also defines the RecordingAgentWrapper to record transitions</span>
+<span class="sd">that an agent experiences.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
 <span class="kn">import</span> <span class="nn">time</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span> <span class="k">as</span> <span class="nn">th</span>
-
-<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">action_from_policy</span><span class="p">,</span> <span class="n">clip_actions</span><span class="p">,</span> <span class="n">resample_noise</span>
-<span class="kn">from</span> <span class="nn">.trajsaver</span> <span class="kn">import</span> <span class="n">TransitionsMinimal</span>
-<span class="kn">from</span> <span class="nn">.observation</span> <span class="kn">import</span> <span class="n">Observation</span>
-
-<span class="kn">from</span> <span class="nn">stable_baselines3.common.utils</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">configure_logger</span><span class="p">,</span>
-    <span class="n">should_collect_more_steps</span><span class="p">,</span>
-    <span class="n">obs_as_tensor</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">stable_baselines3.common.policies</span> <span class="kn">import</span> <span class="n">ActorCriticPolicy</span>
-<span class="kn">from</span> <span class="nn">stable_baselines3.common.on_policy_algorithm</span> <span class="kn">import</span> <span class="n">OnPolicyAlgorithm</span>
-<span class="kn">from</span> <span class="nn">stable_baselines3.common.off_policy_algorithm</span> <span class="kn">import</span> <span class="n">OffPolicyAlgorithm</span>
-<span class="kn">from</span> <span class="nn">stable_baselines3.common.utils</span> <span class="kn">import</span> <span class="n">safe_mean</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Condition</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span> <span class="k">as</span> <span class="nn">th</span>
+
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.policies</span> <span class="kn">import</span> <span class="n">ActorCriticPolicy</span>
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.on_policy_algorithm</span> <span class="kn">import</span> <span class="n">OnPolicyAlgorithm</span>
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.off_policy_algorithm</span> <span class="kn">import</span> <span class="n">OffPolicyAlgorithm</span>
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">safe_mean</span><span class="p">,</span>
+    <span class="n">should_collect_more_steps</span><span class="p">,</span>
+    <span class="n">obs_as_tensor</span><span class="p">,</span>
+<span class="p">)</span>
+
 <span class="kn">from</span> <span class="nn">gymnasium</span> <span class="kn">import</span> <span class="n">spaces</span>
 
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">action_from_policy</span><span class="p">,</span> <span class="n">clip_actions</span>
+<span class="kn">from</span> <span class="nn">.trajsaver</span> <span class="kn">import</span> <span class="n">TransitionsMinimal</span>
+<span class="kn">from</span> <span class="nn">.observation</span> <span class="kn">import</span> <span class="n">Observation</span>
 
 
 <div class="viewcode-block" id="Agent">
@@ -114,12 +128,11 @@
 <div class="viewcode-block" id="Agent.get_action">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.agents.Agent.html#pantheonrl.common.agents.Agent.get_action">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return an action given an observation.</span>
 
 <span class="sd">        :param obs: The observation to use</span>
-<span class="sd">        :param record: Whether to record the obs, action pair (for training)</span>
 <span class="sd">        :returns: The action to take</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
@@ -131,10 +144,11 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add new rewards and done information if the agent can learn.</span>
 
-<span class="sd">        Each update corresponds to the most recent `get_action` (where</span>
-<span class="sd">        `record` is True). If there are multiple calls to `update` that</span>
-<span class="sd">        correspond to the same `get_action`, their rewards are summed up and</span>
-<span class="sd">        the last done flag will be used.</span>
+<span class="sd">        Each update corresponds to the most recent `get_action`.</span>
+
+<span class="sd">        If there are multiple calls to `update` that correspond to the same</span>
+<span class="sd">        `get_action`, their rewards are summed up and the last done flag</span>
+<span class="sd">        will be used.</span>
 
 <span class="sd">        :param reward: The reward receieved from the previous action step</span>
 <span class="sd">        :param done: Whether the game is done</span>
@@ -147,7 +161,12 @@
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.agents.DummyAgent.html#pantheonrl.common.agents.DummyAgent">[docs]</a>
 <span class="k">class</span> <span class="nc">DummyAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Agent wrapper for standard SARL algorithms assuming a gym interface</span>
+<span class="sd">    Agent wrapper for standard SARL algorithms assuming a gym interface.</span>
+
+<span class="sd">    .. warning:: Users should not directly construct a Dummy Agent. Instead,</span>
+<span class="sd">        use the construct_single_agent_interface method from MultiAgentEnv.</span>
+
+<span class="sd">    :param dummy_env: The DummyEnv associated with this DummyAgent</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dummy_env</span><span class="p">):</span>
@@ -163,7 +182,7 @@
 
 <div class="viewcode-block" id="DummyAgent.get_action">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.agents.DummyAgent.html#pantheonrl.common.agents.DummyAgent.get_action">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="c1"># print(&quot;Dummy Agent: got new observation&quot;)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">dummy_env</span><span class="o">.</span><span class="n">obs_cv</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dummy_env</span><span class="o">.</span><span class="n">_obs</span> <span class="o">=</span> <span class="n">obs</span>
@@ -207,12 +226,11 @@
 
 <div class="viewcode-block" id="StaticPolicyAgent.get_action">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.agents.StaticPolicyAgent.html#pantheonrl.common.agents.StaticPolicyAgent.get_action">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return an action given an observation.</span>
 
 <span class="sd">        :param obs: The observation to use</span>
-<span class="sd">        :param record: Whether to record the obs, action (unused)</span>
 <span class="sd">        :returns: The action to take</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">actions</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">action_from_policy</span><span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="p">)</span>
@@ -224,8 +242,10 @@
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">done</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update does nothing since the agent does not learn.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+
+<span class="sd">        :param reward: The reward receieved from the previous action step</span>
+<span class="sd">        :param done: Whether the game is done</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 </div>
 
 
@@ -240,15 +260,25 @@
 <span class="sd">    from ``OnPolicyAlgorithm``.</span>
 
 <span class="sd">    :param model: Model representing the agent&#39;s learning algorithm</span>
+<span class="sd">    :param log_interval: Optional log interval for policy logging</span>
+<span class="sd">    :param working_timesteps: Estimate for number of timesteps to train for.</span>
+<span class="sd">    :param callback: Optional callback fed into the OnPolicyAlgorithm</span>
+<span class="sd">    :param tb_log_name: Name for tensorboard log</span>
+
+<span class="sd">    .. warning:: Note that the model will still continue training beyond the</span>
+<span class="sd">      working_timesteps point, but the model may not behave identically to</span>
+<span class="sd">      one initialized with a correct estimate.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">model</span><span class="p">:</span> <span class="n">OnPolicyAlgorithm</span><span class="p">,</span>
-                 <span class="n">log_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">tensorboard_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">working_timesteps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">tb_log_name</span><span class="o">=</span><span class="s2">&quot;OnPolicyAgent&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">OnPolicyAlgorithm</span><span class="p">,</span>
+        <span class="n">log_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">working_timesteps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tb_log_name</span><span class="o">=</span><span class="s2">&quot;OnPolicyAgent&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tb_log_name</span> <span class="o">=</span> <span class="n">tb_log_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">original_callback</span> <span class="o">=</span> <span class="n">callback</span>
@@ -260,11 +290,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">total_timesteps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_setup_learn</span><span class="p">(</span>
-            <span class="n">working_timesteps</span><span class="p">,</span>
-            <span class="n">callback</span><span class="p">,</span>
-            <span class="kc">False</span><span class="p">,</span>
-            <span class="n">tb_log_name</span><span class="p">,</span>
-            <span class="kc">False</span>
+            <span class="n">working_timesteps</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tb_log_name</span><span class="p">,</span> <span class="kc">False</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">on_training_start</span><span class="p">(</span><span class="nb">locals</span><span class="p">(),</span> <span class="nb">globals</span><span class="p">())</span>
@@ -296,15 +322,14 @@
 
 <div class="viewcode-block" id="OnPolicyAgent.get_action">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.agents.OnPolicyAgent.html#pantheonrl.common.agents.OnPolicyAgent.get_action">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return an action given an observation.</span>
 
-<span class="sd">        When `record` is True, the agent saves the last transition into its</span>
-<span class="sd">        buffer. It also updates the model if the buffer is full.</span>
+<span class="sd">        The agent saves the last transition into its buffer. It also updates</span>
+<span class="sd">        the model if the buffer is full.</span>
 
 <span class="sd">        :param obs: The observation to use</span>
-<span class="sd">        :param record: Whether to record the obs, action (True when training)</span>
 <span class="sd">        :returns: The action to take</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">obs</span>
@@ -322,34 +347,80 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">original_callback</span><span class="p">,</span>
                 <span class="kc">False</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">tb_log_name</span><span class="p">,</span>
-                <span class="kc">False</span>
+                <span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">on_training_start</span><span class="p">(</span><span class="nb">locals</span><span class="p">(),</span> <span class="nb">globals</span><span class="p">())</span>
 
-        <span class="k">if</span> <span class="n">record</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">&gt;=</span> <span class="n">n_rollout_steps</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">&gt;=</span> <span class="n">n_rollout_steps</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">th</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-                <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">predict_values</span><span class="p">(</span><span class="n">obs_as_tensor</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-            <span class="n">rollout_buffer</span><span class="o">.</span><span class="n">compute_returns_and_advantage</span><span class="p">(</span><span class="n">last_values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">dones</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_last_episode_starts</span><span class="p">)</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">predict_values</span><span class="p">(</span>
+                    <span class="n">obs_as_tensor</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">rollout_buffer</span><span class="o">.</span><span class="n">compute_returns_and_advantage</span><span class="p">(</span>
+                <span class="n">last_values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">dones</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_last_episode_starts</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">old_buffer</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">rollout_buffer</span><span class="p">)</span>
             <span class="n">callback</span><span class="o">.</span><span class="n">update_locals</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>
             <span class="n">callback</span><span class="o">.</span><span class="n">on_rollout_end</span><span class="p">()</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_update_current_progress_remaining</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_timesteps</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_update_current_progress_remaining</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_timesteps</span>
+            <span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_interval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log_interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_interval</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="p">):</span>
                 <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ep_info_buffer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="c1"># TODO, Logging</span>
-                <span class="n">time_elapsed</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">time</span><span class="o">.</span><span class="n">time_ns</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e9</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
-                <span class="n">fps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_num_timesteps_at_start</span><span class="p">)</span> <span class="o">/</span> <span class="n">time_elapsed</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;time/iterations&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;rollout/ep_rew_mean&quot;</span><span class="p">,</span> <span class="n">safe_mean</span><span class="p">([</span><span class="n">ep_info</span><span class="p">[</span><span class="s2">&quot;r&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ep_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">]))</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;rollout/ep_len_mean&quot;</span><span class="p">,</span> <span class="n">safe_mean</span><span class="p">([</span><span class="n">ep_info</span><span class="p">[</span><span class="s2">&quot;l&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ep_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">]))</span>
+                <span class="n">time_elapsed</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time_ns</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e9</span><span class="p">,</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">fps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span>
+                        <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_num_timesteps_at_start</span>
+                    <span class="p">)</span>
+                    <span class="o">/</span> <span class="n">time_elapsed</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+                    <span class="s2">&quot;time/iterations&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                    <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+                        <span class="s2">&quot;rollout/ep_rew_mean&quot;</span><span class="p">,</span>
+                        <span class="n">safe_mean</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="n">ep_info</span><span class="p">[</span><span class="s2">&quot;r&quot;</span><span class="p">]</span>
+                                <span class="k">for</span> <span class="n">ep_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ep_info_buffer</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+                        <span class="s2">&quot;rollout/ep_len_mean&quot;</span><span class="p">,</span>
+                        <span class="n">safe_mean</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="n">ep_info</span><span class="p">[</span><span class="s2">&quot;l&quot;</span><span class="p">]</span>
+                                <span class="k">for</span> <span class="n">ep_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ep_info_buffer</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;time/fps&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;time/time_elapsed&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time_elapsed</span><span class="p">),</span> <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;time/total_timesteps&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+                    <span class="s2">&quot;time/time_elapsed&quot;</span><span class="p">,</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">time_elapsed</span><span class="p">),</span>
+                    <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+                    <span class="s2">&quot;time/total_timesteps&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">,</span>
+                    <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
@@ -361,20 +432,29 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">reset_noise</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">on_rollout_start</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">use_sde</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">use_sde</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">reset_noise</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">th</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
             <span class="n">obs_tensor</span> <span class="o">=</span> <span class="n">obs_as_tensor</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-            <span class="n">actions</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">log_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">policy</span><span class="p">(</span><span class="n">obs_tensor</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">actions</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">log_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">policy</span><span class="p">(</span>
+                <span class="n">obs_tensor</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="n">clipped_actions</span> <span class="o">=</span> <span class="n">actions</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">):</span>
-            <span class="n">clipped_actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">high</span><span class="p">)</span>
+            <span class="n">clipped_actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                <span class="n">actions</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">high</span><span class="p">,</span>
+            <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">record</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">in_progress_info</span><span class="p">[</span><span class="s2">&quot;l&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_progress_info</span><span class="p">[</span><span class="s2">&quot;l&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">):</span>
@@ -386,7 +466,7 @@
             <span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_last_episode_starts</span><span class="p">,</span>
             <span class="n">values</span><span class="p">,</span>
-            <span class="n">log_probs</span>
+            <span class="n">log_probs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">clipped_actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
@@ -415,7 +495,7 @@
 <div class="viewcode-block" id="OnPolicyAgent.learn">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.agents.OnPolicyAgent.html#pantheonrl.common.agents.OnPolicyAgent.learn">[docs]</a>
     <span class="k">def</span> <span class="nf">learn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Call the model&#39;s learn function with the given parameters &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call the model&#39;s learn function with the given parameters&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_custom_logger</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">learn</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </div>
@@ -432,15 +512,25 @@
 <span class="sd">    from ``OffPolicyAlgorithm``.</span>
 
 <span class="sd">    :param model: Model representing the agent&#39;s learning algorithm</span>
+<span class="sd">    :param log_interval: Optional log interval for policy logging</span>
+<span class="sd">    :param working_timesteps: Estimate for number of timesteps to train for.</span>
+<span class="sd">    :param callback: Optional callback fed into the OffPolicyAlgorithm</span>
+<span class="sd">    :param tb_log_name: Name for tensorboard log</span>
+
+<span class="sd">    .. warning:: Note that the model will still continue training beyond the</span>
+<span class="sd">      working_timesteps point, but the model may not behave identically to</span>
+<span class="sd">      one initialized with a correct estimate.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">model</span><span class="p">:</span> <span class="n">OffPolicyAlgorithm</span><span class="p">,</span>
-                 <span class="n">log_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">tensorboard_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">working_timesteps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">tb_log_name</span><span class="o">=</span><span class="s2">&quot;OffPolicyAgent&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">OffPolicyAlgorithm</span><span class="p">,</span>
+        <span class="n">log_interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">working_timesteps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tb_log_name</span><span class="o">=</span><span class="s2">&quot;OffPolicyAgent&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tb_log_name</span> <span class="o">=</span> <span class="n">tb_log_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">original_callback</span> <span class="o">=</span> <span class="n">callback</span>
@@ -453,11 +543,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">total_timesteps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_setup_learn</span><span class="p">(</span>
-            <span class="n">working_timesteps</span><span class="p">,</span>
-            <span class="n">callback</span><span class="p">,</span>
-            <span class="kc">False</span><span class="p">,</span>
-            <span class="n">tb_log_name</span><span class="p">,</span>
-            <span class="kc">False</span>
+            <span class="n">working_timesteps</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tb_log_name</span><span class="p">,</span> <span class="kc">False</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">on_training_start</span><span class="p">(</span><span class="nb">locals</span><span class="p">(),</span> <span class="nb">globals</span><span class="p">())</span>
@@ -470,25 +556,24 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">reset_noise</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">on_rollout_start</span><span class="p">()</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_obs</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer_actions</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rewards</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">]</span> <span class="c1">#np.zeros((1,))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dones</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="c1">#np.zeros((1,), dtype=bool)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rewards</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dones</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">infos</span> <span class="o">=</span> <span class="p">[{}]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">log_interval</span> <span class="o">=</span> <span class="n">log_interval</span> <span class="ow">or</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cur_ep_info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cur_ep_info</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
 
 <div class="viewcode-block" id="OffPolicyAgent.get_action">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.agents.OffPolicyAgent.html#pantheonrl.common.agents.OffPolicyAgent.get_action">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return an action given an observation.</span>
 
-<span class="sd">        When `record` is True, the agent saves the last transition into its</span>
-<span class="sd">        buffer.</span>
+<span class="sd">        This function may also update the agent during training</span>
 
 <span class="sd">        :param obs: The observation to use</span>
-<span class="sd">        :param record: Whether to record the obs, action (True when training)</span>
 <span class="sd">        :returns: The action to take</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">obs</span>
@@ -508,24 +593,48 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">new_obs</span> <span class="o">=</span> <span class="n">obs</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_update_info_buffer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dones</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_store_transition</span><span class="p">(</span><span class="n">replay_buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_actions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rewards</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dones</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_update_current_progress_remaining</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_total_timesteps</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_store_transition</span><span class="p">(</span>
+                <span class="n">replay_buffer</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">buffer_actions</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_obs</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rewards</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dones</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_update_current_progress_remaining</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_total_timesteps</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_on_step</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">done</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dones</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">done</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dones</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_episodes</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_episode_num</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="k">if</span> <span class="n">action_noise</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">action_noise</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">log_interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_episode_num</span> <span class="o">%</span> <span class="n">log_interval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">log_interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                        <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_episode_num</span> <span class="o">%</span> <span class="n">log_interval</span> <span class="o">==</span> <span class="mi">0</span>
+                    <span class="p">):</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_dump_logs</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">should_collect_more_steps</span><span class="p">(</span><span class="n">train_freq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_steps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_episodes</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">should_collect_more_steps</span><span class="p">(</span>
+            <span class="n">train_freq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_steps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_episodes</span>
+        <span class="p">):</span>
             <span class="n">callback</span><span class="o">.</span><span class="n">on_rollout_end</span><span class="p">()</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">learning_starts</span><span class="p">:</span>
-                <span class="n">gradient_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">gradient_steps</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">gradient_steps</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_steps</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">learning_starts</span>
+            <span class="p">):</span>
+                <span class="n">gradient_steps</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">gradient_steps</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">gradient_steps</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_steps</span>
+                <span class="p">)</span>
                 <span class="k">if</span> <span class="n">gradient_steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">gradient_steps</span><span class="o">=</span><span class="n">gradient_steps</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
+                        <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+                        <span class="n">gradient_steps</span><span class="o">=</span><span class="n">gradient_steps</span><span class="p">,</span>
+                    <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">set_training_mode</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_steps</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_episodes</span> <span class="o">=</span> <span class="mi">0</span>
@@ -533,17 +642,23 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">reset_noise</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">on_rollout_start</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">use_sde</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">use_sde</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">reset_noise</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="n">actions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_sample_action</span><span class="p">(</span><span class="n">learning_starts</span><span class="p">,</span> <span class="n">action_noise</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">actions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_sample_action</span><span class="p">(</span>
+            <span class="n">learning_starts</span><span class="p">,</span> <span class="n">action_noise</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_collected_steps</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">rewards</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dones</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cur_ep_info</span><span class="p">[</span><span class="s1">&#39;l&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cur_ep_info</span><span class="p">[</span><span class="s2">&quot;l&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
@@ -562,15 +677,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rewards</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">reward</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dones</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">done</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cur_ep_info</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">reward</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cur_ep_info</span><span class="p">[</span><span class="s2">&quot;r&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">reward</span>
         <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;episode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cur_ep_info</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cur_ep_info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;episode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cur_ep_info</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cur_ep_info</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span></div>
 
 
+<div class="viewcode-block" id="OffPolicyAgent.learn">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.agents.OffPolicyAgent.html#pantheonrl.common.agents.OffPolicyAgent.learn">[docs]</a>
     <span class="k">def</span> <span class="nf">learn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call the model&#39;s learn function with the given parameters&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_custom_logger</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">learn</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
 
 
 
@@ -593,7 +712,7 @@
 
 <div class="viewcode-block" id="RecordingAgentWrapper.get_action">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.agents.RecordingAgentWrapper.html#pantheonrl.common.agents.RecordingAgentWrapper.get_action">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return an action given an observation.</span>
 
@@ -601,10 +720,9 @@
 <span class="sd">        this wrapper also stores the observation-action pair to a buffer</span>
 
 <span class="sd">        :param obs: The observation to use</span>
-<span class="sd">        :param record: Whether to record the obs, action (True when training)</span>
 <span class="sd">        :returns: The action to take</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">realagent</span><span class="o">.</span><span class="n">get_action</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">realagent</span><span class="o">.</span><span class="n">get_action</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">allobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">allacts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">action</span></div>

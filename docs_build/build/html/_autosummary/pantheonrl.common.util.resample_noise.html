@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -106,13 +107,11 @@
 <dt class="sig sig-object py" id="pantheonrl.common.util.resample_noise">
 <span class="sig-name descname"><span class="pre">resample_noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/util.html#resample_noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.util.resample_noise" title="Link to this definition"></a></dt>
 <dd><p>Resample the model’s noise given the number of active steps.</p>
-<p>: param model: The model, which might use sde
-: param n_steps: The number of timesteps the model has been active</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>model</strong> (<em>BaseAlgorithm</em>) – </p></li>
-<li><p><strong>n_steps</strong> (<em>int</em>) – </p></li>
+<li><p><strong>model</strong> (<em>BaseAlgorithm</em>) – The model, which might use sde</p></li>
+<li><p><strong>n_steps</strong> (<em>int</em>) – The number of timesteps the model has been active</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

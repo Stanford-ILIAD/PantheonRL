@@ -1,3 +1,6 @@
+"""
+Collection of utility functions for the common classes.
+"""
 from typing import Tuple, Union
 
 import numpy as np
@@ -19,14 +22,13 @@ def get_space_size(space: Space) -> int:
     """ Return the length of a space """
     if isinstance(space, Box):
         return len(space.low)
-    elif isinstance(space, Discrete):
+    if isinstance(space, Discrete):
         return 1
-    elif isinstance(space, MultiBinary):
+    if isinstance(space, MultiBinary):
         return space.n
-    elif isinstance(space, MultiDiscrete):
+    if isinstance(space, MultiDiscrete):
         return len(space.nvec)
-    else:
-        raise SpaceException
+    raise SpaceException
 
 
 def calculate_space(space: Space, numframes: int) -> Space:
@@ -35,29 +37,27 @@ def calculate_space(space: Space, numframes: int) -> Space:
         low = np.tile(space.low, numframes)
         high = np.tile(space.high, numframes)
         return Box(low, high, dtype=space.dtype)
-    elif isinstance(space, Discrete):
+    if isinstance(space, Discrete):
         return MultiDiscrete([space.n] * numframes)
-    elif isinstance(space, MultiBinary):
+    if isinstance(space, MultiBinary):
         return MultiBinary(space.n * numframes)
-    elif isinstance(space, MultiDiscrete):
+    if isinstance(space, MultiDiscrete):
         return MultiDiscrete(list(space.nvec) * numframes)
-    else:
-        raise SpaceException
+    raise SpaceException
 
 
 def get_default_obs(env: gym.Env):
     """ Return the default observation for a given environment """
     space = env.observation_space
     if isinstance(space, Box):
-        return space.low
-    elif isinstance(space, Discrete):
+        return space.sample() * 0
+    if isinstance(space, Discrete):
         return [0]
-    elif isinstance(space, MultiBinary):
+    if isinstance(space, MultiBinary):
         return [0] * space.n
-    elif isinstance(space, MultiDiscrete):
+    if isinstance(space, MultiDiscrete):
         return [0] * len(space.nvec)
-    else:
-        raise SpaceException
+    raise SpaceException
 
 
 def action_from_policy(
@@ -67,10 +67,10 @@ def action_from_policy(
     """
     Return the action, values, and log_probs given an observation and policy
 
-    : param obs: Numpy array representing the observation
-    : param policy: The actor-critic policy
+    :param obs: Numpy array representing the observation
+    :param policy: The actor-critic policy
 
-    : returns: The action, values, and log_probs from the policy
+    :returns: The action, values, and log_probs from the policy
     """
     if not isinstance(obs, np.ndarray):
         obs = np.array([obs])
@@ -90,10 +90,10 @@ def clip_actions(
     """
     Return the actions clipped by the action space of the policy
 
-    : param actions: Raw action(could be outside of the action space)
-    : param policy: The policy to use to clip the actions
+    :param actions: Raw action(could be outside of the action space)
+    :param policy: The policy to use to clip the actions
 
-    : returns: The actions clipped by the policy
+    :returns: The actions clipped by the policy
     """
     if isinstance(policy.action_space, gym.spaces.Box):
         actions = np.clip(actions, policy.action_space.low,
@@ -105,8 +105,8 @@ def resample_noise(model: BaseAlgorithm, n_steps: int) -> None:
     """
     Resample the model's noise given the number of active steps.
 
-    : param model: The model, which might use sde
-    : param n_steps: The number of timesteps the model has been active
+    :param model: The model, which might use sde
+    :param n_steps: The number of timesteps the model has been active
     """
     if model.use_sde and model.sde_sample_freq > 0 and \
             n_steps % model.sde_sample_freq == 0:

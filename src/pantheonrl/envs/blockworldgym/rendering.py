@@ -24,7 +24,7 @@ except ImportError as e:
     )
 
 try:
-    from pyglet.gl import *
+    import pyglet.gl as gl
 except ImportError as e:
     raise ImportError(
         """
@@ -92,8 +92,8 @@ class Viewer(object):
         self.onetime_geoms = []
         self.transform = Transform()
 
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        gl.glEnable(gl.GL_BLEND)
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
 
     def close(self):
         if self.isopen and sys.meta_path:
@@ -119,7 +119,7 @@ class Viewer(object):
         self.onetime_geoms.append(geom)
 
     def render(self, return_rgb_array=False):
-        glClearColor(1, 1, 1, 1)
+        gl.glClearColor(1, 1, 1, 1)
         self.window.clear()
         self.window.switch_to()
         self.window.dispatch_events()
@@ -229,15 +229,15 @@ class Transform(Attr):
         self.set_scale(*scale)
 
     def enable(self):
-        glPushMatrix()
-        glTranslatef(
+        gl.glPushMatrix()
+        gl.glTranslatef(
             self.translation[0], self.translation[1], 0
         )  # translate to GL loc ppint
-        glRotatef(RAD2DEG * self.rotation, 0, 0, 1.0)
-        glScalef(self.scale[0], self.scale[1], 1)
+        gl.glRotatef(RAD2DEG * self.rotation, 0, 0, 1.0)
+        gl.glScalef(self.scale[0], self.scale[1], 1)
 
     def disable(self):
-        glPopMatrix()
+        gl.glPopMatrix()
 
     def set_translation(self, newx, newy):
         self.translation = (float(newx), float(newy))
@@ -254,7 +254,7 @@ class Color(Attr):
         self.vec4 = vec4
 
     def enable(self):
-        glColor4f(*self.vec4)
+        gl.glColor4f(*self.vec4)
 
 
 class LineStyle(Attr):
@@ -262,11 +262,11 @@ class LineStyle(Attr):
         self.style = style
 
     def enable(self):
-        glEnable(GL_LINE_STIPPLE)
-        glLineStipple(1, self.style)
+        gl.glEnable(gl.GL_LINE_STIPPLE)
+        gl.glLineStipple(1, self.style)
 
     def disable(self):
-        glDisable(GL_LINE_STIPPLE)
+        gl.glDisable(gl.GL_LINE_STIPPLE)
 
 
 class LineWidth(Attr):
@@ -274,7 +274,7 @@ class LineWidth(Attr):
         self.stroke = stroke
 
     def enable(self):
-        glLineWidth(self.stroke)
+        gl.glLineWidth(self.stroke)
 
 
 class Point(Geom):
@@ -282,9 +282,9 @@ class Point(Geom):
         Geom.__init__(self)
 
     def render1(self):
-        glBegin(GL_POINTS)  # draw point
-        glVertex3f(0.0, 0.0, 0.0)
-        glEnd()
+        gl.glBegin(gl.GL_POINTS)  # draw point
+        gl.glVertex3f(0.0, 0.0, 0.0)
+        gl.glEnd()
 
 
 class FilledPolygon(Geom):
@@ -294,14 +294,14 @@ class FilledPolygon(Geom):
 
     def render1(self):
         if len(self.v) == 4:
-            glBegin(GL_QUADS)
+            gl.glBegin(gl.GL_QUADS)
         elif len(self.v) > 4:
-            glBegin(GL_POLYGON)
+            gl.glBegin(gl.GL_POLYGON)
         else:
-            glBegin(GL_TRIANGLES)
+            gl.glBegin(gl.GL_TRIANGLES)
         for p in self.v:
-            glVertex3f(p[0], p[1], 0)  # draw each vertex
-        glEnd()
+            gl.glVertex3f(p[0], p[1], 0)  # draw each vertex
+        gl.glEnd()
 
 
 def make_circle(radius=10, res=30, filled=True):
@@ -357,10 +357,10 @@ class PolyLine(Geom):
         self.add_attr(self.linewidth)
 
     def render1(self):
-        glBegin(GL_LINE_LOOP if self.close else GL_LINE_STRIP)
+        gl.glBegin(gl.GL_LINE_LOOP if self.close else gl.GL_LINE_STRIP)
         for p in self.v:
-            glVertex3f(p[0], p[1], 0)  # draw each vertex
-        glEnd()
+            gl.glVertex3f(p[0], p[1], 0)  # draw each vertex
+        gl.glEnd()
 
     def set_linewidth(self, x):
         self.linewidth.stroke = x
@@ -375,10 +375,10 @@ class Line(Geom):
         self.add_attr(self.linewidth)
 
     def render1(self):
-        glBegin(GL_LINES)
-        glVertex2f(*self.start)
-        glVertex2f(*self.end)
-        glEnd()
+        gl.glBegin(gl.GL_LINES)
+        gl.glVertex2f(*self.start)
+        gl.glVertex2f(*self.end)
+        gl.glEnd()
 
 
 class Image(Geom):

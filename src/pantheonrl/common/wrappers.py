@@ -1,13 +1,20 @@
-import numpy as np
+"""
+Collection of environment wrappers.
+
+This module implements the FrameStack and Recording wrappers for
+TurnBasedEnv and SimultaneousEnv
+"""
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Tuple
+
+import numpy as np
 
 import gymnasium as gym
 
 from .multiagentenv import TurnBasedEnv, SimultaneousEnv, MultiAgentEnv
 from .trajsaver import (TurnBasedTransitions, SimultaneousTransitions,
                         MultiTransitions)
-from .util import (calculate_space, get_default_obs)
+from .util import (calculate_space, get_default_obs, SpaceException)
 
 # Flags for the TurnBasedRecorder wrapper
 EGO_NOT_DONE = 0
@@ -21,17 +28,23 @@ DONE = 1
 
 
 def frame_wrap(env: MultiAgentEnv, numframes: int):
+    """ Construct FrameStack environment for the given env """
     if isinstance(env, TurnBasedEnv):
-        return TurnBasedFrameStack(env, numframes)
-    else:
+        return TurnBasedFrameStack(env, numframes, altenv=env.get_dummy_env(1))
+    if isinstance(env, SimultaneousEnv):
         return SimultaneousFrameStack(env, numframes)
+
+    raise SpaceException
 
 
 def recorder_wrap(env: MultiAgentEnv):
+    """ Construct a Recorder environment for the given env"""
     if isinstance(env, TurnBasedEnv):
         return TurnBasedRecorder(env)
-    else:
+    if isinstance(env, SimultaneousEnv):
         return SimultaneousRecorder(env)
+
+    raise SpaceException
 
 
 class HistoryQueue:
@@ -57,6 +70,8 @@ class HistoryQueue:
         :return: The new queue representation, where the first element is the
             most recently added element and the last element is the oldest
         """
+        if isinstance(toadd, int):
+            toadd = np.array([toadd])
         self.history[self.pos] = toadd
         ans = np.array([val for ind in range(self.size)
                         for val in self.history[self.pos - ind]])
@@ -78,6 +93,10 @@ class MultiRecorder(ABC):
     def get_transitions(self) -> MultiTransitions:
         """ Get the transitions that have been recorded """
 
+    def write_transition(self, file):
+        """Write transition to a given file."""
+        self.get_transitions().write_transition(file)
+
 
 class TurnBasedRecorder(TurnBasedEnv, MultiRecorder):
     """
@@ -87,12 +106,11 @@ class TurnBasedRecorder(TurnBasedEnv, MultiRecorder):
     """
 
     def __init__(self, env: gym.Env):
-        super(TurnBasedRecorder, self).__init__(
+        super().__init__(
+            env.observation_spaces,
+            env.action_spaces,
             probegostart=env.probegostart, partners=env.partners[0])
         self.env = env
-
-        self.action_space = env.action_space
-        self.observation_space = env.observation_space
 
         self.allobs: List[np.ndarray] = []
         self.allacts: List[np.ndarray] = []
@@ -168,11 +186,11 @@ class SimultaneousRecorder(SimultaneousEnv, MultiRecorder):
     """
 
     def __init__(self, env):
-        super(SimultaneousRecorder, self).__init__(partners=env.partners[0])
+        super().__init__(
+            env.observation_spaces,
+            env.action_spaces,
+            partners=env.partners[0])
         self.env = env
-
-        self.action_space = env.action_space
-        self.observation_space = env.observation_space
 
         self.allegoobs = []
         self.allegoacts = []
@@ -252,14 +270,12 @@ class TurnBasedFrameStack(TurnBasedEnv):
                 altenv: Optional[gym.Env] = None,
                 defaultaltobs: Optional[np.ndarray] = None
             ):
-        super(TurnBasedFrameStack, self).__init__(
+        super().__init__(
+            [calculate_space(o, numframes) for o in env.observation_spaces],
+            env.action_spaces,
             probegostart=env.probegostart, partners=env.partners[0])
         self.env = env
         self.numframes = numframes
-
-        self.action_space = env.action_space
-        self.observation_space = calculate_space(
-            env.observation_space, numframes)
 
         if defaultobs is not None:
             defobs = defaultobs
@@ -298,8 +314,7 @@ class TurnBasedFrameStack(TurnBasedEnv):
 
         if egofirst:
             return self.egohistory.add(newobs)
-        else:
-            return self.althistory.add(newobs)
+        return self.althistory.add(newobs)
 
 
 class SimultaneousFrameStack(SimultaneousEnv):
@@ -318,13 +333,12 @@ class SimultaneousFrameStack(SimultaneousEnv):
                 numframes: int,
                 defaultobs: Optional[np.ndarray] = None
             ):
-        super(SimultaneousFrameStack, self).__init__(partners=env.partners[0])
+        super().__init__(
+            [calculate_space(o, numframes) for o in env.observation_spaces],
+            env.action_spaces,
+            partners=env.partners[0])
         self.env = env
         self.numframes = numframes
-
-        self.action_space = env.action_space
-        self.observation_space = calculate_space(
-            env.observation_space, numframes)
 
         self.defaultobs = get_default_obs(
             env) if defaultobs is None else list(defaultobs)

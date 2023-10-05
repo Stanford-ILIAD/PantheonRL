@@ -1,4 +1,4 @@
-pantheonrl.common.wrappers.TurnBasedFrameStack
+﻿pantheonrl.common.wrappers.TurnBasedFrameStack
 ==============================================
 
 .. currentmodule:: pantheonrl.common.wrappers
@@ -21,7 +21,8 @@ pantheonrl.common.wrappers.TurnBasedFrameStack
       ~TurnBasedFrameStack.close
       ~TurnBasedFrameStack.construct_single_agent_interface
       ~TurnBasedFrameStack.ego_step
-      ~TurnBasedFrameStack.getDummyEnv
+      ~TurnBasedFrameStack.get_dummy_env
+      ~TurnBasedFrameStack.get_ego_ind
       ~TurnBasedFrameStack.get_wrapper_attr
       ~TurnBasedFrameStack.multi_reset
       ~TurnBasedFrameStack.n_reset
@@ -31,6 +32,7 @@ pantheonrl.common.wrappers.TurnBasedFrameStack
       ~TurnBasedFrameStack.resample_round_robin
       ~TurnBasedFrameStack.reset
       ~TurnBasedFrameStack.set_ego_extractor
+      ~TurnBasedFrameStack.set_ego_ind
       ~TurnBasedFrameStack.set_partnerid
       ~TurnBasedFrameStack.set_resample_policy
       ~TurnBasedFrameStack.step

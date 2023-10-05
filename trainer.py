@@ -93,7 +93,7 @@ def latent_check(args):
 def generate_env(args):
     env = gym.make(args.env, **args.env_config)
 
-    altenv = env.unwrapped.getDummyEnv(1)
+    altenv = env.unwrapped.get_dummy_env(1)
 
     if args.framestack > 1:
         env = frame_wrap(env, args.framestack)

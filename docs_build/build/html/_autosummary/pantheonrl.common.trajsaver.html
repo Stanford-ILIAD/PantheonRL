@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -99,14 +100,18 @@
              
   <section id="module-pantheonrl.common.trajsaver">
 <span id="pantheonrl-common-trajsaver"></span><h1>pantheonrl.common.trajsaver<a class="headerlink" href="#module-pantheonrl.common.trajsaver" title="Link to this heading"></a></h1>
+<p>This module defines classes and methods related to saving trajectories.</p>
+<p>Most of these functions come directly from the HumanCompatibleAI imitation
+repo: <a class="reference external" href="https://github.com/HumanCompatibleAI/imitation/blob/master/src/">https://github.com/HumanCompatibleAI/imitation/blob/master/src/</a>
+imitation/data/types.py</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="pantheonrl.common.trajsaver.dataclass_quick_asdict.html#pantheonrl.common.trajsaver.dataclass_quick_asdict" title="pantheonrl.common.trajsaver.dataclass_quick_asdict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dataclass_quick_asdict</span></code></a></p></td>
-<td><p>This function is from HumanCompatibleAI's imitation repo: <a class="reference external" href="https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/">https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/</a> data/types.py</p></td>
+<td><p>Extract dataclass to items using <cite>dataclasses.fields</cite> + dict comprehension.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pantheonrl.common.trajsaver.transitions_collate_fn.html#pantheonrl.common.trajsaver.transitions_collate_fn" title="pantheonrl.common.trajsaver.transitions_collate_fn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transitions_collate_fn</span></code></a></p></td>
-<td><p>This function is from HumanCompatibleAI's imitation repo: <a class="reference external" href="https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/">https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/</a> data/types.py</p></td>
+<td><p>Custom <cite>torch.utils.data.DataLoader</cite> collate_fn for <cite>TransitionsMinimal</cite>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -117,13 +122,13 @@
 <td><p>Base class for all classes that store multiple transitions</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pantheonrl.common.trajsaver.SimultaneousTransitions.html#pantheonrl.common.trajsaver.SimultaneousTransitions" title="pantheonrl.common.trajsaver.SimultaneousTransitions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SimultaneousTransitions</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Class that stores transitions from SimultaneousEnv</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pantheonrl.common.trajsaver.TransitionsMinimal.html#pantheonrl.common.trajsaver.TransitionsMinimal" title="pantheonrl.common.trajsaver.TransitionsMinimal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransitionsMinimal</span></code></a></p></td>
 <td><p>This class is modified from HumanCompatibleAI's imitation repo: <a class="reference external" href="https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/">https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/</a> data/types.py</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pantheonrl.common.trajsaver.TurnBasedTransitions.html#pantheonrl.common.trajsaver.TurnBasedTransitions" title="pantheonrl.common.trajsaver.TurnBasedTransitions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TurnBasedTransitions</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Class that stores transitions from TurnBasedEnv</p></td>
 </tr>
 </tbody>
 </table>

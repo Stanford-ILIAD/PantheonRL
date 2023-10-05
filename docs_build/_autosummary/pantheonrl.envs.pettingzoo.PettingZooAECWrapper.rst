@@ -1,4 +1,4 @@
-pantheonrl.envs.pettingzoo.PettingZooAECWrapper
+﻿pantheonrl.envs.pettingzoo.PettingZooAECWrapper
 ===============================================
 
 .. currentmodule:: pantheonrl.envs.pettingzoo
@@ -19,7 +19,8 @@ pantheonrl.envs.pettingzoo.PettingZooAECWrapper
       ~PettingZooAECWrapper.add_partner_agent
       ~PettingZooAECWrapper.close
       ~PettingZooAECWrapper.construct_single_agent_interface
-      ~PettingZooAECWrapper.getDummyEnv
+      ~PettingZooAECWrapper.get_dummy_env
+      ~PettingZooAECWrapper.get_ego_ind
       ~PettingZooAECWrapper.get_wrapper_attr
       ~PettingZooAECWrapper.n_reset
       ~PettingZooAECWrapper.n_step
@@ -28,6 +29,7 @@ pantheonrl.envs.pettingzoo.PettingZooAECWrapper
       ~PettingZooAECWrapper.resample_round_robin
       ~PettingZooAECWrapper.reset
       ~PettingZooAECWrapper.set_ego_extractor
+      ~PettingZooAECWrapper.set_ego_ind
       ~PettingZooAECWrapper.set_partnerid
       ~PettingZooAECWrapper.set_resample_policy
       ~PettingZooAECWrapper.step

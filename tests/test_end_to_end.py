@@ -19,7 +19,7 @@ from pantheonrl import OnPolicyAgent, OffPolicyAgent
 def test_PPO(env_name):
     try:
         env = gym.make(env_name)
-        partner = OnPolicyAgent(PPO('MlpPolicy', env.unwrapped.getDummyEnv(1), verbose=0, n_steps=64))
+        partner = OnPolicyAgent(PPO('MlpPolicy', env.unwrapped.get_dummy_env(1), verbose=0, n_steps=64))
         env.unwrapped.add_partner_agent(partner)
         ego = PPO('MlpPolicy', env, verbose=0, n_steps=64)
         ego.learn(total_timesteps=1000)
@@ -32,7 +32,7 @@ def test_PPO(env_name):
 def test_A2C(env_name):
     try:
         env = gym.make(env_name)
-        partner = OnPolicyAgent(A2C('MlpPolicy', env.unwrapped.getDummyEnv(1), verbose=0, n_steps=5))
+        partner = OnPolicyAgent(A2C('MlpPolicy', env.unwrapped.get_dummy_env(1), verbose=0, n_steps=5))
         env.unwrapped.add_partner_agent(partner)
         ego = A2C('MlpPolicy', env, verbose=0, n_steps=5)
         ego.learn(total_timesteps=1000)
@@ -45,7 +45,7 @@ def test_A2C(env_name):
 def test_DQN(env_name):
     try:
         env = gym.make(env_name)
-        partner = OffPolicyAgent(DQN('MlpPolicy', env.unwrapped.getDummyEnv(1), verbose=0, train_freq=4))
+        partner = OffPolicyAgent(DQN('MlpPolicy', env.unwrapped.get_dummy_env(1), verbose=0, train_freq=4))
         env.unwrapped.add_partner_agent(partner)
         ego = DQN('MlpPolicy', env, verbose=0, train_freq=4)
         ego.learn(total_timesteps=1000)

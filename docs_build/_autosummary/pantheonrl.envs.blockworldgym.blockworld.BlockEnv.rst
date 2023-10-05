@@ -1,4 +1,4 @@
-pantheonrl.envs.blockworldgym.blockworld.BlockEnv
+﻿pantheonrl.envs.blockworldgym.blockworld.BlockEnv
 =================================================
 
 .. currentmodule:: pantheonrl.envs.blockworldgym.blockworld
@@ -21,7 +21,8 @@ pantheonrl.envs.blockworldgym.blockworld.BlockEnv
       ~BlockEnv.close
       ~BlockEnv.construct_single_agent_interface
       ~BlockEnv.ego_step
-      ~BlockEnv.getDummyEnv
+      ~BlockEnv.get_dummy_env
+      ~BlockEnv.get_ego_ind
       ~BlockEnv.get_obs
       ~BlockEnv.get_reward
       ~BlockEnv.get_wrapper_attr
@@ -33,6 +34,7 @@ pantheonrl.envs.blockworldgym.blockworld.BlockEnv
       ~BlockEnv.resample_round_robin
       ~BlockEnv.reset
       ~BlockEnv.set_ego_extractor
+      ~BlockEnv.set_ego_ind
       ~BlockEnv.set_partnerid
       ~BlockEnv.set_resample_policy
       ~BlockEnv.step

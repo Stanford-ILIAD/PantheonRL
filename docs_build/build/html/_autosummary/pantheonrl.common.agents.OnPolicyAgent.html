@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -102,16 +103,28 @@
 <h1>pantheonrl.common.agents.OnPolicyAgent<a class="headerlink" href="#pantheonrl-common-agents-onpolicyagent" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pantheonrl.common.agents.OnPolicyAgent">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OnPolicyAgent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tensorboard_log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_timesteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tb_log_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'OnPolicyAgent'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/agents.html#OnPolicyAgent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.agents.OnPolicyAgent" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OnPolicyAgent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_timesteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tb_log_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'OnPolicyAgent'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/agents.html#OnPolicyAgent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.agents.OnPolicyAgent" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pantheonrl.common.agents.Agent.html#pantheonrl.common.agents.Agent" title="pantheonrl.common.agents.Agent"><code class="xref py py-class docutils literal notranslate"><span class="pre">Agent</span></code></a></p>
 <p>Agent representing an on-policy learning algorithm (ex: A2C/PPO).</p>
 <p>The <cite>get_action</cite> and <cite>update</cite> functions are based on the <cite>learn</cite> function
 from <code class="docutils literal notranslate"><span class="pre">OnPolicyAlgorithm</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>OnPolicyAlgorithm</em>) – Model representing the agent’s learning algorithm</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>OnPolicyAlgorithm</em>) – Model representing the agent’s learning algorithm</p></li>
+<li><p><strong>log_interval</strong> – Optional log interval for policy logging</p></li>
+<li><p><strong>working_timesteps</strong> – Estimate for number of timesteps to train for.</p></li>
+<li><p><strong>callback</strong> – Optional callback fed into the OnPolicyAlgorithm</p></li>
+<li><p><strong>tb_log_name</strong> – Name for tensorboard log</p></li>
+</ul>
 </dd>
 </dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Note that the model will still continue training beyond the
+working_timesteps point, but the model may not behave identically to
+one initialized with a correct estimate.</p>
+</div>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -128,16 +141,13 @@ from <code class="docutils literal notranslate"><span class="pre">OnPolicyAlgori
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.common.agents.OnPolicyAgent.get_action">
-<span class="sig-name descname"><span class="pre">get_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/agents.html#OnPolicyAgent.get_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.agents.OnPolicyAgent.get_action" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/agents.html#OnPolicyAgent.get_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.agents.OnPolicyAgent.get_action" title="Link to this definition"></a></dt>
 <dd><p>Return an action given an observation.</p>
-<p>When <cite>record</cite> is True, the agent saves the last transition into its
-buffer. It also updates the model if the buffer is full.</p>
+<p>The agent saves the last transition into its buffer. It also updates
+the model if the buffer is full.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>obs</strong> (<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a>) – The observation to use</p></li>
-<li><p><strong>record</strong> (<em>bool</em>) – Whether to record the obs, action (True when training)</p></li>
-</ul>
+<dd class="field-odd"><p><strong>obs</strong> (<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a>) – The observation to use</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The action to take</p>

@@ -1,4 +1,4 @@
-pantheonrl.common.multiagentenv.MultiAgentEnv
+﻿pantheonrl.common.multiagentenv.MultiAgentEnv
 =============================================
 
 .. currentmodule:: pantheonrl.common.multiagentenv
@@ -19,7 +19,8 @@ pantheonrl.common.multiagentenv.MultiAgentEnv
       ~MultiAgentEnv.add_partner_agent
       ~MultiAgentEnv.close
       ~MultiAgentEnv.construct_single_agent_interface
-      ~MultiAgentEnv.getDummyEnv
+      ~MultiAgentEnv.get_dummy_env
+      ~MultiAgentEnv.get_ego_ind
       ~MultiAgentEnv.get_wrapper_attr
       ~MultiAgentEnv.n_reset
       ~MultiAgentEnv.n_step
@@ -28,6 +29,7 @@ pantheonrl.common.multiagentenv.MultiAgentEnv
       ~MultiAgentEnv.resample_round_robin
       ~MultiAgentEnv.reset
       ~MultiAgentEnv.set_ego_extractor
+      ~MultiAgentEnv.set_ego_ind
       ~MultiAgentEnv.set_partnerid
       ~MultiAgentEnv.set_resample_policy
       ~MultiAgentEnv.step

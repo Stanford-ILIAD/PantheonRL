@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -103,10 +104,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="pantheonrl.common.trajsaver.dataclass_quick_asdict">
 <span class="sig-name descname"><span class="pre">dataclass_quick_asdict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataclass_instance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/trajsaver.html#dataclass_quick_asdict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.trajsaver.dataclass_quick_asdict" title="Link to this definition"></a></dt>
-<dd><p>This function is from HumanCompatibleAI’s imitation repo:
-<a class="reference external" href="https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/">https://github.com/HumanCompatibleAI/imitation/blob/master/src/imitation/</a>
-data/types.py</p>
-<p>Extract dataclass to items using <cite>dataclasses.fields</cite> + dict comprehension.
+<dd><p>Extract dataclass to items using <cite>dataclasses.fields</cite> + dict comprehension.
 This is a quick alternative to <cite>dataclasses.asdict</cite>, which expensively and
 undocumentedly deep-copies every numpy array value.
 See <a class="reference external" href="https://stackoverflow.com/a/52229565/1091722">https://stackoverflow.com/a/52229565/1091722</a>.</p>

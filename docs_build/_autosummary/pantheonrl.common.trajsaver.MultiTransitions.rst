@@ -1,4 +1,4 @@
-pantheonrl.common.trajsaver.MultiTransitions
+﻿pantheonrl.common.trajsaver.MultiTransitions
 ============================================
 
 .. currentmodule:: pantheonrl.common.trajsaver
@@ -18,6 +18,7 @@ pantheonrl.common.trajsaver.MultiTransitions
    
       ~MultiTransitions.get_alt_transitions
       ~MultiTransitions.get_ego_transitions
+      ~MultiTransitions.write_transition
    
    
 

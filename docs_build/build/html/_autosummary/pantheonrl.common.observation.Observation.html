@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -102,14 +103,16 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Observation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/common/observation.html#Observation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.common.observation.Observation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Representation of a single observation provided by an environment.</p>
-<p>obs: the (partial) observation that an agent receives
-state: the full state information
-action_mask: a mask specifying what actions are legal</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>if it is None, all actions are permitted</p></li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obs</strong> (<em>ndarray</em>) – the (partial) observation that an agent receives</p></li>
+<li><p><strong>state</strong> (<em>ndarray</em>) – the full state information</p></li>
+<li><p><strong>action_mask</strong> (<em>ndarray</em><em> | </em><em>None</em>) – a mask specifying what actions are legal.
+If it is None, all actions are permitted</p></li>
 </ul>
-</div></blockquote>
+</dd>
+</dl>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -118,26 +121,35 @@ action_mask: a mask specifying what actions are legal</p>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">action_mask</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.observation.Observation.action_mask" title="pantheonrl.common.observation.Observation.action_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">action_mask</span></code></a></p></td>
+<td><p>The mask of legal actions</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.observation.Observation.obs" title="pantheonrl.common.observation.Observation.obs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs</span></code></a></p></td>
+<td><p>The (partial) observation to choose actions</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">state</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.observation.Observation.state" title="pantheonrl.common.observation.Observation.state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state</span></code></a></p></td>
+<td><p>The full state information, typically used for value functions</p></td>
 </tr>
 </tbody>
 </table>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>obs</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>state</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>action_mask</strong> (<em>ndarray</em><em> | </em><em>None</em>) – </p></li>
-</ul>
-</dd>
-</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pantheonrl.common.observation.Observation.action_mask">
+<span class="sig-name descname"><span class="pre">action_mask</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pantheonrl.common.observation.Observation.action_mask" title="Link to this definition"></a></dt>
+<dd><p>The mask of legal actions</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pantheonrl.common.observation.Observation.obs">
+<span class="sig-name descname"><span class="pre">obs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#pantheonrl.common.observation.Observation.obs" title="Link to this definition"></a></dt>
+<dd><p>The (partial) observation to choose actions</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pantheonrl.common.observation.Observation.state">
+<span class="sig-name descname"><span class="pre">state</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#pantheonrl.common.observation.Observation.state" title="Link to this definition"></a></dt>
+<dd><p>The full state information, typically used for value functions</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>

@@ -26,10 +26,10 @@ env = PettingZooAECWrapper(e.env())
 
 print(env.n_players)
 # PettingZoo has many multi-player environments. To ensure that each agent
-# understands their specific observation/action space, use the getDummyEnv
+# understands their specific observation/action space, use the get_dummy_env
 # function.
 for i in range(env.n_players - 1):
-    partner = OnPolicyAgent(PPO('MlpPolicy', env.getDummyEnv(i+1), verbose=1))
+    partner = OnPolicyAgent(PPO('MlpPolicy', env.get_dummy_env(i+1), verbose=1))
 
     # The second parameter ensures that the partner is assigned to a certain
     # player number. Forgetting this parameter would mean that all of the

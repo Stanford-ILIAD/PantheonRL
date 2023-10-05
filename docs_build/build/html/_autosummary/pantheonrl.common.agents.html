@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -99,6 +100,16 @@
              
   <section id="module-pantheonrl.common.agents">
 <span id="pantheonrl-common-agents"></span><h1>pantheonrl.common.agents<a class="headerlink" href="#module-pantheonrl.common.agents" title="Link to this heading"></a></h1>
+<p>This module defines the standard Agent classes for PantheonRL.</p>
+<p>It defines the following Agents:</p>
+<ul class="simple">
+<li><p>The abstract base Agent class</p></li>
+<li><p>The DummyAgent for wrapping SARL algorithms (not user-facing)</p></li>
+<li><p>The SB3-specific OnPolicyAgent and OffPolicyAgent</p></li>
+<li><p>The StaticPolicyAgent for pure inference of trained policies</p></li>
+</ul>
+<p>It also defines the RecordingAgentWrapper to record transitions
+that an agent experiences.</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -106,7 +117,7 @@
 <td><p>Base class for all agents in multi-agent environments</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pantheonrl.common.agents.DummyAgent.html#pantheonrl.common.agents.DummyAgent" title="pantheonrl.common.agents.DummyAgent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DummyAgent</span></code></a></p></td>
-<td><p>Agent wrapper for standard SARL algorithms assuming a gym interface</p></td>
+<td><p>Agent wrapper for standard SARL algorithms assuming a gym interface.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pantheonrl.common.agents.OffPolicyAgent.html#pantheonrl.common.agents.OffPolicyAgent" title="pantheonrl.common.agents.OffPolicyAgent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OffPolicyAgent</span></code></a></p></td>
 <td><p>Agent representing an off-policy learning algorithm (ex: DQN/SAC).</p></td>

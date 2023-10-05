@@ -1,4 +1,4 @@
-pantheonrl.common.multiagentenv.TurnBasedEnv
+﻿pantheonrl.common.multiagentenv.TurnBasedEnv
 ============================================
 
 .. currentmodule:: pantheonrl.common.multiagentenv
@@ -21,7 +21,8 @@ pantheonrl.common.multiagentenv.TurnBasedEnv
       ~TurnBasedEnv.close
       ~TurnBasedEnv.construct_single_agent_interface
       ~TurnBasedEnv.ego_step
-      ~TurnBasedEnv.getDummyEnv
+      ~TurnBasedEnv.get_dummy_env
+      ~TurnBasedEnv.get_ego_ind
       ~TurnBasedEnv.get_wrapper_attr
       ~TurnBasedEnv.multi_reset
       ~TurnBasedEnv.n_reset
@@ -31,6 +32,7 @@ pantheonrl.common.multiagentenv.TurnBasedEnv
       ~TurnBasedEnv.resample_round_robin
       ~TurnBasedEnv.reset
       ~TurnBasedEnv.set_ego_extractor
+      ~TurnBasedEnv.set_ego_ind
       ~TurnBasedEnv.set_partnerid
       ~TurnBasedEnv.set_resample_policy
       ~TurnBasedEnv.step

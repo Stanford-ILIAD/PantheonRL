@@ -19,7 +19,7 @@ env = gym.make('BlockEnv-v1')
 # to the environment. You can create adaptive partner agents using
 # OnPolicyAgent (for PPO/A2C) or OffPolicyAgent (for DQN/SAC). If you set
 # verbose to true for these agents, you can also see their learning progress
-partner = OnPolicyAgent(PPO('MlpPolicy', env.unwrapped.getDummyEnv(1), verbose=1))
+partner = OnPolicyAgent(PPO('MlpPolicy', env.unwrapped.get_dummy_env(1), verbose=1))
 env.unwrapped.add_partner_agent(partner)
 
 # Finally, you can construct an ego agent and train it in the environment

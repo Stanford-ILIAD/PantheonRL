@@ -1,4 +1,4 @@
-pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv
+﻿pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv
 =============================================================
 
 .. currentmodule:: pantheonrl.envs.blockworldgym.simpleblockworld
@@ -21,7 +21,8 @@ pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv
       ~SimpleBlockEnv.close
       ~SimpleBlockEnv.construct_single_agent_interface
       ~SimpleBlockEnv.ego_step
-      ~SimpleBlockEnv.getDummyEnv
+      ~SimpleBlockEnv.get_dummy_env
+      ~SimpleBlockEnv.get_ego_ind
       ~SimpleBlockEnv.get_obs
       ~SimpleBlockEnv.get_reward
       ~SimpleBlockEnv.get_wrapper_attr
@@ -33,6 +34,7 @@ pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv
       ~SimpleBlockEnv.resample_round_robin
       ~SimpleBlockEnv.reset
       ~SimpleBlockEnv.set_ego_extractor
+      ~SimpleBlockEnv.set_ego_ind
       ~SimpleBlockEnv.set_partnerid
       ~SimpleBlockEnv.set_resample_policy
       ~SimpleBlockEnv.step

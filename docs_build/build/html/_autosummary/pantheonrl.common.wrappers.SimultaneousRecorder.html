@@ -33,6 +33,7 @@
           
           <a href="../index.html" class="icon icon-home">
             PantheonRL
+              <img src="../_static/Pantheon.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -121,44 +122,50 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.close" title="pantheonrl.common.wrappers.SimultaneousRecorder.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a></p></td>
 <td><p>After the user has finished using the environment, close contains the code necessary to &quot;clean up&quot; the environment.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">construct_single_agent_interface</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.construct_single_agent_interface" title="pantheonrl.common.wrappers.SimultaneousRecorder.construct_single_agent_interface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">construct_single_agent_interface</span></code></a></p></td>
+<td><p>Construct a gym interface to be used by a single-agent RL algorithm.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.getDummyEnv" title="pantheonrl.common.wrappers.SimultaneousRecorder.getDummyEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDummyEnv</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.get_dummy_env" title="pantheonrl.common.wrappers.SimultaneousRecorder.get_dummy_env"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dummy_env</span></code></a></p></td>
 <td><p>Returns a dummy environment with just an observation and action space that a partner agent can use to construct their policy network.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.get_transitions" title="pantheonrl.common.wrappers.SimultaneousRecorder.get_transitions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transitions</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.get_ego_ind" title="pantheonrl.common.wrappers.SimultaneousRecorder.get_ego_ind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ego_ind</span></code></a></p></td>
+<td><p>Returns the current player number for the ego agent</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.get_transitions" title="pantheonrl.common.wrappers.SimultaneousRecorder.get_transitions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transitions</span></code></a></p></td>
 <td><p>Return the recorded transitions</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.get_wrapper_attr" title="pantheonrl.common.wrappers.SimultaneousRecorder.get_wrapper_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_wrapper_attr</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.get_wrapper_attr" title="pantheonrl.common.wrappers.SimultaneousRecorder.get_wrapper_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_wrapper_attr</span></code></a></p></td>
 <td><p>Gets the attribute <cite>name</cite> from the environment.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.multi_reset" title="pantheonrl.common.wrappers.SimultaneousRecorder.multi_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multi_reset</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.multi_reset" title="pantheonrl.common.wrappers.SimultaneousRecorder.multi_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multi_reset</span></code></a></p></td>
 <td><p>This function calls the embedded environment's multi_reset and records the new observations.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.multi_step" title="pantheonrl.common.wrappers.SimultaneousRecorder.multi_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multi_step</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.multi_step" title="pantheonrl.common.wrappers.SimultaneousRecorder.multi_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multi_step</span></code></a></p></td>
 <td><p>This function calls the embedded environment's multi_step and records the new actions and observations.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.n_reset" title="pantheonrl.common.wrappers.SimultaneousRecorder.n_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_reset</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.n_reset" title="pantheonrl.common.wrappers.SimultaneousRecorder.n_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_reset</span></code></a></p></td>
 <td><p>Reset the environment and return which agents will move first along with their initial observations.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.n_step" title="pantheonrl.common.wrappers.SimultaneousRecorder.n_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_step</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.n_step" title="pantheonrl.common.wrappers.SimultaneousRecorder.n_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_step</span></code></a></p></td>
 <td><p>Perform the actions specified by the agents that will move.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.render" title="pantheonrl.common.wrappers.SimultaneousRecorder.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.render" title="pantheonrl.common.wrappers.SimultaneousRecorder.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a></p></td>
 <td><p>Compute the render frames as specified by <code class="xref py py-attr docutils literal notranslate"><span class="pre">render_mode</span></code> during the initialization of the environment.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.resample_random" title="pantheonrl.common.wrappers.SimultaneousRecorder.resample_random"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_random</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.resample_random" title="pantheonrl.common.wrappers.SimultaneousRecorder.resample_random"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_random</span></code></a></p></td>
 <td><p>Randomly resamples each partner policy</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.resample_round_robin" title="pantheonrl.common.wrappers.SimultaneousRecorder.resample_round_robin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_round_robin</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.resample_round_robin" title="pantheonrl.common.wrappers.SimultaneousRecorder.resample_round_robin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_round_robin</span></code></a></p></td>
 <td><p>Sets the partner policy to the next option on the list for round-robin sampling.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.reset" title="pantheonrl.common.wrappers.SimultaneousRecorder.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.reset" title="pantheonrl.common.wrappers.SimultaneousRecorder.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a></p></td>
 <td><p>Reset environment to an initial state and return the first observation for the ego agent.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ego_extractor</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.set_ego_extractor" title="pantheonrl.common.wrappers.SimultaneousRecorder.set_ego_extractor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ego_extractor</span></code></a></p></td>
+<td><p>Sets the function to extract Observation for the ego agent.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.set_ego_ind" title="pantheonrl.common.wrappers.SimultaneousRecorder.set_ego_ind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ego_ind</span></code></a></p></td>
+<td><p>Sets the current player number for the ego agent</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.set_partnerid" title="pantheonrl.common.wrappers.SimultaneousRecorder.set_partnerid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_partnerid</span></code></a></p></td>
 <td><p>Set the current partner agent to use</p></td>
@@ -169,13 +176,16 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.step" title="pantheonrl.common.wrappers.SimultaneousRecorder.step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">step</span></code></a></p></td>
 <td><p>Run one timestep from the perspective of the ego-agent.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.write_transition" title="pantheonrl.common.wrappers.SimultaneousRecorder.write_transition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_transition</span></code></a></p></td>
+<td><p>Write transition to a given file.</p></td>
+</tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">action_space</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.action_space" title="pantheonrl.common.wrappers.SimultaneousRecorder.action_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">action_space</span></code></a></p></td>
+<td><p>The action space of the ego agent</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">metadata</span></code></p></td>
 <td><p></p></td>
@@ -183,8 +193,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.np_random" title="pantheonrl.common.wrappers.SimultaneousRecorder.np_random"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np_random</span></code></a></p></td>
 <td><p>Returns the environment's internal <code class="xref py py-attr docutils literal notranslate"><span class="pre">_np_random</span></code> that if not set will initialise with a random seed.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">observation_space</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.common.wrappers.SimultaneousRecorder.observation_space" title="pantheonrl.common.wrappers.SimultaneousRecorder.observation_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">observation_space</span></code></a></p></td>
+<td><p>The observation space of the ego agent</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_mode</span></code></p></td>
 <td><p></p></td>
@@ -200,6 +210,12 @@
 </tr>
 </tbody>
 </table>
+<dl class="py property">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.SimultaneousRecorder.action_space">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_space</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Space</span></em><a class="headerlink" href="#pantheonrl.common.wrappers.SimultaneousRecorder.action_space" title="Link to this definition"></a></dt>
+<dd><p>The action space of the ego agent</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.common.wrappers.SimultaneousRecorder.add_partner_agent">
 <span class="sig-name descname"><span class="pre">add_partner_agent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">player_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.SimultaneousRecorder.add_partner_agent" title="Link to this definition"></a></dt>
@@ -228,15 +244,41 @@ Calling <code class="docutils literal notranslate"><span class="pre">close</span
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pantheonrl.common.wrappers.SimultaneousRecorder.getDummyEnv">
-<span class="sig-name descname"><span class="pre">getDummyEnv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">player_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.SimultaneousRecorder.getDummyEnv" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.SimultaneousRecorder.construct_single_agent_interface">
+<span class="sig-name descname"><span class="pre">construct_single_agent_interface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">player_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.SimultaneousRecorder.construct_single_agent_interface" title="Link to this definition"></a></dt>
+<dd><p>Construct a gym interface to be used by a single-agent RL algorithm.</p>
+<p>Note that when training a policy using this interface, it must be
+spawned in a separate Thread. Please refer to the custom_sarl.py
+file in examples to see how to appropriately use this function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>player_num</strong> (<em>int</em>) – the player number to build the interface around</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>environment to use for the new player</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.SimultaneousRecorder.get_dummy_env">
+<span class="sig-name descname"><span class="pre">get_dummy_env</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">player_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.SimultaneousRecorder.get_dummy_env" title="Link to this definition"></a></dt>
 <dd><p>Returns a dummy environment with just an observation and action
 space that a partner agent can use to construct their policy network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>player_num</strong> (<em>int</em>) – the partner number to query</p>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dummy environment for this player number</p>
+</dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.SimultaneousRecorder.get_ego_ind">
+<span class="sig-name descname"><span class="pre">get_ego_ind</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.SimultaneousRecorder.get_ego_ind" title="Link to this definition"></a></dt>
+<dd><p>Returns the current player number for the ego agent</p>
 </dd></dl>
 
 <dl class="py method">
@@ -302,8 +344,9 @@ with their initial observations.</p>
 <p>This function is called by the <cite>reset</cite> function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>agents: Tuple representing the agents that will move first
-observations: Tuple representing the observations of both agents</p>
+<dd class="field-odd"><p><p>agents: Tuple representing the agents that will move first</p>
+<p>observations: Tuple representing the observations of both agents</p>
+</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><em>Tuple</em>[<em>Tuple</em>[int, …], <em>Tuple</em>[<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a> | None, …]]</p>
@@ -320,23 +363,16 @@ done, info).</p>
 <p>This function is called by the <cite>step</cite> function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>actions</strong> (<em>List</em><em>[</em><em>ndarray</em><em>]</em>) – List of action provided agents that are acting on this</p>
+<dd class="field-odd"><p><strong>actions</strong> (<em>List</em><em>[</em><em>ndarray</em><em>]</em>) – List of action provided agents that are acting on this
+step.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Tuple</em>[<em>Tuple</em>[int, …], <em>Tuple</em>[<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a> | None, …], <em>Tuple</em>[float, …], bool, <em>Dict</em>]</p>
-</dd>
-</dl>
-<p>step.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>agents: Tuple representing the agents to call for the next actions
-observations: Tuple representing the next observations (ego, alt)
-rewards: Tuple representing the rewards of all agents
-done: Whether the episode has ended
-info: Extra information about the environment</p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>actions</strong> (<em>List</em><em>[</em><em>ndarray</em><em>]</em>) – </p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>agents: Tuple representing the agents to call for the next actions</p>
+<p>observations: Tuple representing the next observations (ego, alt)</p>
+<p>rewards: Tuple representing the rewards of all agents</p>
+<p>done: Whether the episode has ended</p>
+<p>info: Extra information about the environment</p>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><em>Tuple</em>[<em>Tuple</em>[int, …], <em>Tuple</em>[<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a> | None, …], <em>Tuple</em>[float, …], bool, <em>Dict</em>]</p>
@@ -352,6 +388,12 @@ info: Extra information about the environment</p>
 <dt>Returns:</dt><dd><p>Instances of <cite>np.random.Generator</cite></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.SimultaneousRecorder.observation_space">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observation_space</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Space</span></em><a class="headerlink" href="#pantheonrl.common.wrappers.SimultaneousRecorder.observation_space" title="Link to this definition"></a></dt>
+<dd><p>The observation space of the ego agent</p>
 </dd></dl>
 
 <dl class="py method">
@@ -440,6 +482,36 @@ for the ego agent.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.SimultaneousRecorder.set_ego_extractor">
+<span class="sig-name descname"><span class="pre">set_ego_extractor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ego_extractor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.SimultaneousRecorder.set_ego_extractor" title="Link to this definition"></a></dt>
+<dd><p>Sets the function to extract Observation for the ego agent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ego_extractor</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a><em>]</em><em>, </em><em>Any</em><em>]</em>) – Function to extract Observation into the type the
+ego agent expects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.SimultaneousRecorder.set_ego_ind">
+<span class="sig-name descname"><span class="pre">set_ego_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silence_partner_warning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.SimultaneousRecorder.set_ego_ind" title="Link to this definition"></a></dt>
+<dd><p>Sets the current player number for the ego agent</p>
+<dl class="simple">
+<dt>..warning:: Modifying the ego_ind after partners have been added will</dt><dd><p>change the player number of those partners as well</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_ind</strong> (<em>int</em>) – the new index of the ego player</p></li>
+<li><p><strong>silence_partner_warning</strong> (<em>bool</em>) – Whether to suppress the partner warning</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.common.wrappers.SimultaneousRecorder.set_partnerid">
 <span class="sig-name descname"><span class="pre">set_partnerid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">player_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.SimultaneousRecorder.set_partnerid" title="Link to this definition"></a></dt>
 <dd><p>Set the current partner agent to use</p>
@@ -447,7 +519,7 @@ for the ego agent.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>agent_id</strong> (<em>int</em>) – agent_id to use as current partner</p></li>
-<li><p><strong>player_num</strong> (<em>int</em>) – </p></li>
+<li><p><strong>player_num</strong> (<em>int</em>) – The player number</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -462,15 +534,13 @@ for the ego agent.</p>
 <dd><p>Set the resample_partner method to round “robin” or “random”</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>resample_policy</strong> (<em>str</em>) – The new resampling policy to use.</p>
+<dd class="field-odd"><p><strong>resample_policy</strong> (<em>str</em>) – The new resampling policy to use.
+Valid values are: “default”, “robin”, “random”</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
-<ul class="simple">
-<li><p>Valid values are: “default”, “robin”, “random”</p></li>
-</ul>
 </dd></dl>
 
 <dl class="py method">
@@ -483,18 +553,19 @@ next observation of the ego agent.</p>
 reward, done, info) from the perspective of the ego agent.</p>
 <p>Note that when the environment is done, the final observation is the
 latest observation provided by the environment, which may be the same
-as the previous observation given to the agent, especially in turn-based
-settings.</p>
+as the previous observation given to the agent, especially in
+turn-based settings.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>action</strong> (<em>ndarray</em>) – An action provided by the ego-agent.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>observation: Ego-agent’s next observation
-reward: Amount of reward returned after previous action
-terminated: Whether the episode has ended (need to call reset() if True)
-truncated: Whether the episode was truncated (need to call reset() if True)
-info: Extra information about the environment</p>
+<dd class="field-even"><p><p>observation: Ego-agent’s next observation</p>
+<p>reward: Amount of reward returned after previous action</p>
+<p>terminated: Whether the episode has ended (call reset() if True)</p>
+<p>truncated: Whether the episode was truncated (call reset() if True)</p>
+<p>info: Extra information about the environment</p>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple[<a class="reference internal" href="pantheonrl.common.observation.Observation.html#pantheonrl.common.observation.Observation" title="pantheonrl.common.observation.Observation"><em>Observation</em></a> | <em>Any</em>, float, bool, bool, dict[str, <em>Any</em>]]</p>
@@ -510,6 +581,12 @@ info: Extra information about the environment</p>
 <dt>Returns:</dt><dd><p>Env: The base non-wrapped <code class="xref py py-class docutils literal notranslate"><span class="pre">gymnasium.Env</span></code> instance</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.common.wrappers.SimultaneousRecorder.write_transition">
+<span class="sig-name descname"><span class="pre">write_transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.common.wrappers.SimultaneousRecorder.write_transition" title="Link to this definition"></a></dt>
+<dd><p>Write transition to a given file.</p>
 </dd></dl>
 
 </dd></dl>
