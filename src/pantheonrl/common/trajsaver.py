@@ -28,7 +28,7 @@ def transitions_collate_fn(
     Use this as the `collate_fn` argument to `DataLoader` if using an instance
     of `TransitionsMinimal` as the `dataset` argument.
     """
-    batch_no_infos = [sample.items() for sample in batch]
+    batch_no_infos = list(batch)
 
     result = default_collate(batch_no_infos)
     assert isinstance(result, dict)

@@ -1,18 +1,28 @@
+"""
+Module defining the ADAP partner agent.
+"""
 from typing import Optional
 
-from collections import deque
+import time
+
+import copy
+import sys
+
+import torch
+
+from gymnasium import spaces
 
 import numpy as np
-import torch as th
-
-from pantheonrl.common.util import (action_from_policy, clip_actions,
-                                    resample_noise)
-
-from stable_baselines3.common.utils import configure_logger
-from stable_baselines3.common.utils import safe_mean
 
 from pantheonrl.common.agents import OnPolicyAgent
 from pantheonrl.common.observation import Observation
+
+from stable_baselines3.common.utils import (
+    safe_mean,
+    obs_as_tensor,
+)
+
+
 from .adap_learn import ADAP
 from .util import SAMPLERS
 from .policies import AdapPolicy
@@ -26,126 +36,192 @@ class AdapAgent(OnPolicyAgent):
     from ``OnPolicyAlgorithm``.
 
     :param model: Model representing the agent's learning algorithm
+    :param log_interval: Optional log interval for policy logging
+    :param working_timesteps: Estimate for number of timesteps to train for.
+    :param callback: Optional callback fed into the OnPolicyAlgorithm
+    :param tb_log_name: Name for tensorboard log
     """
 
-    def __init__(self,
-                 model: ADAP,
-                 log_interval=None,
-                 tensorboard_log=None,
-                 tb_log_name="AdapAgent",
-                 latent_syncer: Optional[AdapPolicy] = None):
-        self.model = model
-        self._last_episode_starts = [True]
-        self.n_steps = 0
-        self.values: th.Tensor = th.empty(0)
-
-        self.model.set_logger(configure_logger(
-            self.model.verbose, tensorboard_log, tb_log_name))
-
-        self.name = tb_log_name
-        self.num_timesteps = 0
-        self.log_interval = log_interval or (1 if model.verbose else None)
-        self.iteration = 0
-        self.model.ep_info_buffer = deque([{"r": 0, "l": 0}], maxlen=100)
+    def __init__(
+        self,
+        model: ADAP,
+        log_interval=None,
+        working_timesteps=1000,
+        callback=None,
+        tb_log_name="AdapAgent",
+        latent_syncer: Optional[AdapPolicy] = None,
+    ):
+        super().__init__(
+            model, log_interval, working_timesteps, callback, tb_log_name
+        )
 
         self.latent_syncer = latent_syncer
 
-        buf = self.model.rollout_buffer
-        self.model.full_obs_shape = (
-            buf.obs_shape[0] + self.model.context_size,)
-        buf.obs_shape = self.model.full_obs_shape
-        buf.reset()
-
-    def get_action(self, obs: Observation, record: bool = True) -> np.ndarray:
+    def get_action(self, obs: Observation) -> np.ndarray:
         """
         Return an action given an observation.
 
-        When `record` is True, the agent saves the last transition into its
-        buffer. It also updates the model if the buffer is full.
+        The agent saves the last transition into its buffer. It also updates
+        the model if the buffer is full.
 
         :param obs: The observation to use
-        :param record: Whether to record the obs, action (True when training)
         :returns: The action to take
         """
         obs = obs.obs
-        if self.latent_syncer is not None:
-            self.model.policy.set_context(self.latent_syncer.get_context())
-
-        buf = self.model.rollout_buffer
-
-        # train the model if the buffer is full
-        if record and self.n_steps >= self.model.n_steps:
-            buf.compute_returns_and_advantage(
-                last_values=self.values,
-                dones=self._last_episode_starts[0]
+        if not isinstance(obs, np.ndarray):
+            obs = np.array([obs])
+        callback = self.callback
+        rollout_buffer = self.model.rollout_buffer
+        if self.model.full_obs_shape is None:
+            self.model.full_obs_shape = (
+                rollout_buffer.obs_shape[0] + self.model.context_size,
             )
 
-            if self.log_interval is not None and \
-                    self.iteration % self.log_interval == 0:
-                self.model.logger.record(
-                    "name", self.name, exclude="tensorboard")
-                self.model.logger.record(
-                    "time/iterations", self.iteration, exclude="tensorboard")
+            rollout_buffer.obs_shape = tuple(self.model.full_obs_shape)
+            rollout_buffer.reset()
 
-                if len(self.model.ep_info_buffer) > 0 and \
-                        len(self.model.ep_info_buffer[0]) > 0:
-                    last_exclude = self.model.ep_info_buffer.pop()
-                    rews = [ep["r"] for ep in self.model.ep_info_buffer]
-                    lens = [ep["l"] for ep in self.model.ep_info_buffer]
-                    self.model.logger.record(
-                        "rollout/ep_rew_mean", safe_mean(rews))
-                    self.model.logger.record(
-                        "rollout/ep_len_mean", safe_mean(lens))
-                    self.model.ep_info_buffer.append(last_exclude)
+        n_rollout_steps = self.model.n_steps
 
-                self.model.logger.record(
-                    "time/total_timesteps", self.num_timesteps,
-                    exclude="tensorboard")
-                self.model.logger.dump(step=self.num_timesteps)
+        if self.model.num_timesteps >= self.total_timesteps:
+            self.callback.on_training_end()
+            self.iteration = 0
+            self.total_timesteps, self.callback = self.model._setup_learn(
+                self.working_timesteps,
+                self.original_callback,
+                False,
+                self.tb_log_name,
+                False,
+            )
 
-            self.model.train()
+            self.callback.on_training_start(locals(), globals())
+
+        if self.n_steps >= n_rollout_steps:
+            with torch.no_grad():
+                values = self.model.policy.predict_values(
+                    obs_as_tensor(obs, self.model.device).unsqueeze(0)
+                )
+            rollout_buffer.compute_returns_and_advantage(
+                last_values=values, dones=self.model._last_episode_starts
+            )
+            self.old_buffer = copy.deepcopy(rollout_buffer)
+            callback.update_locals(locals())
+            callback.on_rollout_end()
+
             self.iteration += 1
-            buf.reset()
+            self.model._update_current_progress_remaining(
+                self.model.num_timesteps, self.working_timesteps
+            )
+
+            if (
+                self.log_interval is not None
+                and self.iteration % self.log_interval == 0
+            ):
+                assert self.model.ep_info_buffer is not None
+                time_elapsed = max(
+                    (time.time_ns() - self.model.start_time) / 1e9,
+                    sys.float_info.epsilon,
+                )
+                fps = int(
+                    (
+                        self.model.num_timesteps
+                        - self.model._num_timesteps_at_start
+                    )
+                    / time_elapsed
+                )
+                self.model.logger.record(
+                    "time/iterations", self.iteration, exclude="tensorboard"
+                )
+                if (
+                    len(self.model.ep_info_buffer) > 0
+                    and len(self.model.ep_info_buffer[0]) > 0
+                ):
+                    self.model.logger.record(
+                        "rollout/ep_rew_mean",
+                        safe_mean(
+                            [
+                                ep_info["r"]
+                                for ep_info in self.model.ep_info_buffer
+                            ]
+                        ),
+                    )
+                    self.model.logger.record(
+                        "rollout/ep_len_mean",
+                        safe_mean(
+                            [
+                                ep_info["l"]
+                                for ep_info in self.model.ep_info_buffer
+                            ]
+                        ),
+                    )
+                self.model.logger.record("time/fps", fps)
+                self.model.logger.record(
+                    "time/time_elapsed",
+                    int(time_elapsed),
+                    exclude="tensorboard",
+                )
+                self.model.logger.record(
+                    "time/total_timesteps",
+                    self.model.num_timesteps,
+                    exclude="tensorboard",
+                )
+                self.model.logger.dump(step=self.model.num_timesteps)
+            self.model.train()
+
+            # Restarting
+            self.model.policy.set_training_mode(False)
             self.n_steps = 0
+            rollout_buffer.reset()
+            if self.model.use_sde:
+                self.model.policy.reset_noise(1)
+            self.callback.on_rollout_start()
 
-        resample_noise(self.model, self.n_steps)
+        if (
+            self.model.use_sde
+            and self.model.sde_sample_freq > 0
+            and self.n_steps % self.model.sde_sample_freq == 0
+        ):
+            self.model.policy.reset_noise(1)
 
-        actions, values, log_probs = action_from_policy(obs, self.model.policy)
+        with torch.no_grad():
+            obs_tensor = obs_as_tensor(obs, self.model.device)
+            actions, values, log_probs = self.model.policy(
+                obs_tensor.unsqueeze(0)
+            )
+        actions = actions.cpu().numpy()
+        clipped_actions = actions
 
-        # modify the rollout buffer with newest info
+        if isinstance(self.model.action_space, spaces.Box):
+            clipped_actions = np.clip(
+                actions,
+                self.model.action_space.low,
+                self.model.action_space.high,
+            )
+
+        self.in_progress_info["l"] += 1
+        self.model.num_timesteps += 1
+        self.n_steps += 1
+        if isinstance(self.model.action_space, spaces.Discrete):
+            actions = actions.reshape(-1, 1)
+        print(obs.shape)
         obs = np.concatenate((np.reshape(obs, (1, -1)),
                               self.model.policy.get_context()),
                              axis=1)
-        if record:
-            obs_shape = self.model.policy.observation_space.shape
-            act_shape = self.model.policy.action_space.shape
-            buf.add(
-                np.reshape(obs, (1,) + obs_shape),
-                np.reshape(actions, (1,) + act_shape),
-                [0],
-                self._last_episode_starts,
-                values,
-                log_probs
-            )
 
-        self.n_steps += 1
-        self.num_timesteps += 1
-        self.values = values
-        return clip_actions(actions, self.model)[0]
+        rollout_buffer.add(
+            obs,
+            actions,
+            [0],
+            self.model._last_episode_starts,
+            values,
+            log_probs,
+        )
+        return clipped_actions[0]
 
     def update(self, reward: float, done: bool) -> None:
-        """
-        Add new rewards and done information.
-
-        The rewards are added to buffer entry corresponding to the most recent
-        recorded action.
-
-        :param reward: The reward receieved from the previous action step
-        :param done: Whether the game is done
-        """
-        super(AdapAgent, self).update(reward, done)
+        super().update(reward, done)
 
         if done and self.latent_syncer is None:
             sampled_context = SAMPLERS[self.model.context_sampler](
-                ctx_size=self.model.context_size, num=1, torch=True)
+                ctx_size=self.model.context_size, num=1, use_torch=True
+            )
             self.model.policy.set_context(sampled_context)

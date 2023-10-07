@@ -56,3 +56,4 @@ def test_DQN(env_name):
         ego.learn(total_timesteps=1000)
     except Exception as e:
         assert False, f"Exception raised on {env_name}: {e}"
+

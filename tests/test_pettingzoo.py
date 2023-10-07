@@ -60,3 +60,4 @@ def test_PPO(option):
         ego.learn(total_timesteps=128)
     except Exception as e:
         assert False, f"Exception raised on {option}: {e}"
+

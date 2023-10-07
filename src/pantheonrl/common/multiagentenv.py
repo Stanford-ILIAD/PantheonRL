@@ -341,6 +341,9 @@ class MultiAgentEnv(gym.Env, ABC):
             self.np_random.integers(0, len(plist)) for plist in self.partners
         ]
 
+    def resample_null(self) -> None:
+        """Do not resample each partner policy"""
+
     def resample_round_robin(self) -> None:
         """
         Sets the partner policy to the next option on the list for round-robin
@@ -355,7 +358,7 @@ class MultiAgentEnv(gym.Env, ABC):
         Set the resample_partner method to round "robin" or "random"
 
         :param resample_policy: The new resampling policy to use.
-          Valid values are: "default", "robin", "random"
+          Valid values are: "default", "robin", "random", or "null"
         """
         if resample_policy == "default":
             resample_policy = "robin" if self.n_players == 2 else "random"
@@ -369,6 +372,8 @@ class MultiAgentEnv(gym.Env, ABC):
             self.resample_partner = self.resample_round_robin
         elif resample_policy == "random":
             self.resample_partner = self.resample_random
+        elif resample_policy == "null":
+            self.resample_partner = self.resample_null
         else:
             raise PlayerException(
                 f"Invalid resampling policy: {resample_policy}"

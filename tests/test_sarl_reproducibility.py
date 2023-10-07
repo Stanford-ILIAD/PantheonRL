@@ -233,11 +233,12 @@ def run_reversed_dqn(ALGO, timesteps, option, n_steps):
 @pytest.mark.parametrize("option", [0, 1])
 @pytest.mark.parametrize("n_steps", [10, 100, 1000])
 def test_dqn(ALGO, epochs, option, n_steps):
+    init_count = threading.active_count()
     model1 = run_standard_dqn(ALGO, n_steps * epochs, option, n_steps)
     model2 = run_reversed_dqn(ALGO, n_steps * epochs, option, n_steps)
     assert check_equivalent_models(model1, model2), "NOT IDENTICAL MODELS"
 
-    assert threading.active_count() == 1, "DID NOT KILL THREADS"
+    assert threading.active_count() == init_count, "DID NOT KILL THREADS"
 
 
 @pytest.mark.timeout(60)
@@ -248,11 +249,12 @@ def test_dqn(ALGO, epochs, option, n_steps):
 @pytest.mark.parametrize("option", [0, 1, 2, 3, 4])
 @pytest.mark.parametrize("n_steps", [10, 100, 1000])
 def test_sarl(ALGO, epochs, option, n_steps):
+    init_count = threading.active_count()
     model1, rb1 = run_standard(ALGO, n_steps * epochs, option, n_steps)
     model2, rb2 = run_reversed(ALGO, n_steps * epochs, option, n_steps)
     assert check_equivalent_models(model1, model2), "NOT IDENTICAL MODELS"
 
-    assert threading.active_count() == 1, "DID NOT KILL THREADS"
+    assert threading.active_count() == init_count, "DID NOT KILL THREADS"
 
 
 # def printifdiff(r1, r2, val):

@@ -33,4 +33,5 @@ dependencies = [
 "Bug Tracker" = "https://github.com/Stanford-ILIAD/PantheonRL/issues"
 
 [tool.pylint]
-disable = ["protected-access", "too-many-arguments", "too-many-instance-attributes", "too-many-statements", "too-many-branches"]
+disable = ["protected-access", "too-many-arguments", "too-many-instance-attributes", "too-many-statements", "too-many-branches", "too-many-locals", "duplicate-code"]
+generated-members = ["numpy.*", "torch.*"]
