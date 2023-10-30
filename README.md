@@ -32,6 +32,9 @@ In Proceedings of the 36th AAAI Conference on Artificial Intelligence (Demo Trac
 conda create -n PantheonRL python=3.7
 conda activate PantheonRL
 
+# downgrade setuptools for gym=0.21
+pip install setuptools==65.5.0 "wheel<0.40.0"
+
 # Clone and install PantheonRL
 git clone https://github.com/Stanford-ILIAD/PantheonRL.git
 cd PantheonRL
