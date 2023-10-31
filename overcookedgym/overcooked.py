@@ -77,7 +77,7 @@ class OvercookedMultiEnv(SimultaneousEnv):
         else:
             ego_obs, alt_obs = ob_p1, ob_p0
 
-        return (ego_obs, alt_obs), (reward, reward), done, {}#info
+        return (ego_obs, alt_obs), (reward, reward), [done], {}#info
 
     def multi_reset(self):
         """
