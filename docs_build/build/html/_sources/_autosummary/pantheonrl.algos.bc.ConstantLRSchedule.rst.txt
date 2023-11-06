@@ -1,4 +1,4 @@
-pantheonrl.algos.bc.ConstantLRSchedule
+﻿pantheonrl.algos.bc.ConstantLRSchedule
 ======================================
 
 .. currentmodule:: pantheonrl.algos.bc
@@ -16,6 +16,7 @@ pantheonrl.algos.bc.ConstantLRSchedule
    .. autosummary::
       :nosignatures:
    
+      ~ConstantLRSchedule.set_lr
    
    
 

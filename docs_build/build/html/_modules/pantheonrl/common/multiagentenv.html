@@ -464,6 +464,12 @@
         <span class="p">]</span></div>
 
 
+<div class="viewcode-block" id="MultiAgentEnv.resample_null">
+<a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.resample_null">[docs]</a>
+    <span class="k">def</span> <span class="nf">resample_null</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Do not resample each partner policy&quot;&quot;&quot;</span></div>
+
+
 <div class="viewcode-block" id="MultiAgentEnv.resample_round_robin">
 <a class="viewcode-back" href="../../../_autosummary/pantheonrl.common.multiagentenv.MultiAgentEnv.html#pantheonrl.common.multiagentenv.MultiAgentEnv.resample_round_robin">[docs]</a>
     <span class="k">def</span> <span class="nf">resample_round_robin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -483,7 +489,7 @@
 <span class="sd">        Set the resample_partner method to round &quot;robin&quot; or &quot;random&quot;</span>
 
 <span class="sd">        :param resample_policy: The new resampling policy to use.</span>
-<span class="sd">          Valid values are: &quot;default&quot;, &quot;robin&quot;, &quot;random&quot;</span>
+<span class="sd">          Valid values are: &quot;default&quot;, &quot;robin&quot;, &quot;random&quot;, or &quot;null&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">resample_policy</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
             <span class="n">resample_policy</span> <span class="o">=</span> <span class="s2">&quot;robin&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_players</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">&quot;random&quot;</span>
@@ -497,6 +503,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">resample_partner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resample_round_robin</span>
         <span class="k">elif</span> <span class="n">resample_policy</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">resample_partner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resample_random</span>
+        <span class="k">elif</span> <span class="n">resample_policy</span> <span class="o">==</span> <span class="s2">&quot;null&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resample_partner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resample_null</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">PlayerException</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Invalid resampling policy: </span><span class="si">{</span><span class="n">resample_policy</span><span class="si">}</span><span class="s2">&quot;</span>

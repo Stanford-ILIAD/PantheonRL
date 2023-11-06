@@ -1,4 +1,4 @@
-pantheonrl.envs.liargym.liar.LiarEnv
+﻿pantheonrl.envs.liargym.liar.LiarEnv
 ====================================
 
 .. currentmodule:: pantheonrl.envs.liargym.liar
@@ -28,6 +28,7 @@ pantheonrl.envs.liargym.liar.LiarEnv
       ~LiarEnv.n_reset
       ~LiarEnv.n_step
       ~LiarEnv.render
+      ~LiarEnv.resample_null
       ~LiarEnv.resample_random
       ~LiarEnv.resample_round_robin
       ~LiarEnv.reset

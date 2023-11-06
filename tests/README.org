@@ -21,3 +21,25 @@
 - [ ] Test wrappers
   - [ ] Trajectory saver
   - [ ] Frame stacking
+
+
+** Contribution Instructions
+
+First, install by git as specified in repo's README. Ensure you have a conda environment specific for testing.
+
+When making changes, ensure that tests still pass. From the home repo directory:
+#+begin_src bash
+  pytest tests
+#+end_src
+
+Follow our pylint guidelines. The code should be rated 10.0/10.0, but let us know if any of the rules are unnecessary:
+#+begin_src bash
+  pylint src
+#+end_src
+
+Finally, update the automatically generated website documentation:
+#+begin_src bash
+  cd docs_build
+  make clean
+  make html
+#+end_src

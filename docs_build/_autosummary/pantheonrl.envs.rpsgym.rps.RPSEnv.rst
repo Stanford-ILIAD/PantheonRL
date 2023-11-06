@@ -1,4 +1,4 @@
-pantheonrl.envs.rpsgym.rps.RPSEnv
+﻿pantheonrl.envs.rpsgym.rps.RPSEnv
 =================================
 
 .. currentmodule:: pantheonrl.envs.rpsgym.rps
@@ -27,6 +27,7 @@ pantheonrl.envs.rpsgym.rps.RPSEnv
       ~RPSEnv.n_reset
       ~RPSEnv.n_step
       ~RPSEnv.render
+      ~RPSEnv.resample_null
       ~RPSEnv.resample_random
       ~RPSEnv.resample_round_robin
       ~RPSEnv.reset

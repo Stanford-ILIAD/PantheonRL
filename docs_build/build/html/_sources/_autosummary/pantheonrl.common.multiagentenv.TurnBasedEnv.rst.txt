@@ -1,4 +1,4 @@
-pantheonrl.common.multiagentenv.TurnBasedEnv
+﻿pantheonrl.common.multiagentenv.TurnBasedEnv
 ============================================
 
 .. currentmodule:: pantheonrl.common.multiagentenv
@@ -28,6 +28,7 @@ pantheonrl.common.multiagentenv.TurnBasedEnv
       ~TurnBasedEnv.n_reset
       ~TurnBasedEnv.n_step
       ~TurnBasedEnv.render
+      ~TurnBasedEnv.resample_null
       ~TurnBasedEnv.resample_random
       ~TurnBasedEnv.resample_round_robin
       ~TurnBasedEnv.reset

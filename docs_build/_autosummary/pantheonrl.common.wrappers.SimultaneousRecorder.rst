@@ -1,4 +1,4 @@
-pantheonrl.common.wrappers.SimultaneousRecorder
+﻿pantheonrl.common.wrappers.SimultaneousRecorder
 ===============================================
 
 .. currentmodule:: pantheonrl.common.wrappers
@@ -28,6 +28,7 @@ pantheonrl.common.wrappers.SimultaneousRecorder
       ~SimultaneousRecorder.n_reset
       ~SimultaneousRecorder.n_step
       ~SimultaneousRecorder.render
+      ~SimultaneousRecorder.resample_null
       ~SimultaneousRecorder.resample_random
       ~SimultaneousRecorder.resample_round_robin
       ~SimultaneousRecorder.reset

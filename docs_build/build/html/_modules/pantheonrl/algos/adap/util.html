@@ -74,16 +74,22 @@
            <div itemprop="articleBody">
              
   <h1>Source code for pantheonrl.algos.adap.util</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Collection of helper functions for ADAP</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
 
-<span class="kn">import</span> <span class="nn">torch</span> <span class="k">as</span> <span class="nn">th</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">torch.distributions</span> <span class="kn">import</span> <span class="n">kl</span>
 <span class="kn">from</span> <span class="nn">stable_baselines3.common</span> <span class="kn">import</span> <span class="n">distributions</span>
 <span class="kn">from</span> <span class="nn">stable_baselines3.common.buffers</span> <span class="kn">import</span> <span class="n">RolloutBufferSamples</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">.adap_learn</span> <span class="kn">import</span> <span class="n">ADAP</span>
     <span class="kn">from</span> <span class="nn">.policies</span> <span class="kn">import</span> <span class="n">AdapPolicy</span>
@@ -91,8 +97,10 @@
 
 <div class="viewcode-block" id="kl_divergence">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.adap.util.kl_divergence.html#pantheonrl.algos.adap.util.kl_divergence">[docs]</a>
-<span class="k">def</span> <span class="nf">kl_divergence</span><span class="p">(</span><span class="n">dist_true</span><span class="p">:</span> <span class="n">distributions</span><span class="o">.</span><span class="n">Distribution</span><span class="p">,</span>
-                  <span class="n">dist_pred</span><span class="p">:</span> <span class="n">distributions</span><span class="o">.</span><span class="n">Distribution</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">th</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">kl_divergence</span><span class="p">(</span>
+    <span class="n">dist_true</span><span class="p">:</span> <span class="n">distributions</span><span class="o">.</span><span class="n">Distribution</span><span class="p">,</span>
+    <span class="n">dist_pred</span><span class="p">:</span> <span class="n">distributions</span><span class="o">.</span><span class="n">Distribution</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrapper for the PyTorch implementation of the full form KL Divergence</span>
 <span class="sd">    :param dist_true: the p distribution</span>
@@ -100,43 +108,47 @@
 <span class="sd">    :return: KL(dist_true||dist_pred)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># KL Divergence for different distribution types is out of scope</span>
-    <span class="k">assert</span> <span class="n">dist_true</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">==</span> <span class="n">dist_pred</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> \
-        <span class="s2">&quot;Error: input distributions should be the same type&quot;</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">dist_true</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">==</span> <span class="n">dist_pred</span><span class="o">.</span><span class="vm">__class__</span>
+    <span class="p">),</span> <span class="s2">&quot;Error: input distributions should be the same type&quot;</span>
 
     <span class="c1"># MultiCategoricalDistribution is not a PyTorch Distribution subclass</span>
     <span class="c1"># so we need to implement it ourselves!</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist_pred</span><span class="p">,</span> <span class="n">distributions</span><span class="o">.</span><span class="n">MultiCategoricalDistribution</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">th</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">kl</span><span class="o">.</span><span class="n">kl_divergence</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-                <span class="n">dist_true</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">dist_pred</span><span class="o">.</span><span class="n">distribution</span><span class="p">)],</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">kl</span><span class="o">.</span><span class="n">kl_divergence</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dist_true</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">dist_pred</span><span class="o">.</span><span class="n">distribution</span><span class="p">)</span>
+            <span class="p">],</span>
             <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># Use the PyTorch kl_divergence implementation</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">kl</span><span class="o">.</span><span class="n">kl_divergence</span><span class="p">(</span><span class="n">dist_true</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">dist_pred</span><span class="o">.</span><span class="n">distribution</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">kl</span><span class="o">.</span><span class="n">kl_divergence</span><span class="p">(</span><span class="n">dist_true</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">dist_pred</span><span class="o">.</span><span class="n">distribution</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="get_L2_sphere">
-<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.adap.util.get_L2_sphere.html#pantheonrl.algos.adap.util.get_L2_sphere">[docs]</a>
-<span class="k">def</span> <span class="nf">get_L2_sphere</span><span class="p">(</span><span class="n">ctx_size</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">torch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">torch</span><span class="p">:</span>
-        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
-        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">ctxs</span> <span class="o">/</span> <span class="p">(</span><span class="n">th</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">ctxs</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">ctxs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="get_l2_sphere">
+<a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.adap.util.get_L2_sphere.html#pantheonrl.algos.adap.util.get_l2_sphere">[docs]</a>
+<span class="k">def</span> <span class="nf">get_l2_sphere</span><span class="p">(</span><span class="n">ctx_size</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">use_torch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Samples from l2 sphere&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_torch</span><span class="p">:</span>
+        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">ctxs</span> <span class="o">/</span> <span class="p">(((</span><span class="n">ctxs</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">ctxs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ctxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
-        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">ctxs</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">ctxs</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">ctxs</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">ctxs</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ctxs</span></div>
 
 
 
 <div class="viewcode-block" id="get_unit_square">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.adap.util.get_unit_square.html#pantheonrl.algos.adap.util.get_unit_square">[docs]</a>
-<span class="k">def</span> <span class="nf">get_unit_square</span><span class="p">(</span><span class="n">ctx_size</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">torch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">torch</span><span class="p">:</span>
-        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="k">def</span> <span class="nf">get_unit_square</span><span class="p">(</span><span class="n">ctx_size</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">use_torch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Samples from unit square centered at 0&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_torch</span><span class="p">:</span>
+        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ctxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">ctxs</span></div>
@@ -145,9 +157,10 @@
 
 <div class="viewcode-block" id="get_positive_square">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.adap.util.get_positive_square.html#pantheonrl.algos.adap.util.get_positive_square">[docs]</a>
-<span class="k">def</span> <span class="nf">get_positive_square</span><span class="p">(</span><span class="n">ctx_size</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">torch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">torch</span><span class="p">:</span>
-        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_positive_square</span><span class="p">(</span><span class="n">ctx_size</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">use_torch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Samples from the square with axes between 0 and 1&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_torch</span><span class="p">:</span>
+        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ctxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ctxs</span></div>
@@ -156,10 +169,11 @@
 
 <div class="viewcode-block" id="get_categorical">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.adap.util.get_categorical.html#pantheonrl.algos.adap.util.get_categorical">[docs]</a>
-<span class="k">def</span> <span class="nf">get_categorical</span><span class="p">(</span><span class="n">ctx_size</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">torch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">torch</span><span class="p">:</span>
-        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">)</span>
-        <span class="n">ctxs</span><span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num</span><span class="p">),</span> <span class="n">th</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num</span><span class="p">,))]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">def</span> <span class="nf">get_categorical</span><span class="p">(</span><span class="n">ctx_size</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">use_torch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Samples from categorical distribution&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_torch</span><span class="p">:</span>
+        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">)</span>
+        <span class="n">ctxs</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num</span><span class="p">,))]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ctxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">))</span>
         <span class="n">ctxs</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num</span><span class="p">,))]</span> <span class="o">=</span> <span class="mi">1</span>
@@ -169,61 +183,67 @@
 
 <div class="viewcode-block" id="get_natural_number">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.adap.util.get_natural_number.html#pantheonrl.algos.adap.util.get_natural_number">[docs]</a>
-<span class="k">def</span> <span class="nf">get_natural_number</span><span class="p">(</span><span class="n">ctx_size</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">torch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="k">def</span> <span class="nf">get_natural_number</span><span class="p">(</span><span class="n">ctx_size</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">use_torch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns context vector of shape (num,1) with numbers in range [0, ctx_size]</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">torch</span><span class="p">:</span>
-        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_torch</span><span class="p">:</span>
+        <span class="n">ctxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ctxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ctx_size</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">ctxs</span></div>
 
 
 
-<span class="n">SAMPLERS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;l2&quot;</span><span class="p">:</span> <span class="n">get_L2_sphere</span><span class="p">,</span>
-            <span class="s2">&quot;unit_square&quot;</span><span class="p">:</span> <span class="n">get_unit_square</span><span class="p">,</span>
-            <span class="s2">&quot;positive_square&quot;</span><span class="p">:</span> <span class="n">get_positive_square</span><span class="p">,</span>
-            <span class="s2">&quot;categorical&quot;</span><span class="p">:</span> <span class="n">get_categorical</span><span class="p">,</span>
-            <span class="s2">&quot;natural_numbers&quot;</span><span class="p">:</span> <span class="n">get_natural_number</span><span class="p">}</span>
+<span class="n">SAMPLERS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;l2&quot;</span><span class="p">:</span> <span class="n">get_l2_sphere</span><span class="p">,</span>
+    <span class="s2">&quot;unit_square&quot;</span><span class="p">:</span> <span class="n">get_unit_square</span><span class="p">,</span>
+    <span class="s2">&quot;positive_square&quot;</span><span class="p">:</span> <span class="n">get_positive_square</span><span class="p">,</span>
+    <span class="s2">&quot;categorical&quot;</span><span class="p">:</span> <span class="n">get_categorical</span><span class="p">,</span>
+    <span class="s2">&quot;natural_numbers&quot;</span><span class="p">:</span> <span class="n">get_natural_number</span><span class="p">,</span>
+<span class="p">}</span>
 
 
 <div class="viewcode-block" id="get_context_kl_loss">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.adap.util.get_context_kl_loss.html#pantheonrl.algos.adap.util.get_context_kl_loss">[docs]</a>
-<span class="k">def</span> <span class="nf">get_context_kl_loss</span><span class="p">(</span><span class="n">policy</span><span class="p">:</span> <span class="s1">&#39;ADAP&#39;</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="s1">&#39;AdapPolicy&#39;</span><span class="p">,</span>
-                        <span class="n">train_batch</span><span class="p">:</span> <span class="n">RolloutBufferSamples</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_context_kl_loss</span><span class="p">(</span>
+    <span class="n">policy</span><span class="p">:</span> <span class="s2">&quot;ADAP&quot;</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="s2">&quot;AdapPolicy&quot;</span><span class="p">,</span> <span class="n">train_batch</span><span class="p">:</span> <span class="n">RolloutBufferSamples</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets the KL loss for ADAP&quot;&quot;&quot;</span>
 
-    <span class="n">original_obs</span> <span class="o">=</span> <span class="n">train_batch</span><span class="o">.</span><span class="n">observations</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="n">policy</span><span class="o">.</span><span class="n">context_size</span><span class="p">]</span>
+    <span class="n">original_obs</span> <span class="o">=</span> <span class="n">train_batch</span><span class="o">.</span><span class="n">observations</span><span class="p">[:,</span> <span class="p">:</span> <span class="o">-</span><span class="n">policy</span><span class="o">.</span><span class="n">context_size</span><span class="p">]</span>
 
     <span class="n">context_size</span> <span class="o">=</span> <span class="n">policy</span><span class="o">.</span><span class="n">context_size</span>
     <span class="n">num_context_samples</span> <span class="o">=</span> <span class="n">policy</span><span class="o">.</span><span class="n">num_context_samples</span>
     <span class="n">num_state_samples</span> <span class="o">=</span> <span class="n">policy</span><span class="o">.</span><span class="n">num_state_samples</span>
 
-    <span class="n">indices</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="n">original_obs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])[:</span><span class="n">num_state_samples</span><span class="p">]</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="n">original_obs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])[:</span><span class="n">num_state_samples</span><span class="p">]</span>
     <span class="n">sampled_states</span> <span class="o">=</span> <span class="n">original_obs</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
     <span class="n">num_state_samples</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">num_state_samples</span><span class="p">,</span> <span class="n">sampled_states</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
     <span class="n">all_contexts</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">all_action_dists</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">old_context</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_context</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_context_samples</span><span class="p">):</span>  <span class="c1"># 10 sampled contexts</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_context_samples</span><span class="p">):</span>  <span class="c1"># 10 sampled contexts</span>
         <span class="n">sampled_context</span> <span class="o">=</span> <span class="n">SAMPLERS</span><span class="p">[</span><span class="n">policy</span><span class="o">.</span><span class="n">context_sampler</span><span class="p">](</span>
-            <span class="n">ctx_size</span><span class="o">=</span><span class="n">context_size</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">torch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">ctx_size</span><span class="o">=</span><span class="n">context_size</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">use_torch</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sampled_context</span> <span class="ow">in</span> <span class="n">all_contexts</span><span class="p">:</span>
             <span class="k">continue</span>
 
         <span class="n">all_contexts</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sampled_context</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="n">sampled_context</span><span class="p">)</span>
-        <span class="n">latent_pi</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">latent_sde</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_get_latent</span><span class="p">(</span><span class="n">sampled_states</span><span class="p">)</span>
-        <span class="n">context_action_dist</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_get_action_dist_from_latent</span><span class="p">(</span>
-            <span class="n">latent_pi</span><span class="p">,</span> <span class="n">latent_sde</span><span class="p">)</span>
+        <span class="n">latent_pi</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_get_latent</span><span class="p">(</span><span class="n">sampled_states</span><span class="p">)</span>
+        <span class="n">context_action_dist</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_get_action_dist_from_latent</span><span class="p">(</span><span class="n">latent_pi</span><span class="p">)</span>
         <span class="n">all_action_dists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">context_action_dist</span><span class="p">))</span>
 
     <span class="n">model</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="n">old_context</span><span class="p">)</span>
-    <span class="n">all_CLs</span> <span class="o">=</span> <span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">th</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">kl_divergence</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)))</span>
-               <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">all_action_dists</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
-    <span class="n">rawans</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">all_CLs</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">all_CLs</span><span class="p">)</span>
+    <span class="n">all_cls</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">kl_divergence</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">all_action_dists</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">rawans</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">all_cls</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_cls</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">rawans</span></div>
 
 </pre></div>

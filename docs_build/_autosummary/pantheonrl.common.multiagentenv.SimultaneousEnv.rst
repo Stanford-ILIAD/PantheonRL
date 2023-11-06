@@ -1,4 +1,4 @@
-pantheonrl.common.multiagentenv.SimultaneousEnv
+﻿pantheonrl.common.multiagentenv.SimultaneousEnv
 ===============================================
 
 .. currentmodule:: pantheonrl.common.multiagentenv
@@ -27,6 +27,7 @@ pantheonrl.common.multiagentenv.SimultaneousEnv
       ~SimultaneousEnv.n_reset
       ~SimultaneousEnv.n_step
       ~SimultaneousEnv.render
+      ~SimultaneousEnv.resample_null
       ~SimultaneousEnv.resample_random
       ~SimultaneousEnv.resample_round_robin
       ~SimultaneousEnv.reset

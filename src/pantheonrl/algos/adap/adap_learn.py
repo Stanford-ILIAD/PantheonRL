@@ -31,61 +31,6 @@ class ADAP(OnPolicyAlgorithm):
     ADAP
 
     Borrows from Proximal Policy Optimization algorithm (PPO) (clip version)
-    Paper: https://arxiv.org/abs/1707.06347
-    Code: This implementation borrows code from OpenAI Spinning Up
-    (https://github.com/openai/spinningup/)
-    https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail and
-    and Stable Baselines (PPO2 from https://github.com/hill-a/stable-baselines)
-    Introduction to PPO:
-    https://spinningup.openai.com/en/latest/algorithms/ppo.html
-    :param policy: The policy model to use (MlpPolicy, CnnPolicy, ...)
-    :param env: The environment to learn from
-        (if registered in Gym, can be str)
-    :param learning_rate: The learning rate, it can be a function
-        of the current progress remaining (from 1 to 0)
-    :param n_steps: The number of steps to run for each environment per update
-        (i.e. rollout buffer size is n_steps * n_envs where n_envs is number of
-        environment copies running in parallel)
-        NOTE: n_steps * n_envs must be greater than 1 (because of the advantage
-        normalization) See https://github.com/pytorch/pytorch/issues/29372
-    :param batch_size: Minibatch size
-    :param n_epochs: Number of epoch when optimizing the surrogate loss
-    :param gamma: Discount factor
-    :param gae_lambda: Factor for trade-off of bias vs variance for Generalized
-        Advantage Estimator
-    :param clip_range: Clipping parameter, it can be a function of the current
-        progress remaining (from 1 to 0).
-    :param clip_range_vf: Clipping parameter for the value function,
-        it can be a function of the current progress remaining (from 1 to 0).
-        This is a parameter specific to the OpenAI implementation. If None is
-        passed (default), no clipping will be done on the value function.
-        IMPORTANT: this clipping depends on the reward scaling.
-    :param ent_coef: Entropy coefficient for the loss calculation
-    :param vf_coef: Value function coefficient for the loss calculation
-    :param max_grad_norm: The maximum value for the gradient clipping
-    :param use_sde: Whether to use generalized State Dependent Exploration
-        (gSDE) instead of action noise exploration (default: False)
-    :param sde_sample_freq: Sample a new noise matrix every n steps when using
-        gSDE
-        Default: -1 (only sample at the beginning of the rollout)
-    :param target_kl: Limit the KL divergence between updates,
-        because the clipping is not enough to prevent large update
-        see issue #213
-        (cf https://github.com/hill-a/stable-baselines/issues/213)
-        By default, there is no limit on the kl div.
-    :param tensorboard_log: the log location for tensorboard
-        (if None, no logging)
-    :param create_eval_env: Whether to create a second environment that will be
-        used for evaluating the agent periodically. (Only available when
-        passing string for the environment)
-    :param policy_kwargs: additional arguments to be passed to the policy on
-        creation
-    :param verbose: the verbosity level: 0 no output, 1 info, 2 debug
-    :param seed: Seed for the pseudo random generators
-    :param device: Device (cpu, cuda, ...) on which the code should be run.
-        Setting it to auto, the code will be run on the GPU if possible.
-    :param _init_setup_model: Whether or not to build the network at the
-        creation of the instance
     """
 
     def __init__(
@@ -107,12 +52,14 @@ class ADAP(OnPolicyAlgorithm):
         use_sde: bool = False,
         sde_sample_freq: int = -1,
         target_kl: Optional[float] = None,
+        stats_window_size: int = 100,
         tensorboard_log: Optional[str] = None,
         policy_kwargs: Optional[Dict[str, Any]] = None,
         verbose: int = 0,
         seed: Optional[int] = None,
         device: Union[torch.device, str] = "auto",
         _init_setup_model: bool = True,
+        # New ADAP
         context_loss_coeff: float = 0.1,
         context_size: int = 3,
         num_context_samples: int = 5,
@@ -134,6 +81,7 @@ class ADAP(OnPolicyAlgorithm):
             max_grad_norm=max_grad_norm,
             use_sde=use_sde,
             sde_sample_freq=sde_sample_freq,
+            stats_window_size=stats_window_size,
             tensorboard_log=tensorboard_log,
             policy_kwargs=policy_kwargs,
             verbose=verbose,
@@ -167,32 +115,32 @@ class ADAP(OnPolicyAlgorithm):
             buffer_size = self.env.num_envs * self.n_steps
             assert buffer_size > 1 or (
                 not normalize_advantage
-            ), f"`n_steps * n_envs` must be greater than 1. Currently \
-            n_steps={self.n_steps} and n_envs={self.env.num_envs}"
+            ), f"`n_steps * n_envs` must be greater than 1. \
+            Currently n_steps={self.n_steps} and n_envs={self.env.num_envs}"
+            # Check that the rollout buffer size is
+            # a multiple of the mini-batch size
             if buffer_size % batch_size > 0:
                 warnings.warn(
                     f"You have specified a mini-batch size of {batch_size},"
                     f" but the `RolloutBuffer` is of size \
-                    `n_steps * n_envs = {buffer_size}`,"
+                    `n_steps * n_envs = {buffer_size}`."
                 )
         self.batch_size = batch_size
         self.n_epochs = n_epochs
-        self.clip_range_raw = clip_range
-        self.clip_range_vf_raw = clip_range_vf
+        self.clip_range = clip_range
+        self.clip_range_vf = clip_range_vf
         self.normalize_advantage = normalize_advantage
         self.target_kl = target_kl
 
         self.context_loss_coeff = context_loss_coeff
-
         self.num_state_samples = num_state_samples
         self.num_context_samples = num_context_samples
         self.context_sampler = context_sampler
         self.context_size = context_size
+        self.full_obs_shape = None
 
         if _init_setup_model:
             self._setup_model()
-
-        self.full_obs_shape = None
 
     def set_env(self, env, force_reset=True):
         """Set the env to use"""
@@ -209,21 +157,176 @@ class ADAP(OnPolicyAlgorithm):
         sampled_context = SAMPLERS[self.context_sampler](
             ctx_size=self.context_size, num=1, use_torch=True
         )
-
         self.policy.set_context(sampled_context)
 
         # Initialize schedules for policy/value clipping
-        self.clip_range = get_schedule_fn(self.clip_range_raw)
-        if self.clip_range_vf_raw is not None:
-            if isinstance(self.clip_range_vf_raw, (float, int)):
-                assert self.clip_range_vf_raw > 0, (
+        self.clip_range = get_schedule_fn(self.clip_range)
+        if self.clip_range_vf is not None:
+            if isinstance(self.clip_range_vf, (float, int)):
+                assert self.clip_range_vf > 0, (
                     "`clip_range_vf` must be positive, "
                     "pass `None` to deactivate vf clipping"
                 )
 
-            self.clip_range_vf = get_schedule_fn(self.clip_range_vf_raw)
-        else:
-            self.clip_range_vf = self.clip_range_vf_raw
+            self.clip_range_vf = get_schedule_fn(self.clip_range_vf)
+
+    def collect_rollouts(
+        self,
+        env: VecEnv,
+        callback: BaseCallback,
+        rollout_buffer: RolloutBuffer,
+        n_rollout_steps: int,
+    ) -> bool:
+        """
+        Collect rollouts using the current policy and fill a `RolloutBuffer`.
+        The term rollout here refers to the model-free notion and should not
+        be used with the concept of rollout used in model-based RL or planning.
+
+        :param env: The training environment
+        :param callback: Callback that will be called at each step
+            (and at the beginning and end of the rollout)
+        :param rollout_buffer: Buffer to fill with rollouts
+        :param n_rollout_steps: Number of experiences to collect per env
+        :return: True if function returned with at least `n_rollout_steps`
+            collected, False if callback terminated rollout prematurely.
+        """
+        assert (
+            self._last_obs is not None
+        ), "No previous observation was provided"
+        # Switch to eval mode (this affects batch norm / dropout)
+        self.policy.set_training_mode(False)
+
+        n_steps = 0
+
+        # ADAP ADDITION
+        if self.full_obs_shape is None:
+            self.full_obs_shape = (
+                rollout_buffer.obs_shape[0] + self.context_size,
+            )
+
+        rollout_buffer.obs_shape = tuple(self.full_obs_shape)
+        # ADAP END
+
+        rollout_buffer.reset()
+        # Sample new weights for the state dependent exploration
+        if self.use_sde:
+            self.policy.reset_noise(env.num_envs)
+
+        callback.on_rollout_start()
+
+        while n_steps < n_rollout_steps:
+            if (
+                self.use_sde
+                and self.sde_sample_freq > 0
+                and n_steps % self.sde_sample_freq == 0
+            ):
+                # Sample a new noise matrix
+                self.policy.reset_noise(env.num_envs)
+
+            with torch.no_grad():
+                # Convert to pytorch tensor or to TensorDict
+                obs_tensor = torch.cat(
+                    (
+                        obs_as_tensor(self._last_obs, self.device).reshape(
+                            (1, -1)
+                        ),
+                        self.policy.get_context(),
+                    ),
+                    dim=1,
+                )
+                actions, values, log_probs = self.policy(obs_tensor)
+            actions = actions.cpu().numpy()
+
+            # Rescale and perform action
+            clipped_actions = actions
+
+            if isinstance(self.action_space, spaces.Box):
+                if self.policy.squash_output:
+                    # Unscale the actions to match env bounds
+                    # if they were previously squashed (scaled in [-1, 1])
+                    clipped_actions = self.policy.unscale_action(
+                        clipped_actions
+                    )
+                else:
+                    # Otherwise, clip the actions to avoid out of bound error
+                    # as we are sampling from an unbounded Gaussian
+                    clipped_actions = np.clip(
+                        actions, self.action_space.low, self.action_space.high
+                    )
+
+            new_obs, rewards, dones, infos = env.step(clipped_actions)
+
+            self.num_timesteps += env.num_envs
+
+            # Give access to local variables
+            callback.update_locals(locals())
+            if not callback.on_step():
+                return False
+
+            self._update_info_buffer(infos)
+            n_steps += 1
+
+            if isinstance(self.action_space, spaces.Discrete):
+                # Reshape in case of discrete action
+                actions = actions.reshape(-1, 1)
+
+            # Handle timeout by bootstraping with value function
+            # see GitHub issue #633
+            for idx, done in enumerate(dones):
+                if (
+                    done
+                    and infos[idx].get("terminal_observation") is not None
+                    and infos[idx].get("TimeLimit.truncated", False)
+                ):
+                    terminal_obs = self.policy.obs_to_tensor(
+                        infos[idx]["terminal_observation"]
+                    )[0].reshape((1, -1))
+                    terminal_obs = torch.cat(
+                        (terminal_obs, self.policy.get_context()), dim=1
+                    )
+                    with torch.no_grad():
+                        terminal_value = self.policy.predict_values(
+                            terminal_obs
+                        )[0]
+                    rewards[idx] += self.gamma * terminal_value
+
+            rollout_buffer.add(
+                np.concatenate(
+                    (self._last_obs, self.policy.get_context()), axis=None
+                ),
+                # self._last_obs,  # type: ignore[arg-type]
+                actions,
+                rewards,
+                self._last_episode_starts,  # type: ignore[arg-type]
+                values,
+                log_probs,
+            )
+            self._last_obs = new_obs  # type: ignore[assignment]
+            self._last_episode_starts = dones
+
+            # ADAP CHANGE: resample context
+            if dones[0]:
+                sampled_context = SAMPLERS[self.context_sampler](
+                    ctx_size=self.context_size, num=1, use_torch=True
+                )
+                self.policy.set_context(sampled_context)
+
+        with torch.no_grad():
+            # Compute value for the last timestep
+            values = self.policy.predict_values(torch.cat((
+                obs_as_tensor(self._last_obs, self.device).reshape((1, -1)),
+                self.policy.get_context()), dim=1)
+            )
+
+        rollout_buffer.compute_returns_and_advantage(
+            last_values=values, dones=dones
+        )
+
+        callback.update_locals(locals())
+
+        callback.on_rollout_end()
+
+        return True
 
     def train(self) -> None:
         """
@@ -273,7 +376,7 @@ class ADAP(OnPolicyAlgorithm):
                         advantages.std() + 1e-8
                     )
 
-                # ratio between old and new policy, should be one at the first
+                # ratio between old and new policy
                 ratio = torch.exp(log_prob - rollout_data.old_log_prob)
 
                 # clipped surrogate loss
@@ -314,12 +417,11 @@ class ADAP(OnPolicyAlgorithm):
 
                 entropy_losses.append(entropy_loss.item())
 
-                # Context loss for ADAP algorithm
+                # Context loss for ADAP
                 context_loss = get_context_kl_loss(
                     self, self.policy, rollout_data
                 )
-
-                context_kl_divs.append(context_loss.detach().numpy())
+                context_kl_divs.append(context_loss.item())
 
                 loss = (
                     policy_loss
@@ -386,154 +488,6 @@ class ADAP(OnPolicyAlgorithm):
         self.logger.record("train/clip_range", clip_range)
         if self.clip_range_vf is not None:
             self.logger.record("train/clip_range_vf", clip_range_vf)
-
-    def collect_rollouts(
-        self,
-        env: VecEnv,
-        callback: BaseCallback,
-        rollout_buffer: RolloutBuffer,
-        n_rollout_steps: int,
-    ) -> bool:
-        """
-        Collect experiences using the current policy and fill a
-        ``RolloutBuffer``.
-
-        The term rollout here refers to the model-free notion and should not
-        be used with the concept of rollout used in model-based RL or planning.
-
-        :param env: The training environment
-        :param callback: Callback that will be called at each step
-            (and at the beginning and end of the rollout)
-        :param rollout_buffer: Buffer to fill with rollouts
-        :param n_rollout_steps: Number of steps to collect per environment
-        :return: True if function returned with at least `n_rollout_steps`
-            collected, False if callback terminated rollout prematurely.
-        """
-        assert (
-            self._last_obs is not None
-        ), "No previous observation was provided"
-        # Switch to eval mode (this affects batch norm / dropout)
-        self.policy.set_training_mode(False)
-
-        n_steps = 0
-
-        # ADAP ADDITION
-        if self.full_obs_shape is None:
-            self.full_obs_shape = (
-                rollout_buffer.obs_shape[0] + self.context_size,
-            )
-
-        rollout_buffer.obs_shape = tuple(self.full_obs_shape)
-        # ADAP END
-
-        rollout_buffer.reset()
-        # Sample new weights for the state dependent exploration
-        if self.use_sde:
-            self.policy.reset_noise(env.num_envs)
-
-        callback.on_rollout_start()
-
-        while n_steps < n_rollout_steps:
-            if (
-                self.use_sde
-                and self.sde_sample_freq > 0
-                and n_steps % self.sde_sample_freq == 0
-            ):
-                # Sample a new noise matrix
-                self.policy.reset_noise(env.num_envs)
-
-            with torch.no_grad():
-                # Convert to pytorch tensor or to TensorDict
-                obs_tensor = obs_as_tensor(self._last_obs, self.device)
-                actions, values, log_probs = self.policy(obs_tensor)
-            actions = actions.cpu().numpy()
-
-            # Rescale and perform action
-            clipped_actions = actions
-
-            if isinstance(self.action_space, spaces.Box):
-                if self.policy.squash_output:
-                    # Unscale the actions to match env bounds
-                    # if they were previously squashed (scaled in [-1, 1])
-                    clipped_actions = self.policy.unscale_action(
-                        clipped_actions
-                    )
-                else:
-                    # Otherwise, clip the actions to avoid out of bound error
-                    # as we are sampling from an unbounded Gaussian distribution
-                    clipped_actions = np.clip(
-                        actions, self.action_space.low, self.action_space.high
-                    )
-
-            new_obs, rewards, dones, infos = env.step(clipped_actions)
-
-            self.num_timesteps += env.num_envs
-
-            # Give access to local variables
-            callback.update_locals(locals())
-            if callback.on_step() is False:
-                return False
-
-            self._update_info_buffer(infos)
-            n_steps += 1
-
-            if isinstance(self.action_space, spaces.Discrete):
-                # Reshape in case of discrete action
-                actions = actions.reshape(-1, 1)
-
-            # Handle timeout by bootstraping with value function
-            # see GitHub issue #633
-            for idx, done in enumerate(dones):
-                if (
-                    done
-                    and infos[idx].get("terminal_observation") is not None
-                    and infos[idx].get("TimeLimit.truncated", False)
-                ):
-                    terminal_obs = self.policy.obs_to_tensor(
-                        infos[idx]["terminal_observation"]
-                    )[0]
-                    with torch.no_grad():
-                        terminal_value = self.policy.predict_values(
-                            terminal_obs
-                        )[0]
-                    rewards[idx] += self.gamma * terminal_value
-
-            rollout_buffer.add(
-                np.concatenate(
-                    (self._last_obs, self.policy.get_context()), axis=None
-                ),
-                # self._last_obs,  # type: ignore[arg-type]
-                actions,
-                rewards,
-                self._last_episode_starts,  # type: ignore[arg-type]
-                values,
-                log_probs,
-            )
-            self._last_obs = new_obs  # type: ignore[assignment]
-            self._last_episode_starts = dones
-
-            # ADAP CHANGE: resample context
-            if dones[0]:
-                sampled_context = SAMPLERS[self.context_sampler](
-                    ctx_size=self.context_size, num=1, use_torch=True
-                )
-                self.policy.set_context(sampled_context)
-
-        with torch.no_grad():
-            # Compute value for the last timestep
-            _, values, _ = self.policy.forward(
-                obs_as_tensor(new_obs, self.device)
-            )
-
-        rollout_buffer.compute_returns_and_advantage(
-            last_values=values, dones=dones
-        )
-
-        callback.update_locals(locals())
-
-        callback.on_rollout_end()
-
-        return True
 
     def learn(
         self,

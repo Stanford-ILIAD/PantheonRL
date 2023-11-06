@@ -19,7 +19,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pantheonrl.algos.adap.util.get_L2_sphere" href="pantheonrl.algos.adap.util.get_L2_sphere.html" />
+    <link rel="next" title="pantheonrl.algos.adap.util.get_categorical" href="pantheonrl.algos.adap.util.get_categorical.html" />
     <link rel="prev" title="pantheonrl.algos.adap.policies.MultModel" href="pantheonrl.algos.adap.policies.MultModel.html" /> 
 </head>
 
@@ -96,26 +96,27 @@
              
   <section id="module-pantheonrl.algos.adap.util">
 <span id="pantheonrl-algos-adap-util"></span><h1>pantheonrl.algos.adap.util<a class="headerlink" href="#module-pantheonrl.algos.adap.util" title="Link to this heading"></a></h1>
+<p>Collection of helper functions for ADAP</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="pantheonrl.algos.adap.util.get_L2_sphere.html#pantheonrl.algos.adap.util.get_L2_sphere" title="pantheonrl.algos.adap.util.get_L2_sphere"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_L2_sphere</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pantheonrl.algos.adap.util.get_categorical.html#pantheonrl.algos.adap.util.get_categorical" title="pantheonrl.algos.adap.util.get_categorical"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_categorical</span></code></a></p></td>
+<td><p>Samples from categorical distribution</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pantheonrl.algos.adap.util.get_categorical.html#pantheonrl.algos.adap.util.get_categorical" title="pantheonrl.algos.adap.util.get_categorical"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_categorical</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pantheonrl.algos.adap.util.get_context_kl_loss.html#pantheonrl.algos.adap.util.get_context_kl_loss" title="pantheonrl.algos.adap.util.get_context_kl_loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_context_kl_loss</span></code></a></p></td>
+<td><p>Gets the KL loss for ADAP</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pantheonrl.algos.adap.util.get_context_kl_loss.html#pantheonrl.algos.adap.util.get_context_kl_loss" title="pantheonrl.algos.adap.util.get_context_kl_loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_context_kl_loss</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pantheonrl.algos.adap.util.get_L2_sphere.html#pantheonrl.algos.adap.util.get_l2_sphere" title="pantheonrl.algos.adap.util.get_l2_sphere"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_l2_sphere</span></code></a></p></td>
+<td><p>Samples from l2 sphere</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pantheonrl.algos.adap.util.get_natural_number.html#pantheonrl.algos.adap.util.get_natural_number" title="pantheonrl.algos.adap.util.get_natural_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_natural_number</span></code></a></p></td>
 <td><p>Returns context vector of shape (num,1) with numbers in range [0, ctx_size]</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pantheonrl.algos.adap.util.get_positive_square.html#pantheonrl.algos.adap.util.get_positive_square" title="pantheonrl.algos.adap.util.get_positive_square"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_positive_square</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Samples from the square with axes between 0 and 1</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pantheonrl.algos.adap.util.get_unit_square.html#pantheonrl.algos.adap.util.get_unit_square" title="pantheonrl.algos.adap.util.get_unit_square"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_unit_square</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Samples from unit square centered at 0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pantheonrl.algos.adap.util.kl_divergence.html#pantheonrl.algos.adap.util.kl_divergence" title="pantheonrl.algos.adap.util.kl_divergence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kl_divergence</span></code></a></p></td>
 <td><p>Wrapper for the PyTorch implementation of the full form KL Divergence :param dist_true: the p distribution :param dist_pred: the q distribution :return: KL(dist_true||dist_pred)</p></td>
@@ -129,7 +130,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="pantheonrl.algos.adap.policies.MultModel.html" class="btn btn-neutral float-left" title="pantheonrl.algos.adap.policies.MultModel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="pantheonrl.algos.adap.util.get_L2_sphere.html" class="btn btn-neutral float-right" title="pantheonrl.algos.adap.util.get_L2_sphere" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pantheonrl.algos.adap.util.get_categorical.html" class="btn btn-neutral float-right" title="pantheonrl.algos.adap.util.get_categorical" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

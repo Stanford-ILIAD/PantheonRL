@@ -1,4 +1,4 @@
-pantheonrl.envs.blockworldgym.blockworld.BlockEnv
+﻿pantheonrl.envs.blockworldgym.blockworld.BlockEnv
 =================================================
 
 .. currentmodule:: pantheonrl.envs.blockworldgym.blockworld
@@ -28,6 +28,7 @@ pantheonrl.envs.blockworldgym.blockworld.BlockEnv
       ~BlockEnv.n_reset
       ~BlockEnv.n_step
       ~BlockEnv.render
+      ~BlockEnv.resample_null
       ~BlockEnv.resample_random
       ~BlockEnv.resample_round_robin
       ~BlockEnv.reset

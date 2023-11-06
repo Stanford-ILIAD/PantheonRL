@@ -1,4 +1,4 @@
-pantheonrl.common.multiagentenv.MultiAgentEnv
+﻿pantheonrl.common.multiagentenv.MultiAgentEnv
 =============================================
 
 .. currentmodule:: pantheonrl.common.multiagentenv
@@ -25,6 +25,7 @@ pantheonrl.common.multiagentenv.MultiAgentEnv
       ~MultiAgentEnv.n_reset
       ~MultiAgentEnv.n_step
       ~MultiAgentEnv.render
+      ~MultiAgentEnv.resample_null
       ~MultiAgentEnv.resample_random
       ~MultiAgentEnv.resample_round_robin
       ~MultiAgentEnv.reset

@@ -1,4 +1,4 @@
-pantheonrl.common.wrappers.TurnBasedFrameStack
+﻿pantheonrl.common.wrappers.TurnBasedFrameStack
 ==============================================
 
 .. currentmodule:: pantheonrl.common.wrappers
@@ -28,6 +28,7 @@ pantheonrl.common.wrappers.TurnBasedFrameStack
       ~TurnBasedFrameStack.n_reset
       ~TurnBasedFrameStack.n_step
       ~TurnBasedFrameStack.render
+      ~TurnBasedFrameStack.resample_null
       ~TurnBasedFrameStack.resample_random
       ~TurnBasedFrameStack.resample_round_robin
       ~TurnBasedFrameStack.reset

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pantheonrl.algos.adap.util.get_L2_sphere &mdash; PantheonRL 0.1 documentation</title>
+  <title>pantheonrl.algos.adap.util.get_l2_sphere &mdash; PantheonRL 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,9 +18,7 @@
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pantheonrl.algos.adap.util.get_categorical" href="pantheonrl.algos.adap.util.get_categorical.html" />
-    <link rel="prev" title="pantheonrl.algos.adap.util" href="pantheonrl.algos.adap.util.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,24 +46,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../guide/install.html">Installation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="pantheonrl.html">pantheonrl</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="pantheonrl.algos.html">pantheonrl.algos</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="pantheonrl.algos.adap.html">pantheonrl.algos.adap</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="pantheonrl.algos.adap.adap_learn.html">pantheonrl.algos.adap.adap_learn</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pantheonrl.algos.adap.agent.html">pantheonrl.algos.adap.agent</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pantheonrl.algos.adap.policies.html">pantheonrl.algos.adap.policies</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="pantheonrl.algos.adap.util.html">pantheonrl.algos.adap.util</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="pantheonrl.algos.bc.html">pantheonrl.algos.bc</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pantheonrl.algos.modular.html">pantheonrl.algos.modular</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="pantheonrl.common.html">pantheonrl.common</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pantheonrl.envs.html">pantheonrl.envs</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pantheonrl.html">pantheonrl</a></li>
 </ul>
 
         </div>
@@ -82,11 +64,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="pantheonrl.html">pantheonrl</a></li>
-          <li class="breadcrumb-item"><a href="pantheonrl.algos.html">pantheonrl.algos</a></li>
-          <li class="breadcrumb-item"><a href="pantheonrl.algos.adap.html">pantheonrl.algos.adap</a></li>
-          <li class="breadcrumb-item"><a href="pantheonrl.algos.adap.util.html">pantheonrl.algos.adap.util</a></li>
-      <li class="breadcrumb-item active">pantheonrl.algos.adap.util.get_L2_sphere</li>
+      <li class="breadcrumb-item active">pantheonrl.algos.adap.util.get_l2_sphere</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -96,21 +74,19 @@
            <div itemprop="articleBody">
              
   <section id="pantheonrl-algos-adap-util-get-l2-sphere">
-<h1>pantheonrl.algos.adap.util.get_L2_sphere<a class="headerlink" href="#pantheonrl-algos-adap-util-get-l2-sphere" title="Link to this heading"></a></h1>
+<h1>pantheonrl.algos.adap.util.get_l2_sphere<a class="headerlink" href="#pantheonrl-algos-adap-util-get-l2-sphere" title="Link to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="pantheonrl.algos.adap.util.get_L2_sphere">
-<span class="sig-name descname"><span class="pre">get_L2_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">torch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/adap/util.html#get_L2_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.adap.util.get_L2_sphere" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="pantheonrl.algos.adap.util.get_l2_sphere">
+<span class="sig-name descname"><span class="pre">get_l2_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_torch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/adap/util.html#get_l2_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.adap.util.get_l2_sphere" title="Link to this definition"></a></dt>
+<dd><p>Samples from l2 sphere</p>
+</dd></dl>
 
 </section>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="pantheonrl.algos.adap.util.html" class="btn btn-neutral float-left" title="pantheonrl.algos.adap.util" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="pantheonrl.algos.adap.util.get_categorical.html" class="btn btn-neutral float-right" title="pantheonrl.algos.adap.util.get_categorical" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

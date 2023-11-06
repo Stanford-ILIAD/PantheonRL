@@ -1,4 +1,4 @@
-pantheonrl.algos.bc.EpochOrBatchIteratorWithProgress
+﻿pantheonrl.algos.bc.EpochOrBatchIteratorWithProgress
 ====================================================
 
 .. currentmodule:: pantheonrl.algos.bc
@@ -16,6 +16,7 @@ pantheonrl.algos.bc.EpochOrBatchIteratorWithProgress
    .. autosummary::
       :nosignatures:
    
+      ~EpochOrBatchIteratorWithProgress.set_data_loader
    
    
 

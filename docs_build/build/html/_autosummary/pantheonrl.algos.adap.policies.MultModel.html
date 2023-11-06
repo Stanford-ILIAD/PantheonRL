@@ -100,7 +100,8 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="pantheonrl.algos.adap.policies.MultModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net_arch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/adap/policies.html#MultModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.adap.policies.MultModel" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MlpExtractor</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Neural Network representing multiplicative layers</p>
 <p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
@@ -139,30 +140,19 @@
 <td><p>Casts all floating point parameters and buffers to <code class="docutils literal notranslate"><span class="pre">float</span></code> datatype.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.forward" title="pantheonrl.algos.adap.policies.MultModel.forward"><code class="xref py py-obj docutils literal notranslate"><span class="pre">forward</span></code></a></p></td>
-<td><p><dl class="field-list simple">
-<dt class="field-odd">return<span class="colon">:</span></dt>
-<dd class="field-odd"><p>latent_policy, latent_value of the specified network.</p>
-</dd>
-</dl>
-</p></td>
+<td><p>Returns the action logits and values</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">forward_actor</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.forward_actor" title="pantheonrl.algos.adap.policies.MultModel.forward_actor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">forward_actor</span></code></a></p></td>
+<td><p>Returns the action logits and values</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">forward_critic</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.forward_critic" title="pantheonrl.algos.adap.policies.MultModel.forward_critic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">forward_critic</span></code></a></p></td>
+<td><p>Returns the action logits and values</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.get_buffer" title="pantheonrl.algos.adap.policies.MultModel.get_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_buffer</span></code></a></p></td>
 <td><p>Returns the buffer given by <code class="docutils literal notranslate"><span class="pre">target</span></code> if it exists, otherwise throws an error.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.get_extra_state" title="pantheonrl.algos.adap.policies.MultModel.get_extra_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_extra_state</span></code></a></p></td>
 <td><p>Returns any extra state to include in the module's state_dict.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_input_size_excluding_ctx</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_input_size_inluding_ctx</span></code></p></td>
-<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.get_parameter" title="pantheonrl.algos.adap.policies.MultModel.get_parameter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parameter</span></code></a></p></td>
 <td><p>Returns the parameter given by <code class="docutils literal notranslate"><span class="pre">target</span></code> if it exists, otherwise throws an error.</p></td>
@@ -197,8 +187,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.parameters" title="pantheonrl.algos.adap.policies.MultModel.parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parameters</span></code></a></p></td>
 <td><p>Returns an iterator over module parameters.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">policies</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.policies" title="pantheonrl.algos.adap.policies.MultModel.policies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">policies</span></code></a></p></td>
+<td><p>Returns the logits from the policy function</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.register_backward_hook" title="pantheonrl.algos.adap.policies.MultModel.register_backward_hook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_backward_hook</span></code></a></p></td>
 <td><p>Registers a backward hook on the module.</p></td>
@@ -254,8 +244,8 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.type" title="pantheonrl.algos.adap.policies.MultModel.type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">type</span></code></a></p></td>
 <td><p>Casts all parameters and buffers to <code class="xref py py-attr docutils literal notranslate"><span class="pre">dst_type</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.values" title="pantheonrl.algos.adap.policies.MultModel.values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></a></p></td>
+<td><p>Returns the response from the value function</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.MultModel.xpu" title="pantheonrl.algos.adap.policies.MultModel.xpu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xpu</span></code></a></p></td>
 <td><p>Moves all model parameters and buffers to the XPU.</p></td>
@@ -572,16 +562,41 @@ strings are acceptable.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.algos.adap.policies.MultModel.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/adap/policies.html#MultModel.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.adap.policies.MultModel.forward" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>latent_policy, latent_value of the specified network.
-If all layers are shared, then <code class="docutils literal notranslate"><span class="pre">latent_policy</span> <span class="pre">==</span> <span class="pre">latent_value</span></code></p>
+<dd><p>Returns the action logits and values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>features</strong> (<em>Tensor</em>) – </p>
 </dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>features</strong> (<em>Tensor</em>) – </p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tuple</em>[<em>Tensor</em>, <em>Tensor</em>]</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Tuple</em>[<em>Tensor</em>, <em>Tensor</em>]</p>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.adap.policies.MultModel.forward_actor">
+<span class="sig-name descname"><span class="pre">forward_actor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/adap/policies.html#MultModel.forward_actor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.adap.policies.MultModel.forward_actor" title="Link to this definition"></a></dt>
+<dd><p>Returns the action logits and values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>features</strong> (<em>Tensor</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tensor</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.adap.policies.MultModel.forward_critic">
+<span class="sig-name descname"><span class="pre">forward_critic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/adap/policies.html#MultModel.forward_critic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.adap.policies.MultModel.forward_critic" title="Link to this definition"></a></dt>
+<dd><p>Returns the action logits and values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>features</strong> (<em>Tensor</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tensor</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1031,6 +1046,23 @@ are direct members of this module.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><em>Iterator</em>[<em>Parameter</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.adap.policies.MultModel.policies">
+<span class="sig-name descname"><span class="pre">policies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contexts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/adap/policies.html#MultModel.policies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.adap.policies.MultModel.policies" title="Link to this definition"></a></dt>
+<dd><p>Returns the logits from the policy function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>observations</strong> (<em>Tensor</em>) – </p></li>
+<li><p><strong>contexts</strong> (<em>Tensor</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tensor</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1717,6 +1749,23 @@ etc.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><em>T</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.adap.policies.MultModel.values">
+<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contexts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/adap/policies.html#MultModel.values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.adap.policies.MultModel.values" title="Link to this definition"></a></dt>
+<dd><p>Returns the response from the value function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>observations</strong> (<em>Tensor</em>) – </p></li>
+<li><p><strong>contexts</strong> (<em>Tensor</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tensor</em></p>
 </dd>
 </dl>
 </dd></dl>

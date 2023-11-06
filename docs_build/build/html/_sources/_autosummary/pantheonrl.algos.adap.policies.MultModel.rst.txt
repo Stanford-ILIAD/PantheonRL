@@ -1,4 +1,4 @@
-pantheonrl.algos.adap.policies.MultModel
+﻿pantheonrl.algos.adap.policies.MultModel
 ========================================
 
 .. currentmodule:: pantheonrl.algos.adap.policies
@@ -32,8 +32,6 @@ pantheonrl.algos.adap.policies.MultModel
       ~MultModel.forward_critic
       ~MultModel.get_buffer
       ~MultModel.get_extra_state
-      ~MultModel.get_input_size_excluding_ctx
-      ~MultModel.get_input_size_inluding_ctx
       ~MultModel.get_parameter
       ~MultModel.get_submodule
       ~MultModel.half

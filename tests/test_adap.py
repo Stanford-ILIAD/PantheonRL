@@ -19,25 +19,47 @@ def make_env(option):
     elif option == 2:
         env = gym.make('LiarsDice-v0')
     env.np_random, _ = gym.utils.seeding.np_random(0)
-    return env
+    return env.unwrapped
 
 
 def run_standard(ALGO, timesteps, option, n_steps):
     env = make_env(option)
     ego = ALGO(AdapPolicy, env, n_steps=n_steps, verbose=0)
     env.unwrapped.ego_ind = 0
-    partner = AdapAgent(ALGO(AdapPolicy, env, n_steps=n_steps, verbose=0), latent_syncer=ego)
+    partner = AdapAgent(ALGO(AdapPolicy, env.unwrapped.get_dummy_env(1), n_steps=n_steps, verbose=0), latent_syncer=ego)
     env.unwrapped.add_partner_agent(partner)
 
     ego.learn(total_timesteps=timesteps)
+
+
+def run_mult(ALGO, timesteps, option, n_steps):
+    env = make_env(option)
+    ego = ALGO(AdapPolicyMult, env, n_steps=n_steps, verbose=0)
+    env.unwrapped.ego_ind = 0
+    partner = AdapAgent(ALGO(AdapPolicyMult, env.unwrapped.get_dummy_env(1), n_steps=n_steps, verbose=0), latent_syncer=ego)
+    env.unwrapped.add_partner_agent(partner)
+
+    ego.learn(total_timesteps=timesteps)
+
 
 @pytest.mark.timeout(60)
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.parametrize("ALGO", [ADAP])
 @pytest.mark.parametrize("epochs", [20])
-@pytest.mark.parametrize("option", [0])
+@pytest.mark.parametrize("option", [0, 1, 2])
 @pytest.mark.parametrize("n_steps", [40])
-def test_onpolicy(ALGO, epochs, option, n_steps):
+def test_adap_standard(ALGO, epochs, option, n_steps):
     run_standard(ALGO, n_steps * epochs, option, n_steps)
+
+
+@pytest.mark.timeout(60)
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize("ALGO", [ADAP])
+@pytest.mark.parametrize("epochs", [20])
+@pytest.mark.parametrize("option", [0, 1, 2])
+@pytest.mark.parametrize("n_steps", [40])
+def test_adap_mult(ALGO, epochs, option, n_steps):
+    run_mult(ALGO, n_steps * epochs, option, n_steps)
 

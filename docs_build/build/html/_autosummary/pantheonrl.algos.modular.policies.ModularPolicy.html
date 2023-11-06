@@ -97,7 +97,7 @@
 <h1>pantheonrl.algos.modular.policies.ModularPolicy<a class="headerlink" href="#pantheonrl-algos-modular-policies-modularpolicy" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModularPolicy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_schedule</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net_arch=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device='auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation_fn=&lt;class</span> <span class="pre">'torch.nn.modules.activation.Tanh'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ortho_init=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sde=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_std_init=0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_std=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sde_net_arch=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_expln=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">squash_output=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_extractor_class=&lt;class</span> <span class="pre">'stable_baselines3.common.torch_layers.FlattenExtractor'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_extractor_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_images=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_class=&lt;class</span> <span class="pre">'torch.optim.adam.Adam'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_partners=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partner_net_arch=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nomain=False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModularPolicy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_schedule</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net_arch=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation_fn=&lt;class</span> <span class="pre">'torch.nn.modules.activation.Tanh'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ortho_init=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sde=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_std_init=0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_std=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sde_net_arch=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_expln=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">squash_output=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_extractor_class=&lt;class</span> <span class="pre">'stable_baselines3.common.torch_layers.FlattenExtractor'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_extractor_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_images=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_class=&lt;class</span> <span class="pre">'torch.optim.adam.Adam'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_partners=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partner_net_arch=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nomain=False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BasePolicy</span></code></p>
 <p>Policy class for actor-critic algorithms (has both policy and value prediction).
 Used by A2C, PPO and the likes.
@@ -105,7 +105,7 @@ Used by A2C, PPO and the likes.
 :param action_space: (gym.spaces.Space) Action space
 :param lr_schedule: (Callable) Learning rate schedule (could be constant)
 :param net_arch: ([int or dict]) The specification of the policy and value networks.
-:param device: (str or th.device) Device on which the code should run.
+:param device: (str or torch.device) Device on which the code should run.
 :param activation_fn: (Type[nn.Module]) Activation function
 :param ortho_init: (bool) Whether to use or not orthogonal initialization
 :param use_sde: (bool) Whether to use State Dependent Exploration or not
@@ -130,15 +130,14 @@ this allows to ensure boundaries when using gSDE.</p></li>
 to pass to the feature extractor.</p></li>
 <li><p><strong>normalize_images</strong> (<em>bool</em>) – (bool) Whether to normalize images or not,
 dividing by 255.0 (True by default)</p></li>
-<li><p><strong>optimizer_class</strong> (<em>Type</em><em>[</em><em>Optimizer</em><em>]</em>) – (Type[th.optim.Optimizer]) The optimizer to use,
-<code class="docutils literal notranslate"><span class="pre">th.optim.Adam</span></code> by default</p></li>
+<li><p><strong>optimizer_class</strong> (<em>Type</em><em>[</em><em>Optimizer</em><em>]</em>) – (Type[torch.optim.Optimizer]) The optimizer to use,
+<code class="docutils literal notranslate"><span class="pre">torch.optim.Adam</span></code> by default</p></li>
 <li><p><strong>optimizer_kwargs</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>None</em>) – (Optional[Dict[str, Any]]) Additional keyword arguments,
 excluding the learning rate, to pass to the optimizer</p></li>
 <li><p><strong>observation_space</strong> (<em>Space</em>) – </p></li>
 <li><p><strong>action_space</strong> (<em>Space</em>) – </p></li>
 <li><p><strong>lr_schedule</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>]</em><em>, </em><em>float</em><em>]</em>) – </p></li>
 <li><p><strong>net_arch</strong> (<em>List</em><em>[</em><em>int</em><em> | </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em><em>] </em><em>| </em><em>None</em>) – </p></li>
-<li><p><strong>device</strong> (<em>device</em><em> | </em><em>str</em>) – </p></li>
 <li><p><strong>activation_fn</strong> (<em>Type</em><em>[</em><em>Module</em><em>]</em>) – </p></li>
 <li><p><strong>ortho_init</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>use_sde</strong> (<em>bool</em>) – </p></li>
@@ -167,8 +166,8 @@ excluding the learning rate, to pass to the optimizer</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.buffers" title="pantheonrl.algos.modular.policies.ModularPolicy.buffers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">buffers</span></code></a></p></td>
 <td><p>Returns an iterator over module buffers.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_mlp_action_value_net</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.build_mlp_action_value_net" title="pantheonrl.algos.modular.policies.ModularPolicy.build_mlp_action_value_net"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_mlp_action_value_net</span></code></a></p></td>
+<td><p>Build the action and value networks</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.children" title="pantheonrl.algos.modular.policies.ModularPolicy.children"><code class="xref py py-obj docutils literal notranslate"><span class="pre">children</span></code></a></p></td>
 <td><p>Returns an iterator over immediate children modules.</p></td>
@@ -179,8 +178,8 @@ excluding the learning rate, to pass to the optimizer</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.cuda" title="pantheonrl.algos.modular.policies.ModularPolicy.cuda"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cuda</span></code></a></p></td>
 <td><p>Moves all model parameters and buffers to the GPU.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">do_init_weights</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.do_init_weights" title="pantheonrl.algos.modular.policies.ModularPolicy.do_init_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">do_init_weights</span></code></a></p></td>
+<td><p>Initialize the weights</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.double" title="pantheonrl.algos.modular.policies.ModularPolicy.double"><code class="xref py py-obj docutils literal notranslate"><span class="pre">double</span></code></a></p></td>
 <td><p>Casts all floating point parameters and buffers to <code class="docutils literal notranslate"><span class="pre">double</span></code> datatype.</p></td>
@@ -189,7 +188,7 @@ excluding the learning rate, to pass to the optimizer</p></li>
 <td><p>Sets the module in evaluation mode.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.evaluate_actions" title="pantheonrl.algos.modular.policies.ModularPolicy.evaluate_actions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_actions</span></code></a></p></td>
-<td><p>Evaluate actions according to the current policy, given the observations. :param obs: (th.Tensor) :param actions: (th.Tensor) :return: (th.Tensor, th.Tensor, th.Tensor) estimated value, log likelihood of taking those actions     and entropy of the action distribution.</p></td>
+<td><p>Evaluate actions according to the current policy, given the observations. :param obs: (torch.Tensor) :param actions: (torch.Tensor) :return: (torch.Tensor, torch.Tensor, torch.Tensor) estimated value, log likelihood of     taking those actions and entropy of the action distribution.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.extra_repr" title="pantheonrl.algos.modular.policies.ModularPolicy.extra_repr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extra_repr</span></code></a></p></td>
 <td><p>Set the extra representation of the module</p></td>
@@ -201,10 +200,10 @@ excluding the learning rate, to pass to the optimizer</p></li>
 <td><p>Casts all floating point parameters and buffers to <code class="docutils literal notranslate"><span class="pre">float</span></code> datatype.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.forward" title="pantheonrl.algos.modular.policies.ModularPolicy.forward"><code class="xref py py-obj docutils literal notranslate"><span class="pre">forward</span></code></a></p></td>
-<td><p>Forward pass in all the networks (actor and critic) :param obs: (th.Tensor) Observation :param deterministic: (bool) Whether to sample or use deterministic actions :return: (Tuple[th.Tensor, th.Tensor, th.Tensor]) action, value and log probability of the action</p></td>
+<td><p>Forward pass in all the networks (actor and critic) :param obs: (torch.Tensor) Observation :param deterministic: (bool) Whether to sample or use deterministic actions :return: (Tuple[torch.Tensor, torch.Tensor, torch.Tensor]) action, value     and log probability of the action</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_action_logits_from_obs</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.get_action_logits_from_obs" title="pantheonrl.algos.modular.policies.ModularPolicy.get_action_logits_from_obs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_action_logits_from_obs</span></code></a></p></td>
+<td><p>Get the action logits from the observation</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.get_buffer" title="pantheonrl.algos.modular.policies.ModularPolicy.get_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_buffer</span></code></a></p></td>
 <td><p>Returns the buffer given by <code class="docutils literal notranslate"><span class="pre">target</span></code> if it exists, otherwise throws an error.</p></td>
@@ -239,8 +238,8 @@ excluding the learning rate, to pass to the optimizer</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.load_state_dict" title="pantheonrl.algos.modular.policies.ModularPolicy.load_state_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_state_dict</span></code></a></p></td>
 <td><p>Copies parameters and buffers from <a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.state_dict" title="pantheonrl.algos.modular.policies.ModularPolicy.state_dict"><code class="xref py py-attr docutils literal notranslate"><span class="pre">state_dict</span></code></a> into this module and its descendants.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_action_dist_net</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.make_action_dist_net" title="pantheonrl.algos.modular.policies.ModularPolicy.make_action_dist_net"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_action_dist_net</span></code></a></p></td>
+<td><p>Make the action distribution network</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.make_features_extractor" title="pantheonrl.algos.modular.policies.ModularPolicy.make_features_extractor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_features_extractor</span></code></a></p></td>
 <td><p>Helper method to create a features extractor.</p></td>
@@ -263,8 +262,8 @@ excluding the learning rate, to pass to the optimizer</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.obs_to_tensor" title="pantheonrl.algos.modular.policies.ModularPolicy.obs_to_tensor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_to_tensor</span></code></a></p></td>
 <td><p>Convert an input observation to a PyTorch tensor that can be fed to a model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">overwrite_main</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.overwrite_main" title="pantheonrl.algos.modular.policies.ModularPolicy.overwrite_main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">overwrite_main</span></code></a></p></td>
+<td><p>Overwrite the main weights</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.parameters" title="pantheonrl.algos.modular.policies.ModularPolicy.parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parameters</span></code></a></p></td>
 <td><p>Returns an iterator over module parameters.</p></td>
@@ -308,55 +307,52 @@ excluding the learning rate, to pass to the optimizer</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.requires_grad_" title="pantheonrl.algos.modular.policies.ModularPolicy.requires_grad_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">requires_grad_</span></code></a></p></td>
 <td><p>Change if autograd should record operations on parameters in this module.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.reset_noise" title="pantheonrl.algos.modular.policies.ModularPolicy.reset_noise"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_noise</span></code></a></p></td>
-<td><p>Sample new weights for the exploration matrix.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.save" title="pantheonrl.algos.modular.policies.ModularPolicy.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.save" title="pantheonrl.algos.modular.policies.ModularPolicy.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a></p></td>
 <td><p>Save model to a given location.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.scale_action" title="pantheonrl.algos.modular.policies.ModularPolicy.scale_action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale_action</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.scale_action" title="pantheonrl.algos.modular.policies.ModularPolicy.scale_action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale_action</span></code></a></p></td>
 <td><p>Rescale the action from [low, high] to [-1, 1] (no need for symmetric action space)</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.set_extra_state" title="pantheonrl.algos.modular.policies.ModularPolicy.set_extra_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_extra_state</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.set_extra_state" title="pantheonrl.algos.modular.policies.ModularPolicy.set_extra_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_extra_state</span></code></a></p></td>
 <td><p>This function is called from <a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.load_state_dict" title="pantheonrl.algos.modular.policies.ModularPolicy.load_state_dict"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_state_dict()</span></code></a> to handle any extra state found within the <cite>state_dict</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_freeze_main</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_main" title="pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_freeze_main</span></code></a></p></td>
+<td><p>freeze / unfreeze main modules</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_freeze_module</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_module" title="pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_module"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_freeze_module</span></code></a></p></td>
+<td><p>freeze / unfreeze the module networks</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_freeze_partner</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_partner" title="pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_partner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_freeze_partner</span></code></a></p></td>
+<td><p>freeze / unfreeze partner modules</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.set_training_mode" title="pantheonrl.algos.modular.policies.ModularPolicy.set_training_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_training_mode</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.set_training_mode" title="pantheonrl.algos.modular.policies.ModularPolicy.set_training_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_training_mode</span></code></a></p></td>
 <td><p>Put the policy in either training or evaluation mode.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.share_memory" title="pantheonrl.algos.modular.policies.ModularPolicy.share_memory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">share_memory</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.share_memory" title="pantheonrl.algos.modular.policies.ModularPolicy.share_memory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">share_memory</span></code></a></p></td>
 <td><p>See <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.share_memory_()</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.state_dict" title="pantheonrl.algos.modular.policies.ModularPolicy.state_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_dict</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.state_dict" title="pantheonrl.algos.modular.policies.ModularPolicy.state_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_dict</span></code></a></p></td>
 <td><p>Returns a dictionary containing references to the whole state of the module.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.to" title="pantheonrl.algos.modular.policies.ModularPolicy.to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.to" title="pantheonrl.algos.modular.policies.ModularPolicy.to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to</span></code></a></p></td>
 <td><p>Moves and/or casts the parameters and buffers.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.to_empty" title="pantheonrl.algos.modular.policies.ModularPolicy.to_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_empty</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.to_empty" title="pantheonrl.algos.modular.policies.ModularPolicy.to_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_empty</span></code></a></p></td>
 <td><p>Moves the parameters and buffers to the specified device without copying storage.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.train" title="pantheonrl.algos.modular.policies.ModularPolicy.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.train" title="pantheonrl.algos.modular.policies.ModularPolicy.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a></p></td>
 <td><p>Sets the module in training mode.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.type" title="pantheonrl.algos.modular.policies.ModularPolicy.type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">type</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.type" title="pantheonrl.algos.modular.policies.ModularPolicy.type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">type</span></code></a></p></td>
 <td><p>Casts all parameters and buffers to <code class="xref py py-attr docutils literal notranslate"><span class="pre">dst_type</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.unscale_action" title="pantheonrl.algos.modular.policies.ModularPolicy.unscale_action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unscale_action</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.unscale_action" title="pantheonrl.algos.modular.policies.ModularPolicy.unscale_action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unscale_action</span></code></a></p></td>
 <td><p>Rescale the action from [-1, 1] to [low, high] (no need for symmetric action space)</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.xpu" title="pantheonrl.algos.modular.policies.ModularPolicy.xpu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xpu</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.xpu" title="pantheonrl.algos.modular.policies.ModularPolicy.xpu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xpu</span></code></a></p></td>
 <td><p>Moves all model parameters and buffers to the XPU.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.zero_grad" title="pantheonrl.algos.modular.policies.ModularPolicy.zero_grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_grad</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.modular.policies.ModularPolicy.zero_grad" title="pantheonrl.algos.modular.policies.ModularPolicy.zero_grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_grad</span></code></a></p></td>
 <td><p>Sets gradients of all model parameters to zero.</p></td>
 </tr>
 </tbody>
@@ -525,6 +521,12 @@ are direct members of this module.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.build_mlp_action_value_net">
+<span class="sig-name descname"><span class="pre">build_mlp_action_value_net</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net_arch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy.build_mlp_action_value_net"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.build_mlp_action_value_net" title="Link to this definition"></a></dt>
+<dd><p>Build the action and value networks</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.children">
 <span class="sig-name descname"><span class="pre">children</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.children" title="Link to this definition"></a></dt>
 <dd><p>Returns an iterator over immediate children modules.</p>
@@ -607,6 +609,12 @@ If it has no parameters, the ‘cpu’ device is used as a fallback.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.do_init_weights">
+<span class="sig-name descname"><span class="pre">do_init_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_main</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_partner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy.do_init_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.do_init_weights" title="Link to this definition"></a></dt>
+<dd><p>Initialize the weights</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.double">
 <span class="sig-name descname"><span class="pre">double</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.double" title="Link to this definition"></a></dt>
 <dd><p>Casts all floating point parameters and buffers to <code class="docutils literal notranslate"><span class="pre">double</span></code> datatype.</p>
@@ -658,11 +666,11 @@ etc.</p>
 <span class="sig-name descname"><span class="pre">evaluate_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partner_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy.evaluate_actions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.evaluate_actions" title="Link to this definition"></a></dt>
 <dd><p>Evaluate actions according to the current policy,
 given the observations.
-:param obs: (th.Tensor)
-:param actions: (th.Tensor)
-:return: (th.Tensor, th.Tensor, th.Tensor) estimated value, log likelihood of taking those actions</p>
+:param obs: (torch.Tensor)
+:param actions: (torch.Tensor)
+:return: (torch.Tensor, torch.Tensor, torch.Tensor) estimated value, log likelihood of</p>
 <blockquote>
-<div><p>and entropy of the action distribution.</p>
+<div><p>taking those actions and entropy of the action distribution.</p>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -749,9 +757,12 @@ strings are acceptable.</p>
 <dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partner_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deterministic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.forward" title="Link to this definition"></a></dt>
 <dd><p>Forward pass in all the networks (actor and critic)
-:param obs: (th.Tensor) Observation
+:param obs: (torch.Tensor) Observation
 :param deterministic: (bool) Whether to sample or use deterministic actions
-:return: (Tuple[th.Tensor, th.Tensor, th.Tensor]) action, value and log probability of the action</p>
+:return: (Tuple[torch.Tensor, torch.Tensor, torch.Tensor]) action, value</p>
+<blockquote>
+<div><p>and log probability of the action</p>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -762,6 +773,24 @@ strings are acceptable.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><em>Tuple</em>[<em>Tensor</em>, <em>Tensor</em>, <em>Tensor</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.get_action_logits_from_obs">
+<span class="sig-name descname"><span class="pre">get_action_logits_from_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partner_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy.get_action_logits_from_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.get_action_logits_from_obs" title="Link to this definition"></a></dt>
+<dd><p>Get the action logits from the observation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obs</strong> (<em>Tensor</em>) – </p></li>
+<li><p><strong>partner_idx</strong> (<em>int</em>) – </p></li>
+<li><p><strong>action_mask</strong> (<em>Tensor</em><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tensor</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1077,6 +1106,20 @@ exists in <a class="reference internal" href="#pantheonrl.algos.modular.policies
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.make_action_dist_net">
+<span class="sig-name descname"><span class="pre">make_action_dist_net</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latent_dim_pi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latent_sde_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy.make_action_dist_net"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.make_action_dist_net" title="Link to this definition"></a></dt>
+<dd><p>Make the action distribution network</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>latent_dim_pi</strong> (<em>int</em>) – </p></li>
+<li><p><strong>latent_sde_dim</strong> (<em>int</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.make_features_extractor">
 <span class="sig-name descname"><span class="pre">make_features_extractor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.make_features_extractor" title="Link to this definition"></a></dt>
 <dd><p>Helper method to create a features extractor.</p>
@@ -1280,6 +1323,12 @@ and whether the observation is vectorized or not</p>
 <dd class="field-odd"><p><em>Tuple</em>[<em>Tensor</em>, bool]</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.overwrite_main">
+<span class="sig-name descname"><span class="pre">overwrite_main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy.overwrite_main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.overwrite_main" title="Link to this definition"></a></dt>
+<dd><p>Overwrite the main weights</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1779,21 +1828,6 @@ or training parts of a model individually (e.g., GAN training).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.reset_noise">
-<span class="sig-name descname"><span class="pre">reset_noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_envs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy.reset_noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.reset_noise" title="Link to this definition"></a></dt>
-<dd><p>Sample new weights for the exploration matrix.
-:param n_envs: (int)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>n_envs</strong> (<em>int</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.save" title="Link to this definition"></a></dt>
 <dd><p>Save model to a given location.</p>
@@ -1841,6 +1875,24 @@ found within the <cite>state_dict</cite>. Implement this function and a correspo
 <dd class="field-odd"><p><strong>state</strong> (<em>Any</em>) – </p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_main">
+<span class="sig-name descname"><span class="pre">set_freeze_main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freeze</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy.set_freeze_main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_main" title="Link to this definition"></a></dt>
+<dd><p>freeze / unfreeze main modules</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_module">
+<span class="sig-name descname"><span class="pre">set_freeze_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freeze</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy.set_freeze_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_module" title="Link to this definition"></a></dt>
+<dd><p>freeze / unfreeze the module networks</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_partner">
+<span class="sig-name descname"><span class="pre">set_freeze_partner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freeze</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/modular/policies.html#ModularPolicy.set_freeze_partner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.modular.policies.ModularPolicy.set_freeze_partner" title="Link to this definition"></a></dt>
+<dd><p>freeze / unfreeze partner modules</p>
 </dd></dl>
 
 <dl class="py method">

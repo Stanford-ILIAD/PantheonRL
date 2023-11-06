@@ -1,4 +1,4 @@
-pantheonrl.algos.modular.policies.ModularPolicy
+﻿pantheonrl.algos.modular.policies.ModularPolicy
 ===============================================
 
 .. currentmodule:: pantheonrl.algos.modular.policies
@@ -67,7 +67,6 @@ pantheonrl.algos.modular.policies.ModularPolicy
       ~ModularPolicy.register_parameter
       ~ModularPolicy.register_state_dict_pre_hook
       ~ModularPolicy.requires_grad_
-      ~ModularPolicy.reset_noise
       ~ModularPolicy.save
       ~ModularPolicy.scale_action
       ~ModularPolicy.set_extra_state

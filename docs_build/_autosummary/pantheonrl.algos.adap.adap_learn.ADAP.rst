@@ -1,4 +1,4 @@
-pantheonrl.algos.adap.adap\_learn.ADAP
+﻿pantheonrl.algos.adap.adap\_learn.ADAP
 ======================================
 
 .. currentmodule:: pantheonrl.algos.adap.adap_learn
@@ -40,7 +40,6 @@ pantheonrl.algos.adap.adap\_learn.ADAP
    
       ~ADAP.logger
       ~ADAP.policy_aliases
-      ~ADAP.full_obs_shape
       ~ADAP.rollout_buffer
       ~ADAP.policy
       ~ADAP.observation_space

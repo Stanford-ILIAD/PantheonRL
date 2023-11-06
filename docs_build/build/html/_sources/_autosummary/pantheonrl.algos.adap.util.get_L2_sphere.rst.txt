@@ -1,6 +1,6 @@
-pantheonrl.algos.adap.util.get\_L2\_sphere
+pantheonrl.algos.adap.util.get\_l2\_sphere
 ==========================================
 
 .. currentmodule:: pantheonrl.algos.adap.util
 
-.. autofunction:: get_L2_sphere
+.. autofunction:: get_l2_sphere

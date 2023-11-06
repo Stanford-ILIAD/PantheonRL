@@ -1,4 +1,4 @@
-pantheonrl.algos.bc.BCShell
+﻿pantheonrl.algos.bc.BCShell
 ===========================
 
 .. currentmodule:: pantheonrl.algos.bc
@@ -16,9 +16,17 @@ pantheonrl.algos.bc.BCShell
    .. autosummary::
       :nosignatures:
    
+      ~BCShell.get_policy
+      ~BCShell.set_policy
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BCShell.policy
    
    

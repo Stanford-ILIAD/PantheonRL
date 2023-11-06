@@ -1,4 +1,4 @@
-pantheonrl.common.wrappers.SimultaneousFrameStack
+﻿pantheonrl.common.wrappers.SimultaneousFrameStack
 =================================================
 
 .. currentmodule:: pantheonrl.common.wrappers
@@ -27,6 +27,7 @@ pantheonrl.common.wrappers.SimultaneousFrameStack
       ~SimultaneousFrameStack.n_reset
       ~SimultaneousFrameStack.n_step
       ~SimultaneousFrameStack.render
+      ~SimultaneousFrameStack.resample_null
       ~SimultaneousFrameStack.resample_random
       ~SimultaneousFrameStack.resample_round_robin
       ~SimultaneousFrameStack.reset

@@ -1,4 +1,4 @@
-pantheonrl.common.wrappers.TurnBasedRecorder
+﻿pantheonrl.common.wrappers.TurnBasedRecorder
 ============================================
 
 .. currentmodule:: pantheonrl.common.wrappers
@@ -29,6 +29,7 @@ pantheonrl.common.wrappers.TurnBasedRecorder
       ~TurnBasedRecorder.n_reset
       ~TurnBasedRecorder.n_step
       ~TurnBasedRecorder.render
+      ~TurnBasedRecorder.resample_null
       ~TurnBasedRecorder.resample_random
       ~TurnBasedRecorder.resample_round_robin
       ~TurnBasedRecorder.reset

@@ -1,4 +1,4 @@
-pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv
+﻿pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv
 =============================================================
 
 .. currentmodule:: pantheonrl.envs.blockworldgym.simpleblockworld
@@ -28,6 +28,7 @@ pantheonrl.envs.blockworldgym.simpleblockworld.SimpleBlockEnv
       ~SimpleBlockEnv.n_reset
       ~SimpleBlockEnv.n_step
       ~SimpleBlockEnv.render
+      ~SimpleBlockEnv.resample_null
       ~SimpleBlockEnv.resample_random
       ~SimpleBlockEnv.resample_round_robin
       ~SimpleBlockEnv.reset

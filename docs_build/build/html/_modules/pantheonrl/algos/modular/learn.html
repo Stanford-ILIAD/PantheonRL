@@ -74,26 +74,36 @@
            <div itemprop="articleBody">
              
   <h1>Source code for pantheonrl.algos.modular.learn</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Implementation of the Modular Algorithm.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">gymnasium</span> <span class="k">as</span> <span class="nn">gym</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span> <span class="k">as</span> <span class="nn">th</span>
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">gymnasium</span> <span class="kn">import</span> <span class="n">spaces</span>
 <span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">functional</span> <span class="k">as</span> <span class="n">F</span>
 
 <span class="kn">from</span> <span class="nn">stable_baselines3.common.on_policy_algorithm</span> <span class="kn">import</span> <span class="n">OnPolicyAlgorithm</span>
 
-<span class="kn">from</span> <span class="nn">stable_baselines3.common</span> <span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">from</span> <span class="nn">stable_baselines3.common.base_class</span> <span class="kn">import</span> <span class="n">BaseAlgorithm</span>
 <span class="kn">from</span> <span class="nn">stable_baselines3.common.buffers</span> <span class="kn">import</span> <span class="n">RolloutBuffer</span>
 <span class="kn">from</span> <span class="nn">stable_baselines3.common.callbacks</span> <span class="kn">import</span> <span class="n">BaseCallback</span>
 <span class="kn">from</span> <span class="nn">stable_baselines3.common.policies</span> <span class="kn">import</span> <span class="n">ActorCriticPolicy</span>
-<span class="kn">from</span> <span class="nn">stable_baselines3.common.type_aliases</span> <span class="kn">import</span> <span class="n">GymEnv</span><span class="p">,</span> <span class="n">MaybeCallback</span><span class="p">,</span> <span class="n">Schedule</span>
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.type_aliases</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GymEnv</span><span class="p">,</span>
+    <span class="n">MaybeCallback</span><span class="p">,</span>
+    <span class="n">Schedule</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">stable_baselines3.common.utils</span> <span class="kn">import</span> <span class="n">safe_mean</span>
 <span class="kn">from</span> <span class="nn">stable_baselines3.common.vec_env</span> <span class="kn">import</span> <span class="n">VecEnv</span>
-<span class="kn">from</span> <span class="nn">stable_baselines3.common.utils</span> <span class="kn">import</span> <span class="n">explained_variance</span><span class="p">,</span> <span class="n">get_schedule_fn</span>
+<span class="kn">from</span> <span class="nn">stable_baselines3.common.utils</span> <span class="kn">import</span> <span class="n">get_schedule_fn</span>
+
+
 
 <div class="viewcode-block" id="ModularAlgorithm">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.modular.learn.ModularAlgorithm.html#pantheonrl.algos.modular.learn.ModularAlgorithm">[docs]</a>
@@ -121,18 +131,16 @@
         <span class="n">sde_sample_freq</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">target_kl</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">tensorboard_log</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">create_eval_env</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">policy_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">device</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">th</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
         <span class="n">_init_setup_model</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        
         <span class="c1"># my additional arguments</span>
-        <span class="n">marginal_reg_coef</span> <span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">marginal_reg_coef</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="p">):</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">ModularAlgorithm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">policy</span><span class="p">,</span>
             <span class="n">env</span><span class="p">,</span>
             <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
@@ -148,7 +156,6 @@
             <span class="n">policy_kwargs</span><span class="o">=</span><span class="n">policy_kwargs</span><span class="p">,</span>
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
             <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
-            <span class="n">create_eval_env</span><span class="o">=</span><span class="n">create_eval_env</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">_init_setup_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">supported_action_spaces</span><span class="o">=</span><span class="p">(</span>
@@ -158,14 +165,15 @@
                 <span class="n">spaces</span><span class="o">.</span><span class="n">MultiBinary</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">marginal_reg_coef</span> <span class="o">=</span> <span class="n">marginal_reg_coef</span>
 
         <span class="c1"># Sanity check, otherwise it will lead to noisy gradient and NaN</span>
         <span class="c1"># because of the advantage normalization</span>
         <span class="k">assert</span> <span class="p">(</span>
             <span class="n">batch_size</span> <span class="o">&gt;</span> <span class="mi">1</span>
-        <span class="p">),</span> <span class="s2">&quot;`batch_size` must be greater than 1. See https://github.com/DLR-RM/stable-baselines3/issues/440&quot;</span>
+        <span class="p">),</span> <span class="s2">&quot;`batch_size` must be greater than 1. </span><span class="se">\</span>
+<span class="s2">        See https://github.com/DLR-RM/stable-baselines3/issues/440&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Check that `n_steps * n_envs &gt; 1` to avoid NaN</span>
@@ -173,17 +181,15 @@
             <span class="n">buffer_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">num_envs</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span>
             <span class="k">assert</span> <span class="p">(</span>
                 <span class="n">buffer_size</span> <span class="o">&gt;</span> <span class="mi">1</span>
-            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;`n_steps * n_envs` must be greater than 1. Currently n_steps=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="si">}</span><span class="s2"> and n_envs=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">num_envs</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="c1"># Check that the rollout buffer size is a multiple of the mini-batch size</span>
-            <span class="n">untruncated_batches</span> <span class="o">=</span> <span class="n">buffer_size</span> <span class="o">//</span> <span class="n">batch_size</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;`n_steps * n_envs` must be greater than 1. </span><span class="se">\</span>
+<span class="s2">            Currently n_steps=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="si">}</span><span class="s2"> and n_envs=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">num_envs</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="c1"># Check that the rollout buffer size is</span>
+            <span class="c1"># a multiple of the mini-batch size</span>
             <span class="k">if</span> <span class="n">buffer_size</span> <span class="o">%</span> <span class="n">batch_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;You have specified a mini-batch size of </span><span class="si">{</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">,&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; but because the `RolloutBuffer` is of size `n_steps * n_envs = </span><span class="si">{</span><span class="n">buffer_size</span><span class="si">}</span><span class="s2">`,&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; after every </span><span class="si">{</span><span class="n">untruncated_batches</span><span class="si">}</span><span class="s2"> untruncated mini-batches,&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; there will be a truncated mini-batch of size </span><span class="si">{</span><span class="n">buffer_size</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">batch_size</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;We recommend using a `batch_size` that is a factor of `n_steps * n_envs`.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Info: (n_steps=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="si">}</span><span class="s2"> and n_envs=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">num_envs</span><span class="si">}</span><span class="s2">)&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; but the `RolloutBuffer` is of size </span><span class="se">\</span>
+<span class="s2">                    `n_steps * n_envs = </span><span class="si">{</span><span class="n">buffer_size</span><span class="si">}</span><span class="s2">`.&quot;</span>
                 <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_epochs</span> <span class="o">=</span> <span class="n">n_epochs</span>
@@ -191,11 +197,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_vf</span> <span class="o">=</span> <span class="n">clip_range_vf</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_kl</span> <span class="o">=</span> <span class="n">target_kl</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_dones</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="n">_init_setup_model</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_setup_model</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_setup_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        
+
         <span class="c1"># OnPolicyAlgorithm&#39;s _setup_model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lr_schedule</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
@@ -205,48 +213,59 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lr_schedule</span><span class="p">,</span>
             <span class="n">use_sde</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_sde</span><span class="p">,</span>
-            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">policy_kwargs</span>  <span class="c1"># pytype:disable=not-instantiable</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">policy_kwargs</span><span class="p">,</span>  <span class="c1"># pytype:disable=not-instantiable</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">policy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        
-        <span class="n">buffer_cls</span> <span class="o">=</span> <span class="n">DictRolloutBuffer</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">RolloutBuffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rollout_buffer</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">RolloutBuffer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+                <span class="n">gamma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="p">,</span>
+                <span class="n">gae_lambda</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gae_lambda</span><span class="p">,</span>
+                <span class="n">n_envs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_envs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">num_partners</span><span class="p">)</span>
+        <span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">rollout_buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">buffer_cls</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
-            <span class="n">gamma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="p">,</span>
-            <span class="n">gae_lambda</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gae_lambda</span><span class="p">,</span>
-            <span class="n">n_envs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_envs</span><span class="p">,</span>
-        <span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">num_partners</span><span class="p">)]</span>
-        
         <span class="c1"># PPO&#39;s _setup_model</span>
         <span class="c1"># Initialize schedules for policy/value clipping</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clip_range</span> <span class="o">=</span> <span class="n">get_schedule_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clip_range</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_vf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clip_range_vf</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
-                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_vf</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;`clip_range_vf` must be positive, &quot;</span> <span class="s2">&quot;pass `None` to deactivate vf clipping&quot;</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_vf</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+                    <span class="s2">&quot;`clip_range_vf` must be positive, &quot;</span>
+                    <span class="s2">&quot;pass `None` to deactivate vf clipping&quot;</span>
+                <span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_vf</span> <span class="o">=</span> <span class="n">get_schedule_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clip_range_vf</span><span class="p">)</span>
-        
+
 <div class="viewcode-block" id="ModularAlgorithm.collect_rollouts">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.modular.learn.ModularAlgorithm.html#pantheonrl.algos.modular.learn.ModularAlgorithm.collect_rollouts">[docs]</a>
     <span class="k">def</span> <span class="nf">collect_rollouts</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="n">VecEnv</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">BaseCallback</span><span class="p">,</span> <span class="n">rollout_buffer</span><span class="p">:</span> <span class="n">RolloutBuffer</span><span class="p">,</span> <span class="n">n_rollout_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">partner_idx</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">env</span><span class="p">:</span> <span class="n">VecEnv</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">:</span> <span class="n">BaseCallback</span><span class="p">,</span>
+        <span class="n">rollout_buffer</span><span class="p">:</span> <span class="n">RolloutBuffer</span><span class="p">,</span>
+        <span class="n">n_rollout_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">partner_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Collect rollouts using the current policy and fill a `RolloutBuffer`.</span>
 
 <span class="sd">        :param env: (VecEnv) The training environment</span>
-<span class="sd">        :param callback: (BaseCallback) Callback that will be called at each step</span>
-<span class="sd">            (and at the beginning and end of the rollout)</span>
+<span class="sd">        :param callback: (BaseCallback) Callback that will be called at each</span>
+<span class="sd">            step (and at the beginning and end of the rollout)</span>
 <span class="sd">        :param rollout_buffer: (RolloutBuffer) Buffer to fill with rollouts</span>
 <span class="sd">        :param n_steps: (int) Number of experiences to collect per environment</span>
-<span class="sd">        :return: (bool) True if function returned with at least `n_rollout_steps`</span>
-<span class="sd">            collected, False if callback terminated rollout prematurely.</span>
+<span class="sd">        :return: (bool) True if function returned with at least</span>
+<span class="sd">            `n_rollout_steps` collected, False if callback terminated rollout</span>
+<span class="sd">            prematurely.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;No previous observation was provided&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;No previous observation was provided&quot;</span>
         <span class="n">n_steps</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">rollout_buffer</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="c1"># Sample new weights for the state dependent exploration</span>
@@ -257,22 +276,31 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_last_dones</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">while</span> <span class="n">n_steps</span> <span class="o">&lt;</span> <span class="n">n_rollout_steps</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_sde</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">n_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">envs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_partnerid</span><span class="p">(</span><span class="n">partner_idx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">use_sde</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="ow">and</span> <span class="n">n_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sde_sample_freq</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="p">):</span>
                 <span class="c1"># Sample a new noise matrix</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">reset_noise</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">num_envs</span><span class="p">)</span>
 
-            <span class="k">with</span> <span class="n">th</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
                 <span class="c1"># Convert to pytorch tensor</span>
-                <span class="n">obs_tensor</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_last_obs</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-                <span class="c1">#actions, values, log_probs = self.policy.forward(obs_tensor)</span>
-                <span class="n">actions</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">log_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">obs_tensor</span><span class="p">,</span> <span class="n">partner_idx</span><span class="o">=</span><span class="n">partner_idx</span><span class="p">)</span>
+                <span class="n">obs_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_last_obs</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                <span class="c1"># actions, values, log_probs = self.policy.forward(obs_tensor)</span>
+                <span class="n">actions</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">log_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span>
+                    <span class="n">obs_tensor</span><span class="p">,</span> <span class="n">partner_idx</span><span class="o">=</span><span class="n">partner_idx</span>
+                <span class="p">)</span>
             <span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
 
             <span class="c1"># Rescale and perform action</span>
             <span class="n">clipped_actions</span> <span class="o">=</span> <span class="n">actions</span>
             <span class="c1"># Clip the actions to avoid out of bound error</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">):</span>
-                <span class="n">clipped_actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">high</span><span class="p">)</span>
+                <span class="n">clipped_actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                    <span class="n">actions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">high</span>
+                <span class="p">)</span>
 
             <span class="n">env</span><span class="o">.</span><span class="n">envs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_partnerid</span><span class="p">(</span><span class="n">partner_idx</span><span class="p">)</span>
             <span class="n">new_obs</span><span class="p">,</span> <span class="n">rewards</span><span class="p">,</span> <span class="n">dones</span><span class="p">,</span> <span class="n">infos</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">clipped_actions</span><span class="p">)</span>
@@ -287,7 +315,14 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">):</span>
                 <span class="c1"># Reshape in case of discrete action</span>
                 <span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">rollout_buffer</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_last_obs</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">rewards</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_dones</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">log_probs</span><span class="p">)</span>
+            <span class="n">rollout_buffer</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_last_obs</span><span class="p">,</span>
+                <span class="n">actions</span><span class="p">,</span>
+                <span class="n">rewards</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_last_dones</span><span class="p">,</span>
+                <span class="n">values</span><span class="p">,</span>
+                <span class="n">log_probs</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_last_obs</span> <span class="o">=</span> <span class="n">new_obs</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_last_dones</span> <span class="o">=</span> <span class="n">dones</span>
 
@@ -297,8 +332,7 @@
 
         <span class="k">return</span> <span class="kc">True</span></div>
 
-    
-    
+
 <div class="viewcode-block" id="ModularAlgorithm.train">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.modular.learn.ModularAlgorithm.html#pantheonrl.algos.modular.learn.ModularAlgorithm.train">[docs]</a>
     <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -312,7 +346,9 @@
         <span class="n">clip_range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_progress_remaining</span><span class="p">)</span>
         <span class="c1"># Optional: clip range for the value function</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_vf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">clip_range_vf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_vf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_progress_remaining</span><span class="p">)</span>
+            <span class="n">clip_range_vf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_vf</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_current_progress_remaining</span>
+            <span class="p">)</span>
 
         <span class="n">entropy_losses</span><span class="p">,</span> <span class="n">all_kl_divs</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
         <span class="n">pg_losses</span><span class="p">,</span> <span class="n">value_losses</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -324,36 +360,48 @@
                 <span class="n">approx_kl_divs</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="c1"># Do a complete pass on the rollout buffer</span>
                 <span class="c1"># for rollout_data in self.rollout_buffer.get(self.batch_size):</span>
-                <span class="k">for</span> <span class="n">rollout_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_buffer</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">rollout_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_buffer</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
+                <span class="p">):</span>
                     <span class="n">actions</span> <span class="o">=</span> <span class="n">rollout_data</span><span class="o">.</span><span class="n">actions</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Discrete</span><span class="p">):</span>
                         <span class="c1"># Convert discrete action from float to long</span>
                         <span class="n">actions</span> <span class="o">=</span> <span class="n">rollout_data</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">long</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
 
-                    <span class="c1"># Re-sample the noise matrix because the log_std has changed</span>
-                    <span class="c1"># TODO: investigate why there is no issue with the gradient</span>
+                    <span class="c1"># Re-sample the noise matrix because the log_std changed</span>
+                    <span class="c1"># investigate why there is no issue with the gradient</span>
                     <span class="c1"># if that line is commented (as in SAC)</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_sde</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">reset_noise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
 
-                    <span class="c1">#values, log_prob, entropy = self.policy.evaluate_actions(rollout_data.observations, actions)</span>
-                    <span class="n">values</span><span class="p">,</span> <span class="n">log_prob</span><span class="p">,</span> <span class="n">entropy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">evaluate_actions</span><span class="p">(</span><span class="n">rollout_data</span><span class="o">.</span><span class="n">observations</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">partner_idx</span><span class="o">=</span><span class="n">partner_idx</span><span class="p">)</span> 
+                    <span class="n">values</span><span class="p">,</span> <span class="n">log_prob</span><span class="p">,</span> <span class="n">entropy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">evaluate_actions</span><span class="p">(</span>
+                        <span class="n">rollout_data</span><span class="o">.</span><span class="n">observations</span><span class="p">,</span>
+                        <span class="n">actions</span><span class="p">,</span>
+                        <span class="n">partner_idx</span><span class="o">=</span><span class="n">partner_idx</span><span class="p">,</span>
+                    <span class="p">)</span>
                     <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
                     <span class="c1"># Normalize advantage</span>
                     <span class="n">advantages</span> <span class="o">=</span> <span class="n">rollout_data</span><span class="o">.</span><span class="n">advantages</span>
-                    <span class="n">advantages</span> <span class="o">=</span> <span class="p">(</span><span class="n">advantages</span> <span class="o">-</span> <span class="n">advantages</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">advantages</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+                    <span class="n">advantages</span> <span class="o">=</span> <span class="p">(</span><span class="n">advantages</span> <span class="o">-</span> <span class="n">advantages</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span>
+                        <span class="n">advantages</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-8</span>
+                    <span class="p">)</span>
 
-                    <span class="c1"># ratio between old and new policy, should be one at the first iteration</span>
-                    <span class="n">ratio</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_prob</span> <span class="o">-</span> <span class="n">rollout_data</span><span class="o">.</span><span class="n">old_log_prob</span><span class="p">)</span>
+                    <span class="c1"># ratio between old and new policy, should be</span>
+                    <span class="c1"># one at the first iteration</span>
+                    <span class="n">ratio</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_prob</span> <span class="o">-</span> <span class="n">rollout_data</span><span class="o">.</span><span class="n">old_log_prob</span><span class="p">)</span>
 
                     <span class="c1"># clipped surrogate loss</span>
                     <span class="n">policy_loss_1</span> <span class="o">=</span> <span class="n">advantages</span> <span class="o">*</span> <span class="n">ratio</span>
-                    <span class="n">policy_loss_2</span> <span class="o">=</span> <span class="n">advantages</span> <span class="o">*</span> <span class="n">th</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">ratio</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">clip_range</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">clip_range</span><span class="p">)</span>
-                    <span class="n">policy_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">th</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">policy_loss_1</span><span class="p">,</span> <span class="n">policy_loss_2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                    <span class="n">policy_loss_2</span> <span class="o">=</span> <span class="n">advantages</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span>
+                        <span class="n">ratio</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">clip_range</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">clip_range</span>
+                    <span class="p">)</span>
+                    <span class="n">policy_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">policy_loss_1</span><span class="p">,</span> <span class="n">policy_loss_2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 
                     <span class="c1"># Logging</span>
                     <span class="n">pg_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">policy_loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
-                    <span class="n">clip_fraction</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">th</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ratio</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">clip_range</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                    <span class="n">clip_fraction</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ratio</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">clip_range</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
                     <span class="n">clip_fractions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clip_fraction</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_vf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -362,8 +410,10 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c1"># Clip the different between old and new value</span>
                         <span class="c1"># NOTE: this depends on the reward scaling</span>
-                        <span class="n">values_pred</span> <span class="o">=</span> <span class="n">rollout_data</span><span class="o">.</span><span class="n">old_values</span> <span class="o">+</span> <span class="n">th</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span>
-                            <span class="n">values</span> <span class="o">-</span> <span class="n">rollout_data</span><span class="o">.</span><span class="n">old_values</span><span class="p">,</span> <span class="o">-</span><span class="n">clip_range_vf</span><span class="p">,</span> <span class="n">clip_range_vf</span>
+                        <span class="n">values_pred</span> <span class="o">=</span> <span class="n">rollout_data</span><span class="o">.</span><span class="n">old_values</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span>
+                            <span class="n">values</span> <span class="o">-</span> <span class="n">rollout_data</span><span class="o">.</span><span class="n">old_values</span><span class="p">,</span>
+                            <span class="o">-</span><span class="n">clip_range_vf</span><span class="p">,</span>
+                            <span class="n">clip_range_vf</span><span class="p">,</span>
                         <span class="p">)</span>
                     <span class="c1"># Value loss using the TD(gae_lambda) target</span>
                     <span class="n">value_loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">rollout_data</span><span class="o">.</span><span class="n">returns</span><span class="p">,</span> <span class="n">values_pred</span><span class="p">)</span>
@@ -374,65 +424,100 @@
                         <span class="c1"># Approximate entropy when no analytical form</span>
                         <span class="n">entropy_loss</span> <span class="o">=</span> <span class="n">log_prob</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">entropy_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">th</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">entropy</span><span class="p">)</span>
+                        <span class="n">entropy_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">entropy</span><span class="p">)</span>
 
                     <span class="n">entropy_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entropy_loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
 
                     <span class="c1">###########</span>
                     <span class="c1"># Marginal Regularization</span>
                     <span class="c1">###########</span>
-                    <span class="c1"># each action_dist is a Distribution object containing self.batch_size observations</span>
-                    <span class="c1"># dist.distribution.probs returns a tensor of shape (self.batch_size, self.action_space)</span>
+                    <span class="c1"># each action_dist is a Distribution object containing</span>
+                    <span class="c1"># self.batch_size observations dist.distribution.probs</span>
+                    <span class="c1"># returns shape (self.batch_size, self.action_space)</span>
                     <span class="c1"># dist.sample() returns a tensor of shape (self.batch_size)</span>
 
-                    <span class="c1"># careful: must extract torch distribution object from stable_baseline Distribution object, otherwise old references get overwritten</span>
-                    <span class="n">main_logits</span><span class="p">,</span> <span class="n">partner_logits</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span> <span class="o">*</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">get_action_logits_from_obs</span><span class="p">(</span><span class="n">rollout_data</span><span class="o">.</span><span class="n">observations</span><span class="p">,</span> <span class="n">partner_idx</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">num_partners</span><span class="p">)]</span> <span class="p">)</span>
-                    <span class="n">main_logits</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">logits</span> <span class="k">for</span> <span class="n">logits</span> <span class="ow">in</span> <span class="n">main_logits</span><span class="p">])</span> <span class="c1"># (num_partners, self.batch_size, self.action_space)</span>
-                    <span class="n">partner_logits</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">logits</span> <span class="k">for</span> <span class="n">logits</span> <span class="ow">in</span> <span class="n">partner_logits</span><span class="p">])</span> <span class="c1"># (num_partners, self.batch_size, self.action_space)</span>
+                    <span class="c1"># careful: must extract torch distribution object from</span>
+                    <span class="c1"># stable_baseline Distribution object, otherwise old</span>
+                    <span class="c1"># references get overwritten</span>
+                    <span class="n">main_logits</span><span class="p">,</span> <span class="n">partner_logits</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="o">*</span><span class="p">[</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">get_action_logits_from_obs</span><span class="p">(</span>
+                                <span class="n">rollout_data</span><span class="o">.</span><span class="n">observations</span><span class="p">,</span> <span class="n">partner_idx</span><span class="o">=</span><span class="n">idx</span>
+                            <span class="p">)</span>
+                            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">num_partners</span><span class="p">)</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="n">main_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                        <span class="nb">list</span><span class="p">(</span><span class="n">main_logits</span><span class="p">)</span>
+                    <span class="p">)</span>  <span class="c1"># (num_partners, self.batch_size, self.action_space)</span>
+                    <span class="n">partner_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                        <span class="nb">list</span><span class="p">(</span><span class="n">partner_logits</span><span class="p">)</span>
+                    <span class="p">)</span>  <span class="c1"># (num_partners, self.batch_size, self.action_space)</span>
                     <span class="n">composed_logits</span> <span class="o">=</span> <span class="n">main_logits</span> <span class="o">+</span> <span class="n">partner_logits</span>
 
                     <span class="c1"># Regularize main prob to be the marginals</span>
-                    <span class="c1"># Wasserstein metric with unitary distances (for categorical actions)</span>
-                    <span class="n">main_probs</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">main_logits</span> <span class="o">-</span> <span class="n">main_logits</span><span class="o">.</span><span class="n">logsumexp</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span> <span class="p">)</span>
-                    <span class="n">composed_probs</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">composed_logits</span> <span class="o">-</span> <span class="n">composed_logits</span><span class="o">.</span><span class="n">logsumexp</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span> <span class="p">)</span>
-                    <span class="n">marginal_regularization_loss</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">th</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">th</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">main_probs</span> <span class="o">-</span> <span class="n">composed_probs</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="c1"># Wasserstein metric with unitary distances</span>
+                    <span class="c1"># (for categorical actions)</span>
+                    <span class="n">main_probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                            <span class="n">main_logits</span>
+                            <span class="o">-</span> <span class="n">main_logits</span><span class="o">.</span><span class="n">logsumexp</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="p">),</span>
+                        <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">composed_probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                            <span class="n">composed_logits</span>
+                            <span class="o">-</span> <span class="n">composed_logits</span><span class="o">.</span><span class="n">logsumexp</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="p">),</span>
+                        <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">marginal_regularization_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">main_probs</span> <span class="o">-</span> <span class="n">composed_probs</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="p">)</span>
                     <span class="c1">###########</span>
 
-                    <span class="n">loss</span> <span class="o">=</span> <span class="n">policy_loss</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ent_coef</span> <span class="o">*</span> <span class="n">entropy_loss</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_coef</span> <span class="o">*</span> <span class="n">value_loss</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">marginal_reg_coef</span> <span class="o">*</span> <span class="n">marginal_regularization_loss</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">policy_loss</span>
+                        <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ent_coef</span> <span class="o">*</span> <span class="n">entropy_loss</span>
+                        <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">vf_coef</span> <span class="o">*</span> <span class="n">value_loss</span>
+                        <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">marginal_reg_coef</span> <span class="o">*</span> <span class="n">marginal_regularization_loss</span>
+                    <span class="p">)</span>
 
                     <span class="c1"># Optimization step</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
                     <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
                     <span class="c1"># Clip grad norm</span>
-                    <span class="n">th</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">clip_grad_norm_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_grad_norm</span><span class="p">)</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">clip_grad_norm_</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_grad_norm</span>
+                    <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-                    <span class="n">approx_kl_divs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">th</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">rollout_data</span><span class="o">.</span><span class="n">old_log_prob</span> <span class="o">-</span> <span class="n">log_prob</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+                    <span class="n">approx_kl_divs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">rollout_data</span><span class="o">.</span><span class="n">old_log_prob</span> <span class="o">-</span> <span class="n">log_prob</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                        <span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+                        <span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+                    <span class="p">)</span>
 
                 <span class="n">all_kl_divs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">approx_kl_divs</span><span class="p">))</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_kl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">approx_kl_divs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_kl</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Early stopping at step </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2"> due to reaching max kl: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">approx_kl_divs</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">target_kl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">approx_kl_divs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_kl</span>
+                <span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Early stopping at step </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2"> due to reaching </span><span class="se">\</span>
+<span class="s2">                        max kl: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">approx_kl_divs</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
                     <span class="k">break</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_updates</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_epochs</span>
-        <span class="c1"># explained_var = explained_variance(self.rollout_buffer.returns.flatten(), self.rollout_buffer.values.flatten())</span>
-        
+
         <span class="c1"># Logs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;train/entropy_loss&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">entropy_losses</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;train/policy_gradient_loss&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pg_losses</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;train/value_loss&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">value_losses</span><span class="p">))</span></div>
 
-        <span class="c1"># self.logger.record(&quot;train/approx_kl&quot;, np.mean(approx_kl_divs))</span>
-        <span class="c1"># self.logger.record(&quot;train/clip_fraction&quot;, np.mean(clip_fractions))</span>
-        <span class="c1"># self.logger.record(&quot;train/loss&quot;, loss.item())</span>
-        <span class="c1"># self.logger.record(&quot;train/explained_variance&quot;, explained_var)</span>
-        <span class="c1"># if hasattr(self.policy, &quot;log_std&quot;):</span>
-        <span class="c1">#     self.logger.record(&quot;train/std&quot;, th.exp(self.policy.log_std).mean().item())</span>
-
-        <span class="c1"># self.logger.record(&quot;train/n_updates&quot;, self._n_updates, exclude=&quot;tensorboard&quot;)</span>
-        <span class="c1"># self.logger.record(&quot;train/clip_range&quot;, clip_range)</span>
-        <span class="c1"># if self.clip_range_vf is not None:</span>
-        <span class="c1">#     self.logger.record(&quot;train/clip_range_vf&quot;, clip_range_vf)</span>
 
 <div class="viewcode-block" id="ModularAlgorithm.learn">
 <a class="viewcode-back" href="../../../../_autosummary/pantheonrl.algos.modular.learn.ModularAlgorithm.html#pantheonrl.algos.modular.learn.ModularAlgorithm.learn">[docs]</a>
@@ -441,17 +526,19 @@
         <span class="n">total_timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">callback</span><span class="p">:</span> <span class="n">MaybeCallback</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">log_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">eval_env</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GymEnv</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">eval_freq</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">n_eval_episodes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
         <span class="n">tb_log_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;OnPolicyAlgorithm&quot;</span><span class="p">,</span>
-        <span class="n">eval_log_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">reset_num_timesteps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">progress_bar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;OnPolicyAlgorithm&quot;</span><span class="p">:</span>
         <span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">envs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_resample_policy</span><span class="p">(</span><span class="s2">&quot;null&quot;</span><span class="p">)</span>
 
         <span class="n">total_timesteps</span><span class="p">,</span> <span class="n">callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_learn</span><span class="p">(</span>
-            <span class="n">total_timesteps</span><span class="p">,</span> <span class="n">eval_env</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">eval_freq</span><span class="p">,</span> <span class="n">n_eval_episodes</span><span class="p">,</span> <span class="n">eval_log_path</span><span class="p">,</span> <span class="n">reset_num_timesteps</span><span class="p">,</span> <span class="n">tb_log_name</span>
+            <span class="n">total_timesteps</span><span class="p">,</span>
+            <span class="n">callback</span><span class="p">,</span>
+            <span class="n">reset_num_timesteps</span><span class="p">,</span>
+            <span class="n">tb_log_name</span><span class="p">,</span>
+            <span class="n">progress_bar</span>
         <span class="p">)</span>
 
         <span class="n">callback</span><span class="o">.</span><span class="n">on_training_start</span><span class="p">(</span><span class="nb">locals</span><span class="p">(),</span> <span class="nb">globals</span><span class="p">())</span>
@@ -459,28 +546,56 @@
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">&lt;</span> <span class="n">total_timesteps</span><span class="p">:</span>
 
             <span class="k">for</span> <span class="n">partner_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">num_partners</span><span class="p">):</span>
-                <span class="k">try</span><span class="p">:</span>    <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">envs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_partnerid</span><span class="p">(</span><span class="n">partner_idx</span><span class="p">)</span>
-                <span class="k">except</span><span class="p">:</span> 
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;unable to switch&quot;</span><span class="p">)</span>
-                    <span class="k">pass</span>
-                <span class="n">continue_training</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collect_rollouts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_buffer</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">],</span> <span class="n">n_rollout_steps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">partner_idx</span><span class="o">=</span><span class="n">partner_idx</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">envs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_partnerid</span><span class="p">(</span><span class="n">partner_idx</span><span class="p">)</span>
+                <span class="n">continue_training</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collect_rollouts</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span>
+                    <span class="n">callback</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">rollout_buffer</span><span class="p">[</span><span class="n">partner_idx</span><span class="p">],</span>
+                    <span class="n">n_rollout_steps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="p">,</span>
+                    <span class="n">partner_idx</span><span class="o">=</span><span class="n">partner_idx</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">continue_training</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="k">break</span>
 
             <span class="n">iteration</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_update_current_progress_remaining</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">,</span> <span class="n">total_timesteps</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_current_progress_remaining</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">,</span> <span class="n">total_timesteps</span>
+            <span class="p">)</span>
 
             <span class="c1"># Display training infos</span>
             <span class="k">if</span> <span class="n">log_interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">iteration</span> <span class="o">%</span> <span class="n">log_interval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">fps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">/</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;time/iterations&quot;</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;rollout/ep_rew_mean&quot;</span><span class="p">,</span> <span class="n">safe_mean</span><span class="p">([</span><span class="n">ep_info</span><span class="p">[</span><span class="s2">&quot;r&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ep_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">]))</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;rollout/ep_len_mean&quot;</span><span class="p">,</span> <span class="n">safe_mean</span><span class="p">([</span><span class="n">ep_info</span><span class="p">[</span><span class="s2">&quot;l&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ep_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+                    <span class="s2">&quot;time/iterations&quot;</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                    <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+                        <span class="s2">&quot;rollout/ep_rew_mean&quot;</span><span class="p">,</span>
+                        <span class="n">safe_mean</span><span class="p">(</span>
+                            <span class="p">[</span><span class="n">ep_info</span><span class="p">[</span><span class="s2">&quot;r&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ep_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+                        <span class="s2">&quot;rollout/ep_len_mean&quot;</span><span class="p">,</span>
+                        <span class="n">safe_mean</span><span class="p">(</span>
+                            <span class="p">[</span><span class="n">ep_info</span><span class="p">[</span><span class="s2">&quot;l&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ep_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep_info_buffer</span><span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;time/fps&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;time/time_elapsed&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">),</span> <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;time/total_timesteps&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+                    <span class="s2">&quot;time/time_elapsed&quot;</span><span class="p">,</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">),</span>
+                    <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+                    <span class="s2">&quot;time/total_timesteps&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">,</span>
+                    <span class="n">exclude</span><span class="o">=</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>

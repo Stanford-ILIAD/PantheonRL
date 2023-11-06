@@ -99,8 +99,9 @@
 <h1>pantheonrl.algos.adap.policies.AdapPolicyMult<a class="headerlink" href="#pantheonrl-algos-adap-policies-adappolicymult" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pantheonrl.algos.adap.policies.AdapPolicyMult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AdapPolicyMult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_schedule</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net_arch=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation_fn=&lt;class</span> <span class="pre">'torch.nn.modules.activation.Tanh'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ortho_init=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sde=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_std_init=0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_std=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sde_net_arch=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_expln=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">squash_output=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_extractor_class=&lt;class</span> <span class="pre">'stable_baselines3.common.torch_layers.FlattenExtractor'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_extractor_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_images=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_class=&lt;class</span> <span class="pre">'torch.optim.adam.Adam'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_size=3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/adap/policies.html#AdapPolicyMult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.adap.policies.AdapPolicyMult" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AdapPolicyMult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_schedule</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net_arch=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation_fn=&lt;class</span> <span class="pre">'torch.nn.modules.activation.Tanh'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ortho_init=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sde=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_std_init=0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_std=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_expln=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">squash_output=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_extractor_class=&lt;class</span> <span class="pre">'stable_baselines3.common.torch_layers.FlattenExtractor'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_extractor_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">share_features_extractor=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_images=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_class=&lt;class</span> <span class="pre">'torch.optim.adam.Adam'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_size=3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/adap/policies.html#AdapPolicyMult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.adap.policies.AdapPolicyMult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pantheonrl.algos.adap.policies.AdapPolicy.html#pantheonrl.algos.adap.policies.AdapPolicy" title="pantheonrl.algos.adap.policies.AdapPolicy"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdapPolicy</span></code></a></p>
+<p>Multiplicative Policy for the ADAP Actor-critic policy</p>
 <p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
@@ -133,7 +134,7 @@
 <td><p>Sets the module in evaluation mode.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.evaluate_actions" title="pantheonrl.algos.adap.policies.AdapPolicyMult.evaluate_actions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_actions</span></code></a></p></td>
-<td><p>Evaluate actions according to the current policy, given the observations. :param obs: :param actions: :return: estimated value, log likelihood of taking those actions     and entropy of the action distribution.</p></td>
+<td><p>Evaluate actions according to the current policy, given the observations.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.extra_repr" title="pantheonrl.algos.adap.policies.AdapPolicyMult.extra_repr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extra_repr</span></code></a></p></td>
 <td><p>Set the extra representation of the module</p></td>
@@ -150,8 +151,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.get_buffer" title="pantheonrl.algos.adap.policies.AdapPolicyMult.get_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_buffer</span></code></a></p></td>
 <td><p>Returns the buffer given by <code class="docutils literal notranslate"><span class="pre">target</span></code> if it exists, otherwise throws an error.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_context</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.get_context" title="pantheonrl.algos.adap.policies.AdapPolicyMult.get_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_context</span></code></a></p></td>
+<td><p>Get the current context</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.get_distribution" title="pantheonrl.algos.adap.policies.AdapPolicyMult.get_distribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_distribution</span></code></a></p></td>
 <td><p>Get the current policy distribution given the observations.</p></td>
@@ -261,8 +262,8 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.scale_action" title="pantheonrl.algos.adap.policies.AdapPolicyMult.scale_action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale_action</span></code></a></p></td>
 <td><p>Rescale the action from [low, high] to [-1, 1] (no need for symmetric action space)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_context</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.set_context" title="pantheonrl.algos.adap.policies.AdapPolicyMult.set_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_context</span></code></a></p></td>
+<td><p>Set the context</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.set_extra_state" title="pantheonrl.algos.adap.policies.AdapPolicyMult.set_extra_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_extra_state</span></code></a></p></td>
 <td><p>This function is called from <a class="reference internal" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.load_state_dict" title="pantheonrl.algos.adap.policies.AdapPolicyMult.load_state_dict"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_state_dict()</span></code></a> to handle any extra state found within the <cite>state_dict</cite>.</p></td>
@@ -334,17 +335,17 @@
 <li><p><strong>observation_space</strong> (<em>Space</em>) – </p></li>
 <li><p><strong>action_space</strong> (<em>Space</em>) – </p></li>
 <li><p><strong>lr_schedule</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>]</em><em>, </em><em>float</em><em>]</em>) – </p></li>
-<li><p><strong>net_arch</strong> (<em>List</em><em>[</em><em>int</em><em> | </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>net_arch</strong> (<em>List</em><em>[</em><em>int</em><em>] </em><em>| </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>] </em><em>| </em><em>None</em>) – </p></li>
 <li><p><strong>activation_fn</strong> (<em>Type</em><em>[</em><em>Module</em><em>]</em>) – </p></li>
 <li><p><strong>ortho_init</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>use_sde</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>log_std_init</strong> (<em>float</em>) – </p></li>
 <li><p><strong>full_std</strong> (<em>bool</em>) – </p></li>
-<li><p><strong>sde_net_arch</strong> (<em>List</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>) – </p></li>
 <li><p><strong>use_expln</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>squash_output</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>features_extractor_class</strong> (<em>Type</em><em>[</em><em>BaseFeaturesExtractor</em><em>]</em>) – </p></li>
 <li><p><strong>features_extractor_kwargs</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>share_features_extractor</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>normalize_images</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>optimizer_class</strong> (<em>Type</em><em>[</em><em>Optimizer</em><em>]</em>) – </p></li>
 <li><p><strong>optimizer_kwargs</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>None</em>) – </p></li>
@@ -619,22 +620,20 @@ etc.</p>
 <dt class="sig sig-object py" id="pantheonrl.algos.adap.policies.AdapPolicyMult.evaluate_actions">
 <span class="sig-name descname"><span class="pre">evaluate_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.evaluate_actions" title="Link to this definition"></a></dt>
 <dd><p>Evaluate actions according to the current policy,
-given the observations.
-:param obs:
-:param actions:
-:return: estimated value, log likelihood of taking those actions</p>
-<blockquote>
-<div><p>and entropy of the action distribution.</p>
-</div></blockquote>
+given the observations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>obs</strong> (<em>Tensor</em>) – </p></li>
-<li><p><strong>actions</strong> (<em>Tensor</em>) – </p></li>
+<li><p><strong>obs</strong> (<em>Tensor</em>) – Observation</p></li>
+<li><p><strong>actions</strong> (<em>Tensor</em>) – Actions</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Tuple</em>[<em>Tensor</em>, <em>Tensor</em>, <em>Tensor</em>]</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>estimated value, log likelihood of taking those actions
+and entropy of the action distribution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[<em>Tensor</em>, <em>Tensor</em>, <em>Tensor</em> | None]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -744,6 +743,12 @@ buffer</p>
 <dd class="field-even"><p><em>Tensor</em></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.adap.policies.AdapPolicyMult.get_context">
+<span class="sig-name descname"><span class="pre">get_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.get_context" title="Link to this definition"></a></dt>
+<dd><p>Get the current context</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1802,6 +1807,12 @@ or training parts of a model individually (e.g., GAN training).</p>
 <dd class="field-odd"><p><em>ndarray</em></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pantheonrl.algos.adap.policies.AdapPolicyMult.set_context">
+<span class="sig-name descname"><span class="pre">set_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctxt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pantheonrl.algos.adap.policies.AdapPolicyMult.set_context" title="Link to this definition"></a></dt>
+<dd><p>Set the context</p>
 </dd></dl>
 
 <dl class="py method">

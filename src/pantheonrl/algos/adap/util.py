@@ -50,7 +50,7 @@ def kl_divergence(
 
 
 def get_l2_sphere(ctx_size, num, use_torch=False):
-    """ Samples from l2 sphere """
+    """Samples from l2 sphere"""
     if use_torch:
         ctxs = torch.rand(num, ctx_size, device="cpu") * 2 - 1
         ctxs = ctxs / (((ctxs) ** 2).sum(dim=-1).reshape(num, 1)) ** (1 / 2)
@@ -62,7 +62,7 @@ def get_l2_sphere(ctx_size, num, use_torch=False):
 
 
 def get_unit_square(ctx_size, num, use_torch=False):
-    """ Samples from unit square centered at 0 """
+    """Samples from unit square centered at 0"""
     if use_torch:
         ctxs = torch.rand(num, ctx_size) * 2 - 1
     else:
@@ -71,7 +71,7 @@ def get_unit_square(ctx_size, num, use_torch=False):
 
 
 def get_positive_square(ctx_size, num, use_torch=False):
-    """ Samples from the square with axes between 0 and 1 """
+    """Samples from the square with axes between 0 and 1"""
     if use_torch:
         ctxs = torch.rand(num, ctx_size)
     else:
@@ -80,7 +80,7 @@ def get_positive_square(ctx_size, num, use_torch=False):
 
 
 def get_categorical(ctx_size, num, use_torch=False):
-    """ Samples from categorical distribution """
+    """Samples from categorical distribution"""
     if use_torch:
         ctxs = torch.zeros(num, ctx_size)
         ctxs[torch.arange(num), torch.randint(0, ctx_size, size=(num,))] = 1
@@ -113,7 +113,7 @@ SAMPLERS = {
 def get_context_kl_loss(
     policy: "ADAP", model: "AdapPolicy", train_batch: RolloutBufferSamples
 ):
-    """ Gets the KL loss for ADAP """
+    """Gets the KL loss for ADAP"""
 
     original_obs = train_batch.observations[:, : -policy.context_size]
 
@@ -138,10 +138,8 @@ def get_context_kl_loss(
 
         all_contexts.add(sampled_context)
         model.set_context(sampled_context)
-        latent_pi, _, latent_sde = model._get_latent(sampled_states)
-        context_action_dist = model._get_action_dist_from_latent(
-            latent_pi, latent_sde
-        )
+        latent_pi, _ = model._get_latent(sampled_states)
+        context_action_dist = model._get_action_dist_from_latent(latent_pi)
         all_action_dists.append(copy.copy(context_action_dist))
 
     model.set_context(old_context)

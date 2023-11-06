@@ -1,4 +1,4 @@
-pantheonrl.envs.pettingzoo.PettingZooAECWrapper
+﻿pantheonrl.envs.pettingzoo.PettingZooAECWrapper
 ===============================================
 
 .. currentmodule:: pantheonrl.envs.pettingzoo
@@ -25,6 +25,7 @@ pantheonrl.envs.pettingzoo.PettingZooAECWrapper
       ~PettingZooAECWrapper.n_reset
       ~PettingZooAECWrapper.n_step
       ~PettingZooAECWrapper.render
+      ~PettingZooAECWrapper.resample_null
       ~PettingZooAECWrapper.resample_random
       ~PettingZooAECWrapper.resample_round_robin
       ~PettingZooAECWrapper.reset

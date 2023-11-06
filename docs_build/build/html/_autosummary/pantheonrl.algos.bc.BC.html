@@ -101,8 +101,8 @@
 <dt class="sig sig-object py" id="pantheonrl.algos.bc.BC">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy_class=&lt;class</span> <span class="pre">'pantheonrl.common.util.FeedForward32Policy'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expert_data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_cls=&lt;class</span> <span class="pre">'torch.optim.adam.Adam'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent_weight=0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2_weight=0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device='auto'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/bc.html#BC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.bc.BC" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Behavioral cloning (BC).
-Recovers a policy via supervised learning on observation-action Tensor
+<p>Behavioral cloning (BC).</p>
+<p>Recovers a policy via supervised learning on observation-action Tensor
 pairs, sampled from a Torch DataLoader or any Iterator that ducktypes
 <cite>torch.utils.data.DataLoader</cite>.
 Args:</p>
@@ -129,7 +129,7 @@ device: name/identity of device to place policy on.</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pantheonrl.algos.bc.BC.save_policy" title="pantheonrl.algos.bc.BC.save_policy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_policy</span></code></a></p></td>
-<td><p>Save policy to a path. Can be reloaded by <cite>.reconstruct_policy()</cite>. Args:     policy_path: path to save policy to.</p></td>
+<td><p>Save policy to a patorch. Can be reloaded by <cite>.reconstruct_policy()</cite>. Args:     policy_path: path to save policy to.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pantheonrl.algos.bc.BC.set_expert_data_loader" title="pantheonrl.algos.bc.BC.set_expert_data_loader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_expert_data_loader</span></code></a></p></td>
 <td><p>Set the expert data loader, which yields batches of obs-act pairs. Changing the expert data loader on-demand is useful for DAgger and other interactive algorithms. Args:      expert_data: Either a Torch <cite>DataLoader</cite>, any other iterator that         yields dictionaries containing &quot;obs&quot; and &quot;acts&quot; Tensors or         Numpy arrays, or a <cite>TransitionsMinimal</cite> instance. If this is a <cite>TransitionsMinimal</cite> instance, then it is         automatically converted into a shuffled <cite>DataLoader</cite> with batch         size <cite>BC.DEFAULT_BATCH_SIZE</cite>.</p></td>
@@ -173,7 +173,7 @@ Transitions. See <cite>set_expert_data_loader()</cite>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pantheonrl.algos.bc.BC.save_policy">
 <span class="sig-name descname"><span class="pre">save_policy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">policy_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pantheonrl/algos/bc.html#BC.save_policy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pantheonrl.algos.bc.BC.save_policy" title="Link to this definition"></a></dt>
-<dd><p>Save policy to a path. Can be reloaded by <cite>.reconstruct_policy()</cite>.
+<dd><p>Save policy to a patorch. Can be reloaded by <cite>.reconstruct_policy()</cite>.
 Args:</p>
 <blockquote>
 <div><p>policy_path: path to save policy to.</p>
